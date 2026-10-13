@@ -1,0 +1,85 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{25456B05-D598-4A2D-B89A-1ECF4ED9E7A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaLauncher.Domain", "src\LlamaLauncher.Domain\LlamaLauncher.Domain.csproj", "{4D337DD8-3D69-4F84-A16C-42F87F8946DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaLauncher.Contracts", "src\LlamaLauncher.Contracts\LlamaLauncher.Contracts.csproj", "{9B301F3F-BE5C-45B6-971C-B856BE1C69C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaLauncher.Application", "src\LlamaLauncher.Application\LlamaLauncher.Application.csproj", "{66656F96-9C3A-4C73-B828-2A3C245DD65C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaLauncher.Infrastructure", "src\LlamaLauncher.Infrastructure\LlamaLauncher.Infrastructure.csproj", "{3CAFD22B-8A81-4C10-AF09-B85AC4D1942B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaLauncher.App", "src\LlamaLauncher.App\LlamaLauncher.App.csproj", "{49AE6463-0B30-4EFC-BAD0-3B84C7E2CB51}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{806CAC0D-CD3E-47F2-8EEE-F6A5961EE43F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaLauncher.UnitTests", "tests\LlamaLauncher.UnitTests\LlamaLauncher.UnitTests.csproj", "{0AE13503-37C4-4E36-961B-6D31F833DDCE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaLauncher.IntegrationTests", "tests\LlamaLauncher.IntegrationTests\LlamaLauncher.IntegrationTests.csproj", "{D1AFE85E-3B70-429E-ADF3-6287CDB66CD6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaLauncher.UiTests", "tests\LlamaLauncher.UiTests\LlamaLauncher.UiTests.csproj", "{672FE6B5-115E-47CB-B0A0-EED852E5C35C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaLauncher.TestChildProcess", "tests\LlamaLauncher.TestChildProcess\LlamaLauncher.TestChildProcess.csproj", "{1D048CFD-36F0-48E2-8E42-0C87E1610DE0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4D337DD8-3D69-4F84-A16C-42F87F8946DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D337DD8-3D69-4F84-A16C-42F87F8946DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D337DD8-3D69-4F84-A16C-42F87F8946DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D337DD8-3D69-4F84-A16C-42F87F8946DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B301F3F-BE5C-45B6-971C-B856BE1C69C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B301F3F-BE5C-45B6-971C-B856BE1C69C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B301F3F-BE5C-45B6-971C-B856BE1C69C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B301F3F-BE5C-45B6-971C-B856BE1C69C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66656F96-9C3A-4C73-B828-2A3C245DD65C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66656F96-9C3A-4C73-B828-2A3C245DD65C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66656F96-9C3A-4C73-B828-2A3C245DD65C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66656F96-9C3A-4C73-B828-2A3C245DD65C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CAFD22B-8A81-4C10-AF09-B85AC4D1942B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CAFD22B-8A81-4C10-AF09-B85AC4D1942B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CAFD22B-8A81-4C10-AF09-B85AC4D1942B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CAFD22B-8A81-4C10-AF09-B85AC4D1942B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49AE6463-0B30-4EFC-BAD0-3B84C7E2CB51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49AE6463-0B30-4EFC-BAD0-3B84C7E2CB51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49AE6463-0B30-4EFC-BAD0-3B84C7E2CB51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49AE6463-0B30-4EFC-BAD0-3B84C7E2CB51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AE13503-37C4-4E36-961B-6D31F833DDCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AE13503-37C4-4E36-961B-6D31F833DDCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AE13503-37C4-4E36-961B-6D31F833DDCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AE13503-37C4-4E36-961B-6D31F833DDCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1AFE85E-3B70-429E-ADF3-6287CDB66CD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1AFE85E-3B70-429E-ADF3-6287CDB66CD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1AFE85E-3B70-429E-ADF3-6287CDB66CD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1AFE85E-3B70-429E-ADF3-6287CDB66CD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{672FE6B5-115E-47CB-B0A0-EED852E5C35C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{672FE6B5-115E-47CB-B0A0-EED852E5C35C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{672FE6B5-115E-47CB-B0A0-EED852E5C35C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{672FE6B5-115E-47CB-B0A0-EED852E5C35C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D048CFD-36F0-48E2-8E42-0C87E1610DE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D048CFD-36F0-48E2-8E42-0C87E1610DE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D048CFD-36F0-48E2-8E42-0C87E1610DE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D048CFD-36F0-48E2-8E42-0C87E1610DE0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4D337DD8-3D69-4F84-A16C-42F87F8946DD} = {25456B05-D598-4A2D-B89A-1ECF4ED9E7A4}
+		{9B301F3F-BE5C-45B6-971C-B856BE1C69C3} = {25456B05-D598-4A2D-B89A-1ECF4ED9E7A4}
+		{66656F96-9C3A-4C73-B828-2A3C245DD65C} = {25456B05-D598-4A2D-B89A-1ECF4ED9E7A4}
+		{3CAFD22B-8A81-4C10-AF09-B85AC4D1942B} = {25456B05-D598-4A2D-B89A-1ECF4ED9E7A4}
+		{49AE6463-0B30-4EFC-BAD0-3B84C7E2CB51} = {25456B05-D598-4A2D-B89A-1ECF4ED9E7A4}
+		{0AE13503-37C4-4E36-961B-6D31F833DDCE} = {806CAC0D-CD3E-47F2-8EEE-F6A5961EE43F}
+		{D1AFE85E-3B70-429E-ADF3-6287CDB66CD6} = {806CAC0D-CD3E-47F2-8EEE-F6A5961EE43F}
+		{672FE6B5-115E-47CB-B0A0-EED852E5C35C} = {806CAC0D-CD3E-47F2-8EEE-F6A5961EE43F}
+		{1D048CFD-36F0-48E2-8E42-0C87E1610DE0} = {806CAC0D-CD3E-47F2-8EEE-F6A5961EE43F}
+	EndGlobalSection
+EndGlobal

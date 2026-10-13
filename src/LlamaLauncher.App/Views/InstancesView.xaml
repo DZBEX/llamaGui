@@ -1,0 +1,92 @@
+<UserControl x:Class="LlamaLauncher.App.Views.InstancesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="服务实例" FontSize="20" FontWeight="SemiBold" />
+
+        <!-- 工具栏 -->
+        <WrapPanel Grid.Row="1" Margin="0,10,0,10">
+            <Button Content="新建实例" Command="{Binding CreateInstanceCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" />
+            <Button Content="启动" Command="{Binding StartCommand}" />
+            <Button Content="停止" Command="{Binding StopCommand}" />
+            <Button Content="重启" Command="{Binding RestartCommand}" />
+            <Button Content="强制结束" Command="{Binding ForceKillCommand}" Style="{DynamicResource App.DestructiveButtonStyle}" />
+            <Button Content="打开聊天" Command="{Binding OpenChatCommand}" />
+            <Button Content="查看日志" Command="{Binding OpenLogsCommand}" />
+            <Button Content="复制 API 地址" Command="{Binding CopyUrlCommand}" />
+            <Button Content="API 测试" Command="{Binding TestApiCommand}" />
+            <Button Content="导出诊断包" Command="{Binding ExportDiagnosticsCommand}" />
+            <Button Content="移除实例" Command="{Binding RemoveCommand}" />
+        </WrapPanel>
+
+        <DataGrid Grid.Row="2"
+                  ItemsSource="{Binding Instances}"
+                  SelectedItem="{Binding SelectedInstance, Mode=TwoWay}"
+                  SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="1.3*" />
+                <DataGridTextColumn Header="模型" Binding="{Binding ModelName}" Width="1.3*" />
+                <DataGridTextColumn Header="版本" Binding="{Binding VersionLabel}" Width="80" />
+                <DataGridTextColumn Header="PID" Binding="{Binding ProcessIdText}" Width="60" />
+                <DataGridTemplateColumn Header="状态" Width="90">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="9" Height="9" VerticalAlignment="Center"
+                                         Fill="{Binding State, Converter={StaticResource StateToBrush}}" />
+                                <TextBlock Text="{Binding StateText}" Margin="6,0,0,0" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="端口" Binding="{Binding Port}" Width="56" />
+                <DataGridTextColumn Header="API 地址" Binding="{Binding Url}" Width="140" />
+                <DataGridTextColumn Header="启动时间" Binding="{Binding StartedText}" Width="132" />
+                <DataGridTextColumn Header="运行时长" Binding="{Binding UptimeText}" Width="88" />
+                <DataGridTextColumn Header="CPU" Binding="{Binding CpuText}" Width="50" />
+                <DataGridTextColumn Header="内存" Binding="{Binding MemoryText}" Width="76" />
+                <DataGridTextColumn Header="健康检查" Binding="{Binding HealthText}" Width="92" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <TextBlock Grid.Row="2"
+                   Text="暂无实例，点击“新建实例”创建。"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Foreground="{DynamicResource App.Text.Secondary}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Instances.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <!-- 详情 -->
+        <Border Grid.Row="3" Style="{DynamicResource App.CardBorder}" Margin="0,10,0,0">
+            <StackPanel>
+                <TextBlock Text="选中实例详情" FontWeight="SemiBold" />
+                <TextBlock Margin="0,6,0,0"
+                           Text="{Binding DetailCommandLine, TargetNullValue=（未启动过：启动后这里显示脱敏后的命令行预览）}"
+                           TextWrapping="Wrap"
+                           FontFamily="Consolas"
+                           FontSize="12" />
+                <TextBlock Margin="0,6,0,0"
+                           Text="{Binding SelectedInstance.LastError, TargetNullValue=''}"
+                           Foreground="{DynamicResource App.State.Error}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

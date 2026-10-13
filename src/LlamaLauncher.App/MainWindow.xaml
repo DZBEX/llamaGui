@@ -1,0 +1,179 @@
+<Window x:Class="LlamaLauncher.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:LlamaLauncher.App.ViewModels"
+        xmlns:views="clr-namespace:LlamaLauncher.App.Views"
+        xmlns:conv="clr-namespace:LlamaLauncher.App.Converters"
+        Title="LlamaLauncher — llama.cpp 启动器"
+        Height="760" Width="1320"
+        MinHeight="600" MinWidth="1080"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource App.Window.Background}">
+    <Window.Resources>
+        <conv:PageTemplateSelector x:Key="PageTemplateSelector">
+            <conv:PageTemplateSelector.Dashboard>
+                <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+                    <views:DashboardView />
+                </DataTemplate>
+            </conv:PageTemplateSelector.Dashboard>
+            <conv:PageTemplateSelector.Instances>
+                <DataTemplate DataType="{x:Type vm:InstancesViewModel}">
+                    <views:InstancesView />
+                </DataTemplate>
+            </conv:PageTemplateSelector.Instances>
+            <conv:PageTemplateSelector.Models>
+                <DataTemplate DataType="{x:Type vm:ModelsViewModel}">
+                    <views:ModelsView />
+                </DataTemplate>
+            </conv:PageTemplateSelector.Models>
+            <conv:PageTemplateSelector.Profiles>
+                <DataTemplate DataType="{x:Type vm:ProfilesViewModel}">
+                    <views:ProfilesView />
+                </DataTemplate>
+            </conv:PageTemplateSelector.Profiles>
+            <conv:PageTemplateSelector.Chat>
+                <DataTemplate DataType="{x:Type vm:ChatViewModel}">
+                    <views:ChatView />
+                </DataTemplate>
+            </conv:PageTemplateSelector.Chat>
+            <conv:PageTemplateSelector.Hardware>
+                <DataTemplate DataType="{x:Type vm:HardwareViewModel}">
+                    <views:HardwareView />
+                </DataTemplate>
+            </conv:PageTemplateSelector.Hardware>
+            <conv:PageTemplateSelector.Updates>
+                <DataTemplate DataType="{x:Type vm:UpdatesViewModel}">
+                    <views:UpdatesView />
+                </DataTemplate>
+            </conv:PageTemplateSelector.Updates>
+            <conv:PageTemplateSelector.Logs>
+                <DataTemplate DataType="{x:Type vm:LogsViewModel}">
+                    <views:LogsView />
+                </DataTemplate>
+            </conv:PageTemplateSelector.Logs>
+            <conv:PageTemplateSelector.History>
+                <DataTemplate DataType="{x:Type vm:HistoryViewModel}">
+                    <views:HistoryView />
+                </DataTemplate>
+            </conv:PageTemplateSelector.History>
+            <conv:PageTemplateSelector.Settings>
+                <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                    <views:SettingsView />
+                </DataTemplate>
+            </conv:PageTemplateSelector.Settings>
+        </conv:PageTemplateSelector>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="52" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+
+        <!-- 顶部状态栏 -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource App.Surface}"
+                BorderBrush="{DynamicResource App.Border}"
+                BorderThickness="0,0,0,1">
+            <Grid Margin="14,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="LlamaLauncher" FontSize="17" FontWeight="Bold" />
+                    <Border Margin="10,0,0,0"
+                            Padding="8,2"
+                            CornerRadius="9"
+                            Background="{DynamicResource App.Surface.Alt}">
+                        <TextBlock Text="{Binding DefaultVersionText}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource App.Text.Secondary}" />
+                    </Border>
+                    <Border Margin="10,0,0,0"
+                            Padding="8,2"
+                            CornerRadius="9"
+                            Background="{DynamicResource App.Surface.Alt}">
+                        <TextBlock Text="{Binding InstancesSummary}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource App.Text.Secondary}" />
+                    </Border>
+                </StackPanel>
+                <TextBlock Grid.Column="2"
+                           VerticalAlignment="Center"
+                           Text="{Binding AppVersionText}"
+                           Foreground="{DynamicResource App.Text.Secondary}" />
+            </Grid>
+        </Border>
+
+        <!-- 主内容：左侧导航 + 页面 -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="196" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="{DynamicResource App.Surface}"
+                    BorderBrush="{DynamicResource App.Border}"
+                    BorderThickness="0,0,1,0">
+                <ListBox ItemsSource="{Binding Pages}"
+                         SelectedItem="{Binding CurrentNav, Mode=TwoWay}"
+                         Style="{DynamicResource App.NavListStyle}"
+                         ItemContainerStyle="{DynamicResource App.NavItemStyle}"
+                         Margin="0,8,0,0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Glyph}" Width="22" FontSize="14" />
+                                <TextBlock Text="{Binding Title}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <ContentControl Grid.Column="1"
+                            Content="{Binding CurrentPage}"
+                            ContentTemplateSelector="{StaticResource PageTemplateSelector}"
+                            Margin="0" />
+
+            <!-- 忙碌覆盖层 -->
+            <Border Grid.Column="1"
+                    Background="#88000000"
+                    Visibility="{Binding IsBusyOverlay, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding BusyOverlayText}"
+                               Foreground="White"
+                               FontSize="15"
+                               HorizontalAlignment="Center" />
+                    <ProgressBar IsIndeterminate="True" Width="240" Margin="0,12,0,0" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- 底部状态栏 -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource App.Surface}"
+                BorderBrush="{DynamicResource App.Border}"
+                BorderThickness="0,1,0,0">
+            <Grid Margin="14,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Text="{Binding StatusBarText}"
+                           TextTrimming="CharacterEllipsis"
+                           Foreground="{DynamicResource App.Text.Secondary}" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Text="{Binding ResourceSummary}"
+                           Foreground="{DynamicResource App.Text.Secondary}" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

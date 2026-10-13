@@ -1,0 +1,30 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="App.Color.Background">#FFF5F6F8</Color>
+    <Color x:Key="App.Color.Surface">#FFFFFFFF</Color>
+    <Color x:Key="App.Color.SurfaceAlt">#FFECEEF2</Color>
+    <Color x:Key="App.Color.Border">#FFD0D4DB</Color>
+    <Color x:Key="App.Color.TextPrimary">#FF1C1F24</Color>
+    <Color x:Key="App.Color.TextSecondary">#FF5B6270</Color>
+    <Color x:Key="App.Color.Accent">#FF2F6FDC</Color>
+
+    <SolidColorBrush x:Key="App.Window.Background" Color="{StaticResource App.Color.Background}" />
+    <SolidColorBrush x:Key="App.Surface" Color="{StaticResource App.Color.Surface}" />
+    <SolidColorBrush x:Key="App.Surface.Alt" Color="{StaticResource App.Color.SurfaceAlt}" />
+    <SolidColorBrush x:Key="App.Border" Color="{StaticResource App.Color.Border}" />
+    <SolidColorBrush x:Key="App.Text.Primary" Color="{StaticResource App.Color.TextPrimary}" />
+    <SolidColorBrush x:Key="App.Text.Secondary" Color="{StaticResource App.Color.TextSecondary}" />
+    <SolidColorBrush x:Key="App.Accent" Color="{StaticResource App.Color.Accent}" />
+
+    <!-- 聊天消息气泡 -->
+    <SolidColorBrush x:Key="App.Chat.UserBubble" Color="#FFE4EDFC" />
+    <SolidColorBrush x:Key="App.Chat.UserBubbleBorder" Color="#FFC4D9F7" />
+    <SolidColorBrush x:Key="App.Chat.AssistantBubble" Color="{StaticResource App.Color.SurfaceAlt}" />
+    <SolidColorBrush x:Key="App.Chat.AssistantBubbleBorder" Color="{StaticResource App.Color.Border}" />
+    <SolidColorBrush x:Key="App.Chat.AvatarBackground" Color="#FFE1E5EB" />
+
+    <!-- 滚动条（细胶囊滑块；Alpha 越低越淡，深浅主题各自调色） -->
+    <SolidColorBrush x:Key="App.Scroll.Thumb" Color="#596E7683" />
+    <SolidColorBrush x:Key="App.Scroll.ThumbHover" Color="#8F6E7683" />
+    <SolidColorBrush x:Key="App.Scroll.ThumbDragging" Color="#C46E7683" />
+</ResourceDictionary>

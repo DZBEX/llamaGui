@@ -1,0 +1,131 @@
+<UserControl x:Class="LlamaLauncher.App.Views.HardwareView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+        <StackPanel>
+            <TextBlock Text="硬件与后端" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" />
+
+            <!-- 系统信息 -->
+            <Border Style="{DynamicResource App.CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <DockPanel LastChildFill="False">
+                        <TextBlock DockPanel.Dock="Left" Text="系统信息" FontWeight="SemiBold" />
+                        <Button DockPanel.Dock="Right" Content="刷新" Command="{Binding RefreshSystemCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                    </DockPanel>
+                    <TextBlock Text="{Binding OsText}" Margin="0,6,0,0" />
+                    <TextBlock Text="{Binding CpuText}" Margin="0,2,0,0" />
+                    <TextBlock Text="{Binding MemoryText, StringFormat=物理内存：{0}}" Margin="0,2,0,0" />
+                    <TextBlock Text="{Binding NvidiaSmiText}"
+                               Margin="0,6,0,0"
+                               TextWrapping="Wrap"
+                               Style="{DynamicResource App.CaptionText}" />
+                </StackPanel>
+            </Border>
+
+            <!-- 显示适配器 vs 推理设备 -->
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{DynamicResource App.CardBorder}" Margin="0,0,10,0">
+                    <StackPanel>
+                        <TextBlock Text="系统枚举的显示适配器（不代表 llama.cpp 可用设备）" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <DataGrid ItemsSource="{Binding DisplayAdapters}" MaxHeight="220" Margin="0,6,0,0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="1.6*" />
+                                <DataGridTextColumn Header="厂商" Binding="{Binding Vendor}" Width="1*" />
+                                <DataGridTextColumn Header="驱动" Binding="{Binding Driver}" Width="1*" />
+                                <DataGridTextColumn Header="显存（粗略）" Binding="{Binding Memory}" Width="100" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <TextBlock Text="来源：WMI Win32_VideoController（AdapterRAM 可能不准确）"
+                                   Style="{DynamicResource App.CaptionText}"
+                                   Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Style="{DynamicResource App.CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="GPU 实时指标（仅可用来源）" FontWeight="SemiBold" />
+                        <DataGrid ItemsSource="{Binding GpuMetrics}" MaxHeight="220" Margin="0,6,0,0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="设备" Binding="{Binding Name}" Width="1.6*" />
+                                <DataGridTextColumn Header="利用率" Binding="{Binding Utilization}" Width="90" />
+                                <DataGridTextColumn Header="显存" Binding="{Binding Memory}" Width="130" />
+                                <DataGridTextColumn Header="来源" Binding="{Binding Source}" Width="100" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <TextBlock Text="无法可靠获取的指标一律显示“—”，不使用估算值冒充真实数据。"
+                                   Style="{DynamicResource App.CaptionText}"
+                                   Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- 能力探测 -->
+            <Border Style="{DynamicResource App.CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="llama.cpp 程序能力探测" FontWeight="SemiBold" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock Text="选择已登记程序：" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <ComboBox Width="260"
+                                  ItemsSource="{Binding Installations}"
+                                  SelectedItem="{Binding SelectedInstallation, Mode=TwoWay}"
+                                  DisplayMemberPath="VersionLabel" />
+                        <Button Content="探测所选程序" Command="{Binding ProbeSelectedCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" Margin="8,0,0,0" />
+                        <Button Content="选择其他 exe…" Command="{Binding PickAndProbeExecutableCommand}" />
+                    </WrapPanel>
+                    <TextBlock Text="{Binding ProbeTargetText}" Margin="0,8,0,0" Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding ProbeVersionText}" Margin="0,6,0,0" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12" />
+                    <TextBlock Text="{Binding ProbeWarningsText}"
+                               Margin="0,6,0,0"
+                               Foreground="{DynamicResource App.State.Loading}"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding ProbeWarningsText, Converter={StaticResource NullOrEmptyToVisibility}}" />
+
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="此二进制的实际推理设备（--list-devices）" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <DataGrid ItemsSource="{Binding DetectedDevices}" MaxHeight="200" Margin="0,6,0,0">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="后端" Binding="{Binding Backend}" Width="100" />
+                                    <DataGridTextColumn Header="序号" Binding="{Binding Index}" Width="60" />
+                                    <DataGridTextColumn Header="设备" Binding="{Binding Name}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="解析出的受支持参数" FontWeight="SemiBold" />
+                            <DataGrid ItemsSource="{Binding SupportedOptions}" MaxHeight="200" Margin="0,6,0,0">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="参数" Binding="{Binding Canonical}" Width="120" />
+                                    <DataGridTextColumn Header="写法" Binding="{Binding Flags}" Width="1.4*" />
+                                    <DataGridTextColumn Header="取值" Binding="{Binding ValueKind}" Width="120" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Grid>
+
+                    <Expander Header="原始探测输出（--help / --list-devices）" Margin="0,10,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBox Grid.Row="0" Text="{Binding RawHelpText}" IsReadOnly="True"
+                                     FontFamily="Consolas" FontSize="11.5" MaxHeight="220"
+                                     VerticalScrollBarVisibility="Auto" TextWrapping="NoWrap" />
+                            <TextBox Grid.Row="1" Text="{Binding RawDevicesText}" IsReadOnly="True" Margin="0,6,0,0"
+                                     FontFamily="Consolas" FontSize="11.5" MaxHeight="140"
+                                     VerticalScrollBarVisibility="Auto" TextWrapping="NoWrap" />
+                        </Grid>
+                    </Expander>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

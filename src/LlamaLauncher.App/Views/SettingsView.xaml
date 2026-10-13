@@ -1,0 +1,141 @@
+<UserControl x:Class="LlamaLauncher.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+        <StackPanel MaxWidth="980" HorizontalAlignment="Left">
+            <TextBlock Text="设置" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" />
+
+            <!-- 外观与行为 -->
+            <Border Style="{DynamicResource App.CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="外观与行为" FontWeight="SemiBold" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock Text="主题：" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <ComboBox Width="120"
+                                  ItemsSource="{Binding ThemeChoices}"
+                                  DisplayMemberPath="DisplayName"
+                                  SelectedValuePath="Value"
+                                  SelectedValue="{Binding Theme, Mode=TwoWay}" />
+                        <CheckBox Content="关闭窗口时最小化到托盘" IsChecked="{Binding CloseToTray}" Margin="16,0,0,0" VerticalAlignment="Center" />
+                        <CheckBox Content="启动时直接进入托盘" IsChecked="{Binding StartMinimizedToTray}" Margin="16,0,0,0" VerticalAlignment="Center" />
+                        <CheckBox Content="开机自动启动" IsChecked="{Binding StartWithWindows}" Margin="16,0,0,0" VerticalAlignment="Center" />
+                    </WrapPanel>
+                    <CheckBox Content="退出应用时停止所有由本应用启动的服务（安全默认，避免产生孤儿进程）"
+                              IsChecked="{Binding StopServicesOnExit}" Margin="0,8,0,0" />
+                </StackPanel>
+            </Border>
+
+            <!-- 数据目录 -->
+            <Border Style="{DynamicResource App.CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="数据与目录" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding DataRootText, StringFormat=当前数据目录：{0}}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Content="更改数据目录…" Command="{Binding ChangeDataRootCommand}" />
+                        <Button Content="便携模式" Command="{Binding TogglePortableModeCommand}" ToolTip="便携（默认）：所有文件保存在程序目录；关闭后改用 %AppData%\\LlamaLauncher（重启生效）" />
+                        <Button Content="打开数据目录" Command="{Binding OpenDataFolderCommand}" />
+                        <Button Content="打开日志目录" Command="{Binding OpenLogsFolderCommand}" />
+                        <Button Content="打开版本目录" Command="{Binding OpenRuntimesFolderCommand}" />
+                        <Button Content="打开导出目录" Command="{Binding OpenExportsFolderCommand}" />
+                    </WrapPanel>
+                    <TextBlock Style="{DynamicResource App.CaptionText}" Margin="0,6,0,0"
+                               Text="数据库、日志、下载、版本目录、清单与备份默认全部保存在程序目录；自定义数据目录会写入程序目录的 LlamaLauncher.bootstrap.json，重启后生效。" />
+                </StackPanel>
+            </Border>
+
+            <!-- 资源与日志 -->
+            <Border Style="{DynamicResource App.CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="资源监控与日志" FontWeight="SemiBold" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock Text="采样间隔（秒）：" VerticalAlignment="Center" />
+                        <TextBox Width="60" Text="{Binding ResourceIntervalText, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="日志保留天数：" VerticalAlignment="Center" Margin="16,0,0,0" />
+                        <TextBox Width="60" Text="{Binding LogRetentionText, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="单文件上限（MB）：" VerticalAlignment="Center" Margin="16,0,0,0" />
+                        <TextBox Width="60" Text="{Binding LogMaxSizeText, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="轮转文件数：" VerticalAlignment="Center" Margin="16,0,0,0" />
+                        <TextBox Width="60" Text="{Binding LogRotatedCountText, UpdateSourceTrigger=PropertyChanged}" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- 更新 -->
+            <Border Style="{DynamicResource App.CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="llama.cpp 更新" FontWeight="SemiBold" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock Text="通道：" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <ComboBox Width="120"
+                                  ItemsSource="{Binding ChannelChoices}"
+                                  DisplayMemberPath="DisplayName"
+                                  SelectedValuePath="Value"
+                                  SelectedValue="{Binding UpdateChannel, Mode=TwoWay}" />
+                        <CheckBox Content="启动时自动检查更新" IsChecked="{Binding AutoCheckUpdates}" Margin="16,0,0,0" VerticalAlignment="Center" />
+                        <TextBlock Text="检查间隔（小时）：" VerticalAlignment="Center" Margin="16,0,0,0" />
+                        <TextBox Width="60" Text="{Binding UpdateIntervalText, UpdateSourceTrigger=PropertyChanged}" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- 安全 -->
+            <Border Style="{DynamicResource App.CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="API Key 与局域网安全" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding ApiKeyStatus, StringFormat=默认 API Key：{0}}" Margin="0,6,0,0" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Content="设置 / 更新 API Key" Command="{Binding SetApiKeyCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" />
+                        <Button Content="删除 API Key" Command="{Binding DeleteApiKeyCommand}" Style="{DynamicResource App.DestructiveButtonStyle}" />
+                    </WrapPanel>
+                    <TextBlock Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Text="密钥使用 Windows DPAPI（当前用户）加密存储；日志、启动历史、导出配置与诊断包均不包含密钥明文。局域网监听需要在启动前额外确认，且 API Key 不提供传输加密。" />
+                </StackPanel>
+            </Border>
+
+            <!-- 备份与恢复 -->
+            <Border Style="{DynamicResource App.CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="数据备份与恢复" FontWeight="SemiBold" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Content="立即备份" Command="{Binding CreateBackupCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" />
+                        <Button Content="恢复所选备份" Command="{Binding RestoreBackupCommand}" />
+                        <Button Content="打开备份目录" Command="{Binding OpenBackupsFolderCommand}" />
+                        <Button Content="导出诊断包" Command="{Binding ExportDiagnosticsCommand}" />
+                    </WrapPanel>
+                    <ListBox ItemsSource="{Binding Backups}"
+                             SelectedItem="{Binding SelectedBackup, Mode=TwoWay}"
+                             MaxHeight="150"
+                             Margin="0,8,0,0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding CreatedText}" Width="170" />
+                                    <TextBlock Text="{Binding SizeText}" Width="90" />
+                                    <TextBlock Text="{Binding PathText}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <TextBlock Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Text="备份使用 SQLite 在线备份（事务一致）；恢复前会自动备份当前数据库，恢复失败会自动回滚。" />
+                </StackPanel>
+            </Border>
+
+            <!-- 关于 -->
+            <Border Style="{DynamicResource App.CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="关于" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding AppVersionText}" Margin="0,6,0,0" />
+                    <TextBlock Text="{Binding AboutText}" TextWrapping="Wrap" Margin="0,6,0,0" Style="{DynamicResource App.SecondaryText}" />
+                </StackPanel>
+            </Border>
+
+            <!-- 操作 -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                <Button Content="保存设置" Command="{Binding SaveCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" MinWidth="120" />
+                <Button Content="恢复默认设置" Command="{Binding ResetToDefaultsCommand}" />
+                <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="10,0,0,0" Style="{DynamicResource App.CaptionText}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,84 @@
+<UserControl x:Class="LlamaLauncher.App.Views.ModelsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="模型库" FontSize="20" FontWeight="SemiBold" />
+
+        <WrapPanel Grid.Row="1" Margin="0,10,0,10">
+            <Button Content="添加 GGUF 文件" Command="{Binding AddFileCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" />
+            <Button Content="扫描目录" Command="{Binding ScanDirectoryCommand}" />
+            <CheckBox Content="包含子目录" IsChecked="{Binding IncludeSubdirectories}" Margin="6,0,12,0" VerticalAlignment="Center" />
+            <Button Content="取消扫描" Command="{Binding CancelScanCommand}" Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibility}}" />
+            <Button Content="重新检查选中" Command="{Binding RevalidateSelectedCommand}" />
+            <Button Content="检查全部" Command="{Binding RevalidateAllCommand}" />
+            <Button Content="在资源管理器中显示" Command="{Binding OpenInExplorerCommand}" />
+            <Button Content="复制路径" Command="{Binding CopyPathCommand}" />
+            <Button Content="移除登记" Command="{Binding RemoveCommand}" Style="{DynamicResource App.DestructiveButtonStyle}" />
+        </WrapPanel>
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <DataGrid ItemsSource="{Binding Models}"
+                      SelectedItem="{Binding SelectedModel, Mode=TwoWay}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="名称" Binding="{Binding DisplayName}" Width="1.6*" />
+                    <DataGridTextColumn Header="大小" Binding="{Binding SizeText}" Width="90" />
+                    <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="90" />
+                    <DataGridTextColumn Header="架构" Binding="{Binding Architecture}" Width="100" />
+                    <DataGridTextColumn Header="量化" Binding="{Binding Quantization}" Width="110" />
+                    <DataGridTextColumn Header="上下文" Binding="{Binding ContextLengthText}" Width="90" />
+                    <DataGridTextColumn Header="参数规模" Binding="{Binding ParameterCountText}" Width="100" />
+                    <DataGridTextColumn Header="最后修改" Binding="{Binding FileTimeText}" Width="140" />
+                    <DataGridTextColumn Header="路径" Binding="{Binding FilePath}" Width="2*" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Grid.Row="1"
+                    Style="{DynamicResource App.CardBorder}"
+                    Margin="0,10,0,0"
+                    Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <ProgressBar IsIndeterminate="True" />
+                    <TextBlock Text="{Binding ScanProgressText}" Margin="0,6,0,0" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="3" Style="{DynamicResource App.CardBorder}" Margin="0,10,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="300" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                    <TextBlock Text="GGUF 元数据" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding MetadataSummary}"
+                               TextWrapping="Wrap"
+                               FontFamily="Consolas"
+                               FontSize="12"
+                               Margin="0,6,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="别名" />
+                    <TextBox Text="{Binding EditAlias, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6" />
+                    <TextBlock Text="标签（逗号分隔）" />
+                    <TextBox Text="{Binding EditTags, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6" />
+                    <TextBlock Text="备注" />
+                    <TextBox Text="{Binding EditNotes, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6" AcceptsReturn="True" MinHeight="46" />
+                    <Button Content="保存模型信息" Command="{Binding SaveDetailsCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" HorizontalAlignment="Left" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

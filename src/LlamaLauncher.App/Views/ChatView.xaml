@@ -1,0 +1,680 @@
+<UserControl x:Class="LlamaLauncher.App.Views.ChatView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:LlamaLauncher.App.Controls">
+    <UserControl.Resources>
+        <!-- 会话列表项：圆角选中态 -->
+        <Style x:Key="Chat.ConversationItem" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="Margin" Value="0,1" />
+            <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
+            <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Root"
+                                Background="Transparent"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource App.Surface.Alt}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource App.Accent}" />
+                                <Setter Property="Foreground" Value="#FFFFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 消息操作小按钮：低调文字按钮 -->
+        <Style x:Key="Chat.MiniButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
+            <Setter Property="Padding" Value="7,2" />
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="Margin" Value="2,0,0,0" />
+        </Style>
+
+        <!-- 建议词胶囊按钮 -->
+        <Style x:Key="Chat.SuggestionChip" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{DynamicResource App.Surface.Alt}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource App.Border}" />
+            <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <!-- 浮动“回到底部”按钮 -->
+        <Style x:Key="Chat.FloatingButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{DynamicResource App.Surface.Alt}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource App.Border}" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.35" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 参数小标签 + 输入框 -->
+        <Style x:Key="Chat.FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ================= 会话列表 ================= -->
+        <Border Grid.Column="0" Style="{DynamicResource App.CardBorder}" Padding="10" Margin="0,0,12,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0">
+                    <TextBlock DockPanel.Dock="Left" Text="会话" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock DockPanel.Dock="Right"
+                               Text="{Binding Conversations.Count, StringFormat='共 {0} 个'}"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource App.Text.Secondary}"
+                               VerticalAlignment="Center" />
+                </DockPanel>
+
+                <Grid Grid.Row="1" Margin="0,8,0,0">
+                    <TextBox x:Name="SearchBox"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="8,5"
+                             ToolTip="按标题搜索会话" />
+                    <TextBlock Text="搜索会话…"
+                               Margin="10,6,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource App.Text.Secondary}"
+                               VerticalAlignment="Top"
+                               IsHitTestVisible="False"
+                               Visibility="{Binding SearchText, Converter={StaticResource NullOrEmptyToVisibility}, ConverterParameter=invert}" />
+                </Grid>
+
+                <Button Grid.Row="2"
+                        Content="＋ 新建会话"
+                        Margin="0,8,0,6"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding NewConversationCommand}"
+                        Style="{DynamicResource App.PrimaryButtonStyle}" />
+
+                <Grid Grid.Row="3">
+                    <ListBox ItemsSource="{Binding Conversations}"
+                             SelectedItem="{Binding SelectedConversation, Mode=TwoWay}"
+                             ItemContainerStyle="{StaticResource Chat.ConversationItem}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
+                                    <TextBlock Text="{Binding UpdatedText}"
+                                               Margin="0,2,0,0"
+                                               FontSize="11"
+                                               Opacity="0.75"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <TextBlock Text="暂无会话。点击上方“新建会话”开始聊天。"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="12"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               Foreground="{DynamicResource App.Text.Secondary}"
+                               FontSize="12">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Conversations.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <TextBlock Text="没有匹配的会话。"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource App.Text.Secondary}"
+                               FontSize="12"
+                               Visibility="{Binding HasSearchResults, Converter={StaticResource InverseBoolToVisibility}}" />
+                </Grid>
+
+                <StackPanel Grid.Row="4" Margin="0,8,0,0">
+                    <Separator />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Button Grid.Row="0" Grid.Column="0"
+                                Content="重命名"
+                                Margin="0,0,3,4"
+                                HorizontalContentAlignment="Center"
+                                Command="{Binding RenameConversationCommand}"
+                                Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Button Grid.Row="0" Grid.Column="1"
+                                Content="导出"
+                                Margin="3,0,0,4"
+                                HorizontalContentAlignment="Center"
+                                ToolTip="导出为 Markdown 文件"
+                                Command="{Binding ExportConversationCommand}"
+                                Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Button Grid.Row="1" Grid.Column="0"
+                                Content="清空消息"
+                                Margin="0,0,3,0"
+                                HorizontalContentAlignment="Center"
+                                Command="{Binding ClearConversationCommand}"
+                                Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Button Grid.Row="1" Grid.Column="1"
+                                Content="删除会话"
+                                Margin="3,0,0,0"
+                                HorizontalContentAlignment="Center"
+                                Command="{Binding DeleteConversationCommand}"
+                                Style="{DynamicResource App.DestructiveButtonStyle}" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ================= 消息区 ================= -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- 会话标题 + 实例连接 -->
+            <Border Grid.Row="0" Style="{DynamicResource App.CardBorder}" Padding="12,10" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="去启动实例"
+                                    Command="{Binding NavigateToInstancesCommand}"
+                                    Visibility="{Binding ShowNoInstanceHint, Converter={StaticResource BoolToVisibility}}"
+                                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                            <Button Content="测试对话"
+                                    ToolTip="发送一次轻量请求，验证所选实例的对话端点"
+                                    Command="{Binding TestConnectionCommand}"
+                                    Visibility="{Binding IsParametersExpanded, Converter={StaticResource InverseBoolToVisibility}}"
+                                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                            <Button Content="参数面板"
+                                    ToolTip="展开/收起系统提示词与采样参数"
+                                    Command="{Binding ToggleParametersCommand}"
+                                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding SelectedConversation.Title, TargetNullValue=未选择会话}"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center" />
+                    </DockPanel>
+
+                    <Grid Grid.Row="1" Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8"
+                                     Fill="{Binding ConnectionState, Converter={StaticResource StateToBrush}}"
+                                     VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ConnectionStateText}"
+                                       Margin="6,0,0,0"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ConnectionDetailText}"
+                                       Margin="8,0,0,0"
+                                       FontSize="11.5"
+                                       Foreground="{DynamicResource App.Text.Secondary}"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <ComboBox Grid.Column="1"
+                                  MinWidth="170"
+                                  MaxWidth="280"
+                                  Margin="10,0,0,0"
+                                  HorizontalAlignment="Right"
+                                  VerticalAlignment="Center"
+                                  ItemsSource="{Binding InstanceOptions}"
+                                  SelectedItem="{Binding SelectedInstance, Mode=TwoWay}"
+                                  DisplayMemberPath="DisplayText" />
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- 消息滚动区 + 空状态 + 回到底部 -->
+            <Grid Grid.Row="1">
+                <ScrollViewer x:Name="MessagesScroll"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Padding="2"
+                              ScrollChanged="OnMessagesScrollChanged">
+                    <ItemsControl ItemsSource="{Binding Messages}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border x:Name="AssistantAvatar"
+                                            Grid.Column="0"
+                                            Width="32" Height="32"
+                                            CornerRadius="16"
+                                            Background="{DynamicResource App.Chat.AvatarBackground}"
+                                            VerticalAlignment="Top"
+                                            Margin="0,2,10,0">
+                                        <TextBlock Text="AI"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource App.Accent}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+
+                                    <Border x:Name="UserAvatar"
+                                            Grid.Column="2"
+                                            Width="32" Height="32"
+                                            CornerRadius="16"
+                                            Background="{DynamicResource App.Accent}"
+                                            VerticalAlignment="Top"
+                                            Margin="10,2,0,0"
+                                            Visibility="Collapsed">
+                                        <TextBlock Text="我"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="White"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+
+                                    <StackPanel x:Name="ContentPanel" Grid.Column="1" HorizontalAlignment="Left" MaxWidth="780">
+                                        <StackPanel x:Name="MetaPanel" Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding RoleText}"
+                                                       FontSize="12.5"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource App.Accent}" />
+                                            <TextBlock Text="{Binding TimeText}"
+                                                       Margin="8,0,0,0"
+                                                       FontSize="11.5"
+                                                       Foreground="{DynamicResource App.Text.Secondary}"
+                                                       VerticalAlignment="Center" />
+                                            <StackPanel Orientation="Horizontal"
+                                                        Margin="8,0,0,0"
+                                                        VerticalAlignment="Center"
+                                                        Visibility="{Binding ShowStatus, Converter={StaticResource BoolToVisibility}}">
+                                                <Ellipse Width="7" Height="7"
+                                                         Fill="{Binding Message.Status, Converter={StaticResource MessageStatusToBrush}}"
+                                                         VerticalAlignment="Center">
+                                                    <Ellipse.Triggers>
+                                                        <EventTrigger RoutedEvent="Loaded">
+                                                            <BeginStoryboard>
+                                                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                     From="1" To="0.25" Duration="0:0:0.8" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </EventTrigger>
+                                                    </Ellipse.Triggers>
+                                                </Ellipse>
+                                                <TextBlock Text="{Binding StatusText}"
+                                                           Margin="4,0,0,0"
+                                                           FontSize="11.5"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{Binding Message.Status, Converter={StaticResource MessageStatusToBrush}}" />
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <Border x:Name="Bubble"
+                                                Margin="0,5,0,0"
+                                                Padding="12,9"
+                                                CornerRadius="10"
+                                                BorderThickness="1"
+                                                Background="{DynamicResource App.Chat.AssistantBubble}"
+                                                BorderBrush="{DynamicResource App.Chat.AssistantBubbleBorder}">
+                                            <controls:MarkdownViewer Markdown="{Binding MarkdownContent, Mode=OneWay}" />
+                                        </Border>
+
+                                        <TextBlock Text="{Binding ErrorText}"
+                                                   Margin="2,6,0,0"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{Binding Message.Status, Converter={StaticResource MessageStatusToBrush}}"
+                                                   Visibility="{Binding ErrorText, Converter={StaticResource NullOrEmptyToVisibility}}" />
+
+                                        <StackPanel x:Name="FooterPanel"
+                                                    Orientation="Horizontal"
+                                                    HorizontalAlignment="Left"
+                                                    Margin="2,5,0,0">
+                                            <TextBlock Text="{Binding MetricsText}"
+                                                       FontSize="11.5"
+                                                       Foreground="{DynamicResource App.Text.Secondary}"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <StackPanel Orientation="Horizontal" Margin="8,0,0,0">
+                                                <Button Content="复制"
+                                                        Style="{StaticResource Chat.MiniButton}"
+                                                        ToolTip="复制消息原文（Markdown）"
+                                                        Command="{Binding DataContext.CopyMessageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}" />
+                                                <Button Content="重新生成"
+                                                        Style="{StaticResource Chat.MiniButton}"
+                                                        ToolTip="删除这条回复并重新生成"
+                                                        Visibility="{Binding ShowRegenerate, Converter={StaticResource BoolToVisibility}}"
+                                                        Command="{Binding DataContext.RegenerateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                <Button Content="删除"
+                                                        Style="{StaticResource Chat.MiniButton}"
+                                                        ToolTip="删除这条消息"
+                                                        Command="{Binding DataContext.DeleteMessageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsUser}" Value="True">
+                                        <Setter TargetName="AssistantAvatar" Property="Visibility" Value="Collapsed" />
+                                        <Setter TargetName="UserAvatar" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="ContentPanel" Property="HorizontalAlignment" Value="Right" />
+                                        <Setter TargetName="MetaPanel" Property="HorizontalAlignment" Value="Right" />
+                                        <Setter TargetName="FooterPanel" Property="HorizontalAlignment" Value="Right" />
+                                        <Setter TargetName="Bubble" Property="Background" Value="{DynamicResource App.Chat.UserBubble}" />
+                                        <Setter TargetName="Bubble" Property="BorderBrush" Value="{DynamicResource App.Chat.UserBubbleBorder}" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- 空状态：未选择会话 -->
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsHitTestVisible="False"
+                            Visibility="{Binding ShowConversationEmptyState, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="💬" FontSize="40" HorizontalAlignment="Center" Opacity="0.85" />
+                    <TextBlock Text="选择或新建一个会话"
+                               Margin="0,10,0,0"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="从左侧会话列表选择会话，或点击“新建会话”开始聊天。"
+                               Margin="0,6,0,0"
+                               FontSize="12"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource App.Text.Secondary}" />
+                </StackPanel>
+
+                <!-- 空状态：会话无消息（新手引导） -->
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding ShowStartState, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="✨" FontSize="38" HorizontalAlignment="Center" Opacity="0.9" />
+                    <TextBlock Text="开始新的对话"
+                               Margin="0,10,0,0"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="输入消息后按 Ctrl+Enter 发送；Enter 换行。"
+                               Margin="0,6,0,0"
+                               FontSize="12"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource App.Text.Secondary}" />
+                    <ItemsControl ItemsSource="{Binding Suggestions}" Margin="0,8,0,0" HorizontalAlignment="Center">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel HorizontalAlignment="Center" MaxWidth="560" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding}"
+                                        Margin="4,4"
+                                        Style="{StaticResource Chat.SuggestionChip}"
+                                        Command="{Binding DataContext.UseSuggestionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0,8,0,0"
+                                HorizontalAlignment="Center"
+                                Visibility="{Binding ShowNoInstanceHint, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="当前没有就绪的实例，发送前请先启动一个实例。"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource App.State.Loading}"
+                                   VerticalAlignment="Center" />
+                        <Button Content="去启动实例"
+                                Margin="8,0,0,0"
+                                Padding="10,3"
+                                FontSize="12"
+                                Command="{Binding NavigateToInstancesCommand}"
+                                Style="{DynamicResource App.ToolbarButtonStyle}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Button x:Name="ScrollToBottomButton"
+                        Content="↓ 回到底部"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Margin="0,0,18,14"
+                        Visibility="Collapsed"
+                        Click="OnScrollToBottomClick"
+                        Style="{StaticResource Chat.FloatingButton}" />
+            </Grid>
+
+            <!-- 输入区 -->
+            <Border Grid.Row="2" Style="{DynamicResource App.CardBorder}" Padding="10" Margin="0,10,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <TextBox x:Name="InputBox"
+                                 AcceptsReturn="True"
+                                 MinHeight="56"
+                                 MaxHeight="150"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Padding="2"
+                                 Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                                 KeyDown="OnInputKeyDown" />
+                        <TextBlock Text="输入消息…（Ctrl+Enter 发送，Enter 换行）"
+                                   Margin="4,4,0,0"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource App.Text.Secondary}"
+                                   VerticalAlignment="Top"
+                                   IsHitTestVisible="False"
+                                   Visibility="{Binding InputText, Converter={StaticResource NullOrEmptyToVisibility}, ConverterParameter=invert}" />
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding GenerationStatus}"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource App.State.Loading}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding InputText.Length, StringFormat='共 {0} 字符'}"
+                                       Margin="0,0,10,0"
+                                       FontSize="11.5"
+                                       Foreground="{DynamicResource App.Text.Secondary}"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding InputText, Converter={StaticResource NullOrEmptyToVisibility}}" />
+                            <Button Content="停止生成"
+                                    Command="{Binding StopGenerationCommand}"
+                                    Style="{DynamicResource App.DestructiveButtonStyle}"
+                                    Visibility="{Binding IsGenerating, Converter={StaticResource BoolToVisibility}}" />
+                            <Button Content="发送"
+                                    ToolTip="Ctrl+Enter 发送"
+                                    Command="{Binding SendCommand}"
+                                    Style="{DynamicResource App.PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ================= 参数面板 ================= -->
+        <Border Grid.Column="2"
+                Width="320"
+                Margin="12,0,0,0"
+                Style="{DynamicResource App.CardBorder}"
+                Padding="12"
+                Visibility="{Binding IsParametersExpanded, Converter={StaticResource BoolToVisibility}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0">
+                    <Button DockPanel.Dock="Right"
+                            Content="✕"
+                            Style="{StaticResource Chat.MiniButton}"
+                            ToolTip="收起参数面板"
+                            Command="{Binding CloseParametersCommand}" />
+                    <TextBlock Text="会话参数"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                </DockPanel>
+
+                <ScrollViewer Grid.Row="1" Margin="0,8,0,0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="系统提示词" Style="{StaticResource Chat.FieldLabel}" />
+                        <TextBox Text="{Binding SystemPromptText, UpdateSourceTrigger=PropertyChanged}"
+                                 AcceptsReturn="True"
+                                 MinHeight="64"
+                                 MaxHeight="150"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Margin="0,3,0,12" />
+
+                        <TextBlock Text="采样参数" Style="{StaticResource Chat.FieldLabel}" Margin="0,0,0,4" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,8">
+                                <TextBlock Text="temperature" Style="{StaticResource Chat.FieldLabel}" />
+                                <TextBox Text="{Binding TemperatureText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,8">
+                                <TextBlock Text="top_p" Style="{StaticResource Chat.FieldLabel}" />
+                                <TextBox Text="{Binding TopPText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,8">
+                                <TextBlock Text="top_k" Style="{StaticResource Chat.FieldLabel}" />
+                                <TextBox Text="{Binding TopKText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,8">
+                                <TextBlock Text="min_p" Style="{StaticResource Chat.FieldLabel}" />
+                                <TextBox Text="{Binding MinPText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,8">
+                                <TextBlock Text="repeat_penalty" Style="{StaticResource Chat.FieldLabel}" />
+                                <TextBox Text="{Binding RepeatPenaltyText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,8">
+                                <TextBlock Text="随机种子（留空随机）" Style="{StaticResource Chat.FieldLabel}" />
+                                <TextBox Text="{Binding SeedText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="3" Grid.Column="0">
+                                <TextBlock Text="max tokens（-1 不限制）" Style="{StaticResource Chat.FieldLabel}" />
+                                <TextBox Text="{Binding MaxTokensText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="停止序列（每行一个）" Style="{StaticResource Chat.FieldLabel}" Margin="0,4,0,0" />
+                        <TextBox Text="{Binding StopSequencesText, UpdateSourceTrigger=PropertyChanged}"
+                                 AcceptsReturn="True"
+                                 MinHeight="52"
+                                 MaxHeight="120"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Margin="0,3,0,10" />
+                    </StackPanel>
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="2" Margin="0,8,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="保存参数" Command="{Binding SaveParametersCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" />
+                        <Button Content="重置默认" Command="{Binding ResetParametersCommand}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding ParameterStatus}"
+                               Margin="0,6,0,0"
+                               FontSize="11.5"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource App.Text.Secondary}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
