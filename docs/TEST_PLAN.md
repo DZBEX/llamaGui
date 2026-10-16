@@ -7,8 +7,8 @@
 
 | 测试项目 | 数量 | 结果 | 命令 |
 | --- | --- | --- | --- |
-| LlamaLauncher.UnitTests | 285 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UnitTests -c Debug` |
-| LlamaLauncher.IntegrationTests | 181 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.IntegrationTests -c Debug` |
+| LlamaLauncher.UnitTests | 286 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UnitTests -c Debug` |
+| LlamaLauncher.IntegrationTests | 182 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.IntegrationTests -c Debug` |
 | LlamaLauncher.UiTests | 44 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UiTests -c Debug` |
 | 解决方案构建 | — | ✅ Debug / Release 均 0 警告 0 错误 | `dotnet build LlamaLauncher.sln -c Release` |
 | 无界面冒烟测试 | — | ✅ SMOKE_OK（含实验室视图实例化与布局） | `LlamaLauncher.exe --smoke-test` |
@@ -141,9 +141,17 @@
 
 - **模拟路径**：设计器打开工作流 → 运行成功（22 ms，输出 `{"summary":"HELLO DECISION LAB","length":18}`，
   节点状态/耗时/轨迹正确）；批量测试模拟模式 + 断言 1/1 通过；运行历史可查询/查看详情。
-- **真实模型路径**：通过启动器启动 `Laya-Q8_0 实例`（端口 8081，b11577）→ `/health` ok，
-  `/v1/systemone` 返回校准概率（billing 0.987、confidence 0.980、churn 0.876）；
-  实验室「模型调试」（真实模式）此前已用同一实例验证过相同调用链。
+- **真实决策路径（模型调试页）**：通过启动器启动 `Laya-Q8_0 实例`（端口 8081，b11577）→
+  「模型调试」真实模式调用成功：department=billing（97.8%）、置信度 96.6%、144 ms / 158 tokens。
+- **真实决策路径（设计器整链路）**：「真实决策-路由（Laya）」工作流（开始 → 决策模型（绑定 Laya 实例）→
+  规则校验 → pass/fail 分支 → 结束）经启动器运行：**Succeeded，282 ms，6 个节点**，
+  输出 `{"department":"billing","department_confidence":0.902…,"churn_risk":0.139…,"decision":"billing-confirmed"}`，
+  决策节点真实调用 261 ms，规则命中「通过」分支，画布运行轨迹与节点详情（输入/输出/变量/诊断）一致。
+- **缺陷修复（当晚发现并修复，均有回归测试）**：
+  1. 应用被强制结束且实例遗留 Ready 状态时启动失败（`Ready -> LoadingModel` 非法迁移）——
+     状态机允许该迁移用于「重启后接管重新校验」，接管测试参数化覆盖 LoadingModel/Ready 两种遗留状态；
+  2. 画布渲染带分支标签连线时进程崩溃（`MidPoint` 对空展开几何取 `Figures[0]`）——
+     中点改为纯贝塞尔求值（t=0.5），离屏渲染回归测试复现旧崩溃并在修复后通过（产物 `artifacts/lab-preview/lab-06-canvas-branches.png`）。
 6. **Windows 10（较旧版本）**：本机为 Windows 11 派生版本；便携版自包含运行时，理论兼容 Win10 1809+。
 
 ## 7. 模型性能基准（2026-10-17 增量）

@@ -283,8 +283,10 @@ public sealed class InstanceManagerTests
         Assert.NotNull(reloaded.LastError);
     }
 
-    [Fact]
-    public async Task Recovery_AdoptsVerifiedRunningProcess()
+    [Theory]
+    [InlineData(InstanceState.LoadingModel)]
+    [InlineData(InstanceState.Ready)]
+    public async Task Recovery_AdoptsVerifiedRunningProcess(InstanceState persistedState)
     {
         using var fixture = new IntegrationFixture();
         var port = IntegrationFixture.GetFreePort();
@@ -327,7 +329,7 @@ public sealed class InstanceManagerTests
             {
                 Id = Guid.NewGuid(),
                 Name = "被接管实例",
-                State = InstanceState.LoadingModel,
+                State = persistedState,
                 Host = "127.0.0.1",
                 Port = port,
                 ProcessId = child.Id,

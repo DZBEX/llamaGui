@@ -13,6 +13,7 @@ public sealed class InstanceStateMachineTests
     [InlineData(InstanceState.LoadingModel, InstanceState.Ready)]
     [InlineData(InstanceState.LoadingModel, InstanceState.Failed)]
     [InlineData(InstanceState.Ready, InstanceState.Stopping)]
+    [InlineData(InstanceState.Ready, InstanceState.LoadingModel)]
     [InlineData(InstanceState.Stopping, InstanceState.Stopped)]
     [InlineData(InstanceState.Ready, InstanceState.ExitedUnexpectedly)]
     [InlineData(InstanceState.Failed, InstanceState.Starting)]

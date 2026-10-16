@@ -38,6 +38,8 @@ public static class InstanceStateMachine
         (InstanceState.Ready, InstanceState.Stopping),
         (InstanceState.Ready, InstanceState.Failed),
         (InstanceState.Ready, InstanceState.ExitedUnexpectedly),
+        // 应用重启后接管仍运行的实例：对已就绪实例重新进入“加载/校验”，由健康检查确认最终状态。
+        (InstanceState.Ready, InstanceState.LoadingModel),
         (InstanceState.Stopping, InstanceState.Stopped),
         (InstanceState.Stopping, InstanceState.Failed),
         (InstanceState.Stopping, InstanceState.ExitedUnexpectedly),
