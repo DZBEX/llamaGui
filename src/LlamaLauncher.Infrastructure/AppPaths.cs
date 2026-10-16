@@ -54,6 +54,15 @@ public sealed class AppPaths : IAppPaths
 
     public string ExportsDirectory => Path.Combine(DataRoot, "exports");
 
+    /// <summary>决策模型实验室：工作流定义目录。</summary>
+    public string WorkflowsDirectory => Path.Combine(DataRoot, "workflows");
+
+    /// <summary>工作流版本快照目录（不可变，按工作流分子目录）。</summary>
+    public string WorkflowSnapshotsDirectory => Path.Combine(WorkflowsDirectory, "snapshots");
+
+    /// <summary>测试用例目录。</summary>
+    public string WorkflowTestCasesDirectory => Path.Combine(WorkflowsDirectory, "testcases");
+
     private string? _runtimesDirectoryOverride;
 
     private string? _downloadsDirectoryOverride;
@@ -97,6 +106,9 @@ public sealed class AppPaths : IAppPaths
         Directory.CreateDirectory(ManifestsDirectory);
         Directory.CreateDirectory(BackupsDirectory);
         Directory.CreateDirectory(ExportsDirectory);
+        Directory.CreateDirectory(WorkflowsDirectory);
+        Directory.CreateDirectory(WorkflowSnapshotsDirectory);
+        Directory.CreateDirectory(WorkflowTestCasesDirectory);
     }
 
     /// <summary>读取引导配置（无效内容按默认处理并返回错误信息）。</summary>

@@ -19,11 +19,13 @@ public sealed class MigrationTests
             "SELECT (SELECT MAX(Version) FROM schema_migrations), " +
             "(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN " +
             "('Models','LaunchProfiles','LlamaCppInstallations','ServerInstances','StartupHistory'," +
-            "'Conversations','ChatMessages','UpdateOperations','AppSettings','Secrets'));";
+            "'Conversations','ChatMessages','UpdateOperations','AppSettings','Secrets','WorkflowRuns'," +
+            "'BenchmarkRuns'));";
         await using var reader = await command.ExecuteReaderAsync();
         Assert.True(await reader.ReadAsync());
-        Assert.Equal(1, reader.GetInt32(0));
-        Assert.Equal(10, reader.GetInt32(1));
+        // 迁移版本随功能增量推进（v2：决策模型实验室运行历史；v3：性能基准运行记录）。
+        Assert.Equal(SqliteDatabase.Migrations.Count, reader.GetInt32(0));
+        Assert.Equal(12, reader.GetInt32(1));
     }
 
     [Fact]
@@ -40,7 +42,7 @@ public sealed class MigrationTests
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM schema_migrations;";
         var count = Convert.ToInt64(await command.ExecuteScalarAsync());
-        Assert.Equal(1, count);
+        Assert.Equal(SqliteDatabase.Migrations.Count, count);
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using LlamaLauncher.App.Services;
 using LlamaLauncher.App.ViewModels;
+using LlamaLauncher.App.ViewModels.Lab;
 
 namespace LlamaLauncher.App;
 
@@ -40,12 +41,21 @@ internal static class AppServiceCollectionExtensions
         services.AddSingleton<ModelsViewModel>();
         services.AddSingleton<ProfilesViewModel>();
         services.AddSingleton<ChatViewModel>();
+        services.AddSingleton<BenchmarkViewModel>();
         services.AddSingleton<HardwareViewModel>();
         services.AddSingleton<UpdatesViewModel>();
         services.AddSingleton<LogsViewModel>();
         services.AddSingleton<HistoryViewModel>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<ShellViewModel>();
+
+        // 决策模型实验室
+        services.AddSingleton<ModelDebugViewModel>();
+        services.AddSingleton<WorkflowDesignerViewModel>();
+        services.AddSingleton<TestCaseViewModel>();
+        services.AddSingleton<BatchTestViewModel>();
+        services.AddSingleton<RunHistoryViewModel>();
+        services.AddSingleton<LabViewModel>();
 
         // 配置编辑器按需创建
         services.AddTransient<ProfileEditorViewModel>();

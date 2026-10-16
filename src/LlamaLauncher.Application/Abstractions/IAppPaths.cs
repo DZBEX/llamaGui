@@ -39,6 +39,15 @@ public interface IAppPaths
     /// <summary>配置导出目录。</summary>
     string ExportsDirectory { get; }
 
+    /// <summary>决策模型实验室：工作流定义目录。</summary>
+    string WorkflowsDirectory { get; }
+
+    /// <summary>工作流版本快照目录。</summary>
+    string WorkflowSnapshotsDirectory { get; }
+
+    /// <summary>测试用例目录。</summary>
+    string WorkflowTestCasesDirectory { get; }
+
     /// <summary>确保所有目录存在。</summary>
     void EnsureCreated();
 

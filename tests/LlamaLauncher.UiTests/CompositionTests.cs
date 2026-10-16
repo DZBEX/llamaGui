@@ -59,14 +59,36 @@ public sealed class CompositionTests
             Assert.NotNull(provider.GetRequiredService<ModelsViewModel>());
             Assert.NotNull(provider.GetRequiredService<ProfilesViewModel>());
             Assert.NotNull(provider.GetRequiredService<ChatViewModel>());
+            Assert.NotNull(provider.GetRequiredService<BenchmarkViewModel>());
             Assert.NotNull(provider.GetRequiredService<HardwareViewModel>());
             Assert.NotNull(provider.GetRequiredService<UpdatesViewModel>());
             Assert.NotNull(provider.GetRequiredService<LogsViewModel>());
             Assert.NotNull(provider.GetRequiredService<HistoryViewModel>());
             Assert.NotNull(provider.GetRequiredService<SettingsViewModel>());
 
+            // 决策模型实验室（容器 + 子页 ViewModel + 引擎服务）
+            Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Workflows.WorkflowRunnerService>());
+            Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Workflows.WorkflowEngine>());
+            Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Workflows.IWorkflowDefinitionStore>());
+            Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Workflows.IWorkflowTestCaseStore>());
+            Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Workflows.IWorkflowRunStore>());
+            Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Abstractions.IModelDecisionClient>());
+            Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Workflows.IWorkflowModelResolver>());
+            Assert.NotNull(provider.GetRequiredService<App.ViewModels.Lab.ModelDebugViewModel>());
+            Assert.NotNull(provider.GetRequiredService<App.ViewModels.Lab.WorkflowDesignerViewModel>());
+            Assert.NotNull(provider.GetRequiredService<App.ViewModels.Lab.TestCaseViewModel>());
+            Assert.NotNull(provider.GetRequiredService<App.ViewModels.Lab.BatchTestViewModel>());
+            Assert.NotNull(provider.GetRequiredService<App.ViewModels.Lab.RunHistoryViewModel>());
+            var lab = provider.GetRequiredService<App.ViewModels.Lab.LabViewModel>();
+            Assert.Equal(5, lab.Tabs.Count);
+
+            // 性能基准（页面 ViewModel + 运行编排 + 客户端/存储）
+            Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Benchmarks.BenchmarkRunnerService>());
+            Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Benchmarks.IBenchmarkClient>());
+            Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Benchmarks.IBenchmarkRunStore>());
+
             var shell = provider.GetRequiredService<ShellViewModel>();
-            Assert.Equal(10, shell.Pages.Count);
+            Assert.Equal(12, shell.Pages.Count);
             Assert.NotNull(shell.CurrentPage);
 
             // 配置编辑器工厂可用

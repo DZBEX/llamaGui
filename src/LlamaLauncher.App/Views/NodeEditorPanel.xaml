@@ -1,0 +1,104 @@
+<UserControl x:Class="LlamaLauncher.App.Views.NodeEditorPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LlamaLauncher.App.ViewModels.Lab">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <!-- 基本信息 -->
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding NodeTypeTitle}" FontWeight="SemiBold" FontSize="14" />
+                <TextBlock Text="{Binding NodeIdText}" Margin="8,0,0,0" Style="{DynamicResource App.SecondaryText}" />
+            </StackPanel>
+            <TextBlock Text="{Binding NodeTypeDescription}" Style="{DynamicResource App.CaptionText}"
+                       TextWrapping="Wrap" Margin="0,4,0,8" />
+
+            <TextBlock Text="名称" />
+            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="备注" Margin="0,6,0,0" />
+            <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="34" />
+
+            <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="失败策略" />
+                    <ComboBox ItemsSource="{Binding FailurePolicyOptions}"
+                              SelectedItem="{Binding FailurePolicy, Mode=TwoWay}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="节点超时（秒，留空=默认）" />
+                    <TextBox Text="{Binding TimeoutText, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </Grid>
+
+            <CheckBox Content="在此节点设置断点（执行前暂停）" IsChecked="{Binding Breakpoint}"
+                      Margin="0,8,0,0" />
+
+            <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="1.4*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="重试次数（1–5）" />
+                    <TextBox Text="{Binding RetryMaxAttempts, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="重试间隔（毫秒）" />
+                    <TextBox Text="{Binding RetryDelayMs, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Grid.Column="4">
+                    <TextBlock Text="重试条件" />
+                    <ComboBox ItemsSource="{Binding RetryConditionOptions}"
+                              SelectedItem="{Binding RetryCondition, Mode=TwoWay}" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="写入变量（可选：把本节点主输出保存到 vars.&lt;名称&gt;）" Margin="0,8,0,0" />
+            <TextBox Text="{Binding OutputVariable, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Separator Margin="0,10" />
+
+            <!-- 类型专属配置 -->
+            <ContentControl Content="{Binding}" />
+
+            <Separator Margin="0,10" />
+
+            <!-- 输入映射 -->
+            <DockPanel>
+                <TextBlock Text="输入映射（来源表达式 → 目标字段）" FontWeight="SemiBold" />
+            </DockPanel>
+            <DataGrid ItemsSource="{Binding InputMappings}"
+                      SelectedItem="{Binding SelectedMapping, Mode=TwoWay}"
+                      MinHeight="110"
+                      MaxHeight="220"
+                      Margin="0,6,0,0"
+                      CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="目标" Binding="{Binding Target, UpdateSourceTrigger=PropertyChanged}" Width="72" />
+                    <DataGridTextColumn Header="来源表达式" Binding="{Binding Source, UpdateSourceTrigger=PropertyChanged}" Width="112" />
+                    <DataGridTemplateColumn Header="转换" Width="64">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.ConvertOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                          SelectedItem="{Binding Convert, UpdateSourceTrigger=PropertyChanged}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridCheckBoxColumn Header="必填" Binding="{Binding Required, UpdateSourceTrigger=PropertyChanged}" Width="42" />
+                    <DataGridTextColumn Header="默认值 (JSON)" Binding="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}" Width="54" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                <Button Content="添加映射" Command="{Binding AddMappingCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Content="删除映射" Command="{Binding RemoveMappingCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -14,6 +14,12 @@ llama.cpp 的 Windows 桌面启动器（WPF / .NET 8）：管理本地 GGUF 模�
 - **模型库**：登记/扫描本地 GGUF（只读文件头解析元数据），失效检测；移除登记不删除文件。
 - **启动配置**：结构化参数、预设、能力校验、脱敏命令预览、高级额外参数与冲突检测、JSON 导入导出（默认不含秘密）。
 - **内置聊天**：真实 SSE 流式输出、停止生成、系统提示词与采样参数、Markdown 安全渲染与代码块复制、历史持久化与中断恢复。
+- **性能基准**：对运行中的实例执行可复现的模型性能测试（`/completion` 流式测速）：提示处理速度（prompt processing）、
+  生成速度（token generation）、首 token 延迟与单次总耗时；支持多档提示长度、预热/重复/冷却、每档均值±标准差统计、
+  样本明细、历史记录与 Markdown/JSON 报告导出（禁用提示缓存 + 随机前缀，保证真实 prefill；速度取自服务端 timings）。
+- **决策模型实验室**：调试决策模型（`/v1/systemone`）、可视化工作流设计与运行调试（断点/单步/运行轨迹/节点详情）、
+  测试用例与断言、批量测试、运行历史与字段级比较；工作流与用例为版本化 JSON，运行历史进入 SQLite
+  （详见 [docs/DECISION_LAB.md](docs/DECISION_LAB.md)）。
 - **安全默认**：仅监听 127.0.0.1；局域网监听需要显式确认 + API Key；密钥使用 Windows DPAPI 存储，日志/历史/导出/诊断包全部脱敏。
 - **版本管理**：官方 Releases 检查（稳定/预发布通道）、资产分类标注、流式下载与 SHA-256 校验、ZIP 安全解压、
   独立版本目录、切换默认与一键回滚、本地压缩包导入。
@@ -49,6 +55,7 @@ pwsh -File scripts/build-installer.ps1             # Windows 安装包（需要 
 - [更新系统设计](docs/UPDATE_DESIGN.md)
 - [安全模型](docs/SECURITY.md)
 - [测试计划与执行结果](docs/TEST_PLAN.md)
+- [决策模型实验室](docs/DECISION_LAB.md)
 
 ## 目录结构
 

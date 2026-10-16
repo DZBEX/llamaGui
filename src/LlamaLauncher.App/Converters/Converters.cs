@@ -4,7 +4,10 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using LlamaLauncher.App.ViewModels;
+using LlamaLauncher.App.ViewModels.Lab;
 using LlamaLauncher.Domain;
+using LlamaLauncher.Domain.Benchmarks;
+using LlamaLauncher.Domain.Workflows;
 
 namespace LlamaLauncher.App.Converters;
 
@@ -31,6 +34,10 @@ public sealed class PageTemplateSelector : DataTemplateSelector
 
     public DataTemplate? Settings { get; set; }
 
+    public DataTemplate? Lab { get; set; }
+
+    public DataTemplate? Benchmark { get; set; }
+
     public override DataTemplate? SelectTemplate(object? item, DependencyObject container) => item switch
     {
         DashboardViewModel => Dashboard,
@@ -43,8 +50,117 @@ public sealed class PageTemplateSelector : DataTemplateSelector
         LogsViewModel => Logs,
         HistoryViewModel => History,
         SettingsViewModel => Settings,
+        LabViewModel => Lab,
+        BenchmarkViewModel => Benchmark,
         _ => null,
     };
+}
+
+/// <summary>实验室子页模板选择器。</summary>
+public sealed class LabPageTemplateSelector : DataTemplateSelector
+{
+    public DataTemplate? ModelDebug { get; set; }
+
+    public DataTemplate? Designer { get; set; }
+
+    public DataTemplate? TestCases { get; set; }
+
+    public DataTemplate? BatchTest { get; set; }
+
+    public DataTemplate? History { get; set; }
+
+    public override DataTemplate? SelectTemplate(object? item, DependencyObject container) => item switch
+    {
+        ModelDebugViewModel => ModelDebug,
+        WorkflowDesignerViewModel => Designer,
+        TestCaseViewModel => TestCases,
+        BatchTestViewModel => BatchTest,
+        RunHistoryViewModel => History,
+        _ => null,
+    };
+}
+
+/// <summary>节点运行状态 → 状态色。</summary>
+public sealed class NodeRunStateToBrushConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var key = value switch
+        {
+            NodeRunState.Succeeded => "App.State.Ready",
+            NodeRunState.Running or NodeRunState.WaitingForUser or NodeRunState.PausedAtBreakpoint => "App.State.Loading",
+            NodeRunState.Failed or NodeRunState.TimedOut => "App.State.Error",
+            _ => "App.State.Stopped",
+        };
+        return System.Windows.Application.Current?.TryFindResource(key) as Brush
+            ?? new SolidColorBrush(Colors.Gray);
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>运行/节点状态 → 图标字形。</summary>
+public sealed class RunStateGlyphConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value switch
+        {
+            NodeRunState.Succeeded => "●",
+            NodeRunState.Running => "▶",
+            NodeRunState.Failed => "✕",
+            NodeRunState.TimedOut => "⏱",
+            NodeRunState.Skipped => "–",
+            NodeRunState.Canceled => "⊘",
+            NodeRunState.PausedAtBreakpoint => "⏸",
+            NodeRunState.WaitingForUser => "✋",
+            NodeRunState.Pending => "○",
+            WorkflowRunState.Succeeded => "●",
+            WorkflowRunState.Running => "▶",
+            WorkflowRunState.Paused => "⏸",
+            WorkflowRunState.Failed => "✕",
+            WorkflowRunState.Canceled => "⊘",
+            WorkflowRunState.TimedOut => "⏱",
+            _ => "○",
+        };
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>差异类型 → 颜色（新增=绿、删除=红、变化=琥珀）。</summary>
+public sealed class DiffKindToBrushConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var key = value switch
+        {
+            LlamaLauncher.Application.Workflows.Testing.JsonDiffKind.Added => "App.State.Ready",
+            LlamaLauncher.Application.Workflows.Testing.JsonDiffKind.Removed => "App.State.Error",
+            _ => "App.State.Loading",
+        };
+        return System.Windows.Application.Current?.TryFindResource(key) as Brush
+            ?? new SolidColorBrush(Colors.Gray);
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>枚举值等于参数（字符串比较）→ Visibility。</summary>
+public sealed class EnumEqualsToVisibilityConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var expected = parameter as string ?? string.Empty;
+        var actual = value?.ToString() ?? string.Empty;
+        return string.Equals(actual, expected, StringComparison.OrdinalIgnoreCase)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
 }
 
 /// <summary>true → Collapsed，false → Visible。</summary>
@@ -150,6 +266,16 @@ public sealed class NullToBoolConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is null or false;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>基准运行状态 → 中文文本。</summary>
+public sealed class BenchmarkStateTextConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is BenchmarkRunState state ? BenchmarkReportFormatter.StateText(state) : string.Empty;
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();

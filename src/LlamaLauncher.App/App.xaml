@@ -18,6 +18,11 @@
             <converters:SeverityToBrushConverter x:Key="SeverityToBrush" />
             <converters:InverseBoolConverter x:Key="InverseBool" />
             <converters:NullToBoolConverter x:Key="NullToBoolIndeterminate" />
+            <converters:LabPageTemplateSelector x:Key="LabPageTemplateSelector" />
+            <converters:NodeRunStateToBrushConverter x:Key="NodeRunStateToBrush" />
+            <converters:RunStateGlyphConverter x:Key="RunStateGlyph" />
+            <converters:DiffKindToBrushConverter x:Key="DiffKindToBrush" />
+            <converters:EnumEqualsToVisibilityConverter x:Key="EnumEqualsToVisibility" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

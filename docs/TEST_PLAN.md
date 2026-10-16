@@ -1,14 +1,17 @@
 # 测试计划与执行结果
 
-> 本文件记录**实际执行过**的命令与结果（2026-10-12/13，Windows 10.0.26300，.NET SDK 8.0.425）。
+> 本文件记录**实际执行过**的命令与结果（2026-10-12/13 首版；2026-10-17 增量：决策模型实验室、模型性能基准）。
+> 环境：Windows 10.0.26300，.NET SDK 8.0.425/8.0.426，RTX 4060 Laptop（8 GB）。
 
 ## 1. 自动化测试总览
 
 | 测试项目 | 数量 | 结果 | 命令 |
 | --- | --- | --- | --- |
-| LlamaLauncher.UnitTests | 165 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UnitTests -c Release` |
-| LlamaLauncher.IntegrationTests | 116 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.IntegrationTests -c Release` |
-| LlamaLauncher.UiTests | 25 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UiTests -c Release` |
+| LlamaLauncher.UnitTests | 285 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UnitTests -c Debug` |
+| LlamaLauncher.IntegrationTests | 181 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.IntegrationTests -c Debug` |
+| LlamaLauncher.UiTests | 44 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UiTests -c Debug` |
+| 解决方案构建 | — | ✅ Debug / Release 均 0 警告 0 错误 | `dotnet build LlamaLauncher.sln -c Release` |
+| 无界面冒烟测试 | — | ✅ SMOKE_OK（含实验室视图实例化与布局） | `LlamaLauncher.exe --smoke-test` |
 | 一键流水线 | — | ✅ 构建 0 警告 0 错误 | `pwsh -File scripts/build.ps1` |
 
 ## 2. 单元测试覆盖
@@ -62,7 +65,7 @@
   非 SQLite 文件拒绝恢复、诊断包内容与脱敏。
   另含：数据根解析（默认/环境变量/引导配置）、目录覆盖（版本/下载目录应用与恢复默认、不可用路径回退提示）、
   新增路径设置的设置往返。
-- **工程组合**：整个 DI 图（基础设施 + 10 个页面 ViewModel + 编辑器工厂）可完整解析。
+- **工程组合**：整个 DI 图（基础设施 + 全部页面 ViewModel + 编辑器工厂）可完整解析。
 
 ## 4. UI 逻辑测试（UiTests）
 
@@ -70,7 +73,7 @@
 - 转换器（反相可见性、空值可见性、进度不确定）。
 - Markdown 渲染：标题/列表/引用文本、HTML 按纯文本、围栏代码块生成可复制 TextBox、
   表格渲染、`javascript:` 链接不生成超链接。
-- 组合根解析（10 个导航页）。
+- 组合根解析（12 个导航页）。
 - 应用图标资源：已嵌入且包含 16/24/32/48/64/128/256 全部尺寸、各条目为 PNG 压缩、可按 16/32 加载为托盘图标。
 - ComboBox 深色/浅色主题渲染回归：用真实主题资源字典渲染控件并做像素级断言
   （背景为对应主题色、文字像素清晰可见、下拉项选中态为强调色底白字），
@@ -94,4 +97,87 @@
 3. **WebView2**：未使用（Markdown 采用 FlowDocument 渲染，无此依赖）。
 4. **局域网真实设备访问**：界面/校验/威胁确认流程已实现并有测试；跨设备网络连通性需实机验证。
 5. **GitHub Releases 在线检查/下载**：客户端实现完整并有本地模拟测试；真实网络下的速率限制行为建议实测。
+
+## 5. 决策模型实验室（2026-10-17 增量）
+
+### 5.1 单元测试（`tests/LlamaLauncher.UnitTests/Workflows/`，+95 项）
+
+- **安全表达式**：字面量/路径/纯路径提取、比较（数值/字符串/类型不匹配报错）、逻辑短路、`??`、`in`、
+  算术与字符串拼接、除零、白名单函数全量行为、非法字符/未知函数/未闭合/嵌套过深/超长、
+  操作预算与集合上限、Bool 求值接口、运行期错误定位；**拒绝任何系统能力调用**（如 `System.IO...`、shell 片段）。
+- **模板**：占位符渲染（字符串/非字符串紧凑 JSON）、缺失记录、转义 `\{{`、非路径与未闭合报错。
+- **定义序列化**：JSON 往返（含节点配置、重试、边分支）、深克隆独立、类型化配置读写、节点目录 13 类完整且 ID 唯一。
+- **校验器**：合法通过；缺开始/结束、多开始、重复 ID/连线、悬空与未知端口、孤立/不可达、环路、
+  条件默认分支与表达式、模板、分支连线标注、错误出口、映射（引用/必填/转换）、决策问题（选项/等级/类型/实例绑定）、
+  循环（迭代上限/子流程存在性）、子流程递归、未知节点、重试/超时越界、算法求解器未注册。
+- **执行引擎**：顺序与 `input/vars/up` 传递、变量写入读取、条件分支只走选中路径（含跳过传播）、
+  失败终止/继续（错误上下文）/错误分支路由、瞬时错误重试（次数记录）、节点超时（TimedOut）、
+  运行取消（在途取消、未开始节点不再调度）、单步（每节点后暂停）、断点（执行前暂停并可继续）、
+  并行扇出与汇合（顺序/输出）、循环迭代上限、循环逐项子工作流、子流程深度保护、
+  模拟模式（不调用模型；缺模拟响应明确失败）、必填输入缺失、输入默认值与类型、人工确认分支、算法节点状态、结束节点业务失败。
+- **测试工具**：断言运算符全量行为、失败信息含实际/期望、警告级不判失败、节点记录查询、非法表达式/正则不崩溃；
+  JSON 字段级差异（新增/删除/变化/数组）与忽略字段；运行比较（输出差异/节点状态变化/耗时摘要）。
+
+### 5.2 集成测试（`tests/LlamaLauncher.IntegrationTests/Workflows/`，+22 项）
+
+- **文件存储**：保存→读取、覆盖保存原子性（无临时残留）、版本快照不可变、非法 JSON/超大文件/未知节点类型、
+  不安全 ID 拒绝、导出再导入结构一致；测试用例 CRUD 与断言表达式导入校验。
+- **SQLite 运行历史**：写入/查询（状态/搜索过滤）/取回（节点与日志）/清理策略/删除/计数；迁移 v2 建表与幂等。
+- **决策 HTTP 客户端**（本地模拟 JSON 服务）：成功解析 answers、请求体与 Bearer 头、HTTP 状态分类（404 含升级提示）、
+  无效 JSON/缺 answers、响应超限、超时、连接失败（处理器注入）、用户取消抛 OCE。
+- **模型解析**：实例→目标（就绪状态与不可用原因、上下文快照）、默认选择第一个就绪实例、按 GUID（D/N）解析、
+  API Key 读取、未知实例返回 null。
+
+### 5.3 UI 测试（`tests/LlamaLauncher.UiTests/`，+6 项）
+
+- 组合根：页面 11 项、实验室 5 个子页 ViewModel 与引擎服务（运行协调/引擎/存储/决策客户端/模型解析）全部可解析。
+- 实验室渲染：真实主题资源 + 容器解析下逐页布局与渲染（6 张 PNG 产物在 `artifacts/lab-preview/`），
+  非空白断言；设计器画布初始化（`InitializePreview`）覆盖画布/ViewModel 桥接路径。
+- 冒烟测试：`--smoke-test` 现将实验室 ViewModel 与全部子页视图实例化并执行一次布局，发布产物自动验证覆盖实验室。
+
+### 5.4 手工端到端（2026-10-17，实测）
+
+- **模拟路径**：设计器打开工作流 → 运行成功（22 ms，输出 `{"summary":"HELLO DECISION LAB","length":18}`，
+  节点状态/耗时/轨迹正确）；批量测试模拟模式 + 断言 1/1 通过；运行历史可查询/查看详情。
+- **真实模型路径**：通过启动器启动 `Laya-Q8_0 实例`（端口 8081，b11577）→ `/health` ok，
+  `/v1/systemone` 返回校准概率（billing 0.987、confidence 0.980、churn 0.876）；
+  实验室「模型调试」（真实模式）此前已用同一实例验证过相同调用链。
 6. **Windows 10（较旧版本）**：本机为 Windows 11 派生版本；便携版自包含运行时，理论兼容 Win10 1809+。
+
+## 7. 模型性能基准（2026-10-17 增量）
+
+### 7.1 单元测试（`tests/LlamaLauncher.UnitTests/Benchmarks/`，+25 项）
+
+- **统计聚合**：均值/样本标准差（n-1）/最小/最大、null 与 NaN 过滤、空与单样本边界、预热与失败样本排除、
+  按档位分组、平均实际提示 token、指标格式化（均值 ± 标准差 / 空值）。
+- **提示构造**：目标长度近似（4 字符/token 估计与上界）、随机盐前缀（缓存绕过的可测约定）、
+  长度随档位单调增长、非正目标拒绝、盐唯一且固定长度。
+- **流帧解析**：content/stop 字段、`timings`（prompt_n/prompt_ms/prompt_per_second/predicted_*）、
+  `[DONE]` 标记、错误对象与错误字符串、顶层 `tokens_predicted`/`tokens_evaluated` 回退、
+  空载荷/非法 JSON/非字符串内容容错。
+- **限量校验**：默认与边界值通过；空档位、档位过多/重复/越界、生成长度、重复/预热/冷却范围逐项报错。
+
+### 7.2 集成测试（`tests/LlamaLauncher.IntegrationTests/Benchmarks/` + `Sqlite/BenchmarkRunStoreTests.cs`，+12 项）
+
+- **运行编排**（伪造客户端 + 真实 SQLite）：档位升序与“预热→重复”顺序、请求参数与 API Key 传递、
+  每样本提示唯一（前缀不同）、进度上报（预热/第 N 次）、样本级增量持久化；
+  连续失败自动提前中止（全失败 → Failed；部分成功 → Succeeded + “提前中止”说明）；
+  取消保留已完成样本并持久化为 Canceled；未就绪实例与非法配置拒绝启动；并发运行保护（门闩阻塞时第二次运行立即拒绝）。
+- **HTTP 客户端**（本地模拟 SSE 服务）：流式 timings 解析与客户端实测首 token/总耗时；
+  请求体校验（prompt / n_predict / cache_prompt=false / stream / temperature=0 / Bearer 头 / POST /completion）；
+  404 错误分类并透传服务端消息；流内服务端错误帧识别；无 timings 时回退内容帧计数；
+  数据体卡死触发请求时限（裸 TCP 服务只发响应头）。
+- **SQLite 仓储**：完整往返（配置/样本/错误/状态）、摘要按时间倒序且不加载明细、原位更新（增量保存）、删除。
+- **迁移 v3**：`BenchmarkRuns` 表与两个索引创建；迁移清单与幂等性断言同步更新。
+
+### 7.3 UI 测试（`tests/LlamaLauncher.UiTests/BenchmarkViewModelTests.cs`，+5 项）
+
+- 运行完成：档位聚合行与样本明细、历史自动刷新、进度到 100%、完成通知、Markdown 报告复制（真实剪贴板替身捕获文本）。
+- 无就绪实例：提示且不产生任何记录；非法配置：警告对话框与状态栏提示，且不启动运行。
+- 历史删除（确认后记录与仓储同步移除）；提示长度解析（去重 + 排序）。
+- 组合根：页面数 12、基准页 ViewModel 与运行编排/客户端/存储全部可解析。
+
+### 7.4 冒烟与构建
+
+- `dotnet build LlamaLauncher.sln -c Release` → 0 警告 0 错误；`pwsh -File scripts/build.ps1` 全部通过。
+- 发布产物 `LlamaLauncher.exe --smoke-test`（真实宿主 + 迁移 v3 + 恢复流程 + 主题/设置加载）→ 输出 `SMOKE_OK`、退出码 0。

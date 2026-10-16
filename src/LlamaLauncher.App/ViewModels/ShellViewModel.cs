@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using LlamaLauncher.Application.Abstractions;
 using LlamaLauncher.Application.Instances;
 using LlamaLauncher.Application.Services;
+using LlamaLauncher.App.ViewModels.Lab;
 using LlamaLauncher.App.Services;
 using LlamaLauncher.Domain;
 using Microsoft.Extensions.Logging;
@@ -55,11 +56,13 @@ public sealed partial class ShellViewModel : ViewModelBase, IDisposable
         ModelsViewModel modelsPage,
         ProfilesViewModel profilesPage,
         ChatViewModel chatPage,
+        BenchmarkViewModel benchmarkPage,
         HardwareViewModel hardwarePage,
         UpdatesViewModel updatesPage,
         LogsViewModel logsPage,
         HistoryViewModel historyPage,
         SettingsViewModel settingsPage,
+        LabViewModel labPage,
         IInstanceManager instances,
         IResourceMonitorService resources,
         ISettingsService settings,
@@ -82,6 +85,8 @@ public sealed partial class ShellViewModel : ViewModelBase, IDisposable
             new("模型库", "▤", modelsPage),
             new("启动配置", "▥", profilesPage),
             new("内置聊天", "◈", chatPage),
+            new("性能基准", "⚡", benchmarkPage),
+            new("决策模型实验室", "⚗", labPage),
             new("硬件与后端", "▣", hardwarePage),
             new("版本管理", "⟳", updatesPage),
             new("日志与诊断", "≡", logsPage),

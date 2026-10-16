@@ -20,6 +20,57 @@ public partial class App : System.Windows.Application
     private ILogger<App>? _logger;
     private TrayService? _tray;
 
+    /// <summary>
+    /// 冒烟测试中的实验室验证：解析实验室全部 ViewModel，并实例化各子页视图做一次布局，
+    /// 尽早暴露依赖注册缺失、XAML 资源/模板错误（发布产物自动检查的一部分）。
+    /// </summary>
+    private static void RunLabSmokeTest(IServiceProvider services)
+    {
+        var lab = services.GetRequiredService<ViewModels.Lab.LabViewModel>();
+        if (lab.Tabs.Count != 5)
+        {
+            throw new InvalidOperationException($"实验室子页数量异常：{lab.Tabs.Count}。");
+        }
+
+        var views = new FrameworkElement[]
+        {
+            new Views.LabView(),
+            new Views.ModelDebugView(),
+            new Views.WorkflowDesignerView(),
+            new Views.TestCaseView(),
+            new Views.BatchTestView(),
+            new Views.RunHistoryView(),
+        };
+        foreach (var view in views)
+        {
+            view.Width = 1280;
+            view.Height = 800;
+            view.Measure(new Size(1280, 800));
+            view.Arrange(new Rect(0, 0, 1280, 800));
+            view.UpdateLayout();
+        }
+
+        // 设计器画布与属性编辑器的初始化路径（无窗口消息循环时 Loaded 不触发，显式调用）。
+        var designer = services.GetRequiredService<ViewModels.Lab.WorkflowDesignerViewModel>();
+        var designerView = new Views.WorkflowDesignerView { DataContext = designer, Width = 1280, Height = 800 };
+        designerView.InitializePreview();
+        designerView.Measure(new Size(1280, 800));
+        designerView.Arrange(new Rect(0, 0, 1280, 800));
+        designerView.UpdateLayout();
+
+        // 性能基准页：实例化并执行一次布局（校验模板与资源键，如表格、转换器与进度条）。
+        var benchmark = services.GetRequiredService<ViewModels.BenchmarkViewModel>();
+        var benchmarkView = new Views.BenchmarkView
+        {
+            DataContext = benchmark,
+            Width = 1280,
+            Height = 800,
+        };
+        benchmarkView.Measure(new Size(1280, 800));
+        benchmarkView.Arrange(new Rect(0, 0, 1280, 800));
+        benchmarkView.UpdateLayout();
+    }
+
     /// <summary>是否已进入退出流程（关闭窗口事件据此放行）。</summary>
     public bool IsShutdownRequested { get; private set; }
 
@@ -83,6 +134,7 @@ public partial class App : System.Windows.Application
             // 无界面冒烟测试模式：用于发布产物自动验证（--smoke-test），成功输出标记后立即退出。
             if (smokeTest)
             {
+                RunLabSmokeTest(services);
                 Console.WriteLine("SMOKE_OK");
                 Console.Out.Flush();
                 Shutdown(0);

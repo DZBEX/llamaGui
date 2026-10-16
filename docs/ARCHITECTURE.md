@@ -81,7 +81,7 @@ ReleaseFeed(GitHub) ─► AssetSelector(纯逻辑分类) ─► 用户确认 �
 
 ### 4.1 SQLite（`data/llamalauncher.db`）
 
-表：`schema_migrations`、`Models`、`LaunchProfiles`、`LlamaCppInstallations`、`ServerInstances`、`StartupHistory`、`Conversations`、`ChatMessages`、`UpdateOperations`、`AppSettings`、`Secrets`（DPAPI 密文）。
+表：`schema_migrations`、`Models`、`LaunchProfiles`、`LlamaCppInstallations`、`ServerInstances`、`StartupHistory`、`Conversations`、`ChatMessages`、`UpdateOperations`、`AppSettings`、`Secrets`（DPAPI 密文）、`WorkflowRuns`、`BenchmarkRuns`。
 
 - 时间为 UTC ISO-8601 文本；UI 按本地时间显示。
 - 关键写操作使用事务；消息按 `ConversationId + Sequence` 索引。
@@ -111,3 +111,39 @@ ReleaseFeed(GitHub) ─► AssetSelector(纯逻辑分类) ─► 用户确认 �
 
 - 纯逻辑（参数校验、命令行构建、能力解析、SSE 解析、导入计划、资产筛选、状态机、脱敏）全部在 Application/Domain，无 I/O，直接单元测试。
 - I/O 通过接口替换：HTTP 用本地 TcpListener 测试服务器；进程用 `LlamaLauncher.TestChildProcess`；文件用临时目录；数据库用临时 SQLite 文件；时间用自定义 `FakeTimeProvider`。
+
+## 7. 决策模型实验室
+
+新增模块沿用同一分层与依赖方向（引擎不引用 WPF，可脱离 UI 单元测试）：
+
+```text
+Domain/Workflows             # 定义/节点/连线/变量/表达式/模板/节点目录/运行记录/测试用例（可序列化，版本化）
+Application/Workflows        # 引擎（调度/分支/并行/断点/单步/取消/重试/超时）、校验器、节点执行器、
+                             # 断言评估、JSON 差异、模型解析与算法注册抽象、运行协调（WorkflowRunnerService）
+Infrastructure               # /v1/systemone HTTP 客户端、实例→模型目标解析、JSON 文件存储（原子写）、
+                             # WorkflowRuns SQLite 仓储（迁移 v2）
+App/ViewModels/Lab + Views   # 实验室容器与五个子页、节点属性编辑器、自绘画布控件（无第三方图形库）
+```
+
+- 引擎通过 `IWorkflowRunObserver` 单向通知 UI（UI 侧切回 Dispatcher），不引用窗口/控件；
+  `IWorkflowInteractionBroker` 提供人工确认通道（未提供时明确失败）。
+- 数据流以 JSON（`JsonNode`）为统一载体：`input` / `vars` / `up` / `meta` / `error` / `doc`；
+  表达式的语法、函数、长度、步数均有白名单与上限（禁止任意代码执行）。
+- 存储：工作流与用例为版本化 JSON 文件（`workflows/`、`workflows/testcases/`、`workflows/snapshots/`），
+  运行历史为 `WorkflowRuns` 表（内嵌定义快照与节点/日志 JSON，`FinalVariablesJson` 记录最终变量）。
+
+## 8. 性能基准
+
+```text
+Domain/Benchmarks          # 运行记录/样本/配置、限量校验、聚合统计（纯逻辑，无 I/O）
+Application/Benchmarks     # 运行编排（预热/重复/冷却/取消/提前中止）、提示构造、/completion 流帧解析、存储抽象
+Infrastructure             # llama-server /completion 流式客户端（SSE + timings + 客户端实测）、
+                           # BenchmarkRuns SQLite 仓储（迁移 v3）
+App/ViewModels/Views       # 性能基准页（“本次测试 / 历史记录”两个页签）
+```
+
+- 测量保真：`cache_prompt=false` + 每个样本唯一提示前缀（防止服务端 KV 缓存复用导致偏快）；
+  贪心采样（temperature=0 / top_k=1）；速度优先取服务端 `timings`，无 timings（旧版本）时以内容帧数
+  近似生成 token 并回退客户端计时（首 token 与总耗时始终为客户端实测）。
+- 运行记录按样本增量写入（中途取消/异常退出仍保留已完成样本）；完成后按档位聚合（均值 ± 样本标准差）。
+- 沿用既有分层：编排不引用 WPF，UI 通过回调切回 Dispatcher；HTTP 客户端可在本地模拟 SSE 服务上端到端测试。

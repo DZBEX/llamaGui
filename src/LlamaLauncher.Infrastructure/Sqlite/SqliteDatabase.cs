@@ -162,7 +162,59 @@ public sealed class SqliteDatabase
     public static IReadOnlyList<(int Version, string Sql)> Migrations { get; } = new List<(int, string)>
     {
         (1, SchemaV1),
+        (2, SchemaV2),
+        (3, SchemaV3),
     };
+
+    /// <summary>v3：模型性能基准——运行记录与样本明细。</summary>
+    private const string SchemaV3 = """
+        CREATE TABLE IF NOT EXISTS BenchmarkRuns(
+          RunId TEXT PRIMARY KEY,
+          InstanceId TEXT NOT NULL,
+          InstanceNameSnapshot TEXT NOT NULL,
+          ModelNameSnapshot TEXT NULL,
+          ProfileNameSnapshot TEXT NULL,
+          VersionLabel TEXT NULL,
+          AppVersion TEXT NOT NULL,
+          StartedUtc TEXT NOT NULL,
+          EndedUtc TEXT NULL,
+          DurationMs REAL NULL,
+          State INTEGER NOT NULL,
+          OptionsJson TEXT NOT NULL,
+          SamplesJson TEXT NOT NULL DEFAULT '[]',
+          ErrorSummary TEXT NULL
+        );
+        CREATE INDEX IF NOT EXISTS IX_BenchmarkRuns_Started ON BenchmarkRuns(StartedUtc DESC);
+        CREATE INDEX IF NOT EXISTS IX_BenchmarkRuns_Instance ON BenchmarkRuns(InstanceId, StartedUtc DESC);
+        """;
+
+    /// <summary>v2：决策模型实验室——工作流运行历史。</summary>
+    private const string SchemaV2 = """
+        CREATE TABLE IF NOT EXISTS WorkflowRuns(
+          RunId TEXT PRIMARY KEY,
+          WorkflowId TEXT NOT NULL,
+          WorkflowNameSnapshot TEXT NOT NULL,
+          VersionLabel TEXT NULL,
+          AppVersion TEXT NOT NULL,
+          StartedUtc TEXT NOT NULL,
+          EndedUtc TEXT NULL,
+          DurationMs REAL NULL,
+          State INTEGER NOT NULL,
+          TestMode INTEGER NOT NULL,
+          InputSnapshotJson TEXT NULL,
+          OutputJson TEXT NULL,
+          ErrorSummary TEXT NULL,
+          ModelContextJson TEXT NULL,
+          DefinitionSnapshotJson TEXT NULL,
+          ValidationSummary TEXT NULL,
+          FinalVariablesJson TEXT NULL,
+          NodesJson TEXT NOT NULL DEFAULT '[]',
+          LogsJson TEXT NOT NULL DEFAULT '[]'
+        );
+        CREATE INDEX IF NOT EXISTS IX_WorkflowRuns_Workflow ON WorkflowRuns(WorkflowId, StartedUtc DESC);
+        CREATE INDEX IF NOT EXISTS IX_WorkflowRuns_Started ON WorkflowRuns(StartedUtc DESC);
+        CREATE INDEX IF NOT EXISTS IX_WorkflowRuns_State ON WorkflowRuns(State);
+        """;
 
     private const string SchemaV1 = """
         CREATE TABLE IF NOT EXISTS Models(

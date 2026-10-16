@@ -485,4 +485,43 @@
         <Setter Property="MaxWidth" Value="420" />
     </Style>
 
+    <!-- 选项卡（决策模型实验室的属性/运行/校验/日志、详情/对比） -->
+    <Style TargetType="TabControl">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <Style TargetType="TabItem">
+        <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="Root"
+                            Margin="0,0,4,0"
+                            Padding="11,5"
+                            CornerRadius="6"
+                            Background="{DynamicResource App.Surface.Alt}"
+                            BorderBrush="Transparent"
+                            BorderThickness="1">
+                        <ContentPresenter ContentSource="Header"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource App.Border}" />
+                            <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource App.Surface}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource App.Accent}" />
+                            <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

@@ -31,6 +31,12 @@ public sealed class TestAppPaths : IAppPaths
 
     public string ExportsDirectory => Path.Combine(DataRoot, "exports");
 
+    public string WorkflowsDirectory => Path.Combine(DataRoot, "workflows");
+
+    public string WorkflowSnapshotsDirectory => Path.Combine(WorkflowsDirectory, "snapshots");
+
+    public string WorkflowTestCasesDirectory => Path.Combine(WorkflowsDirectory, "testcases");
+
     private string? _runtimesDirectoryOverride;
 
     private string? _downloadsDirectoryOverride;
@@ -59,5 +65,8 @@ public sealed class TestAppPaths : IAppPaths
         Directory.CreateDirectory(ManifestsDirectory);
         Directory.CreateDirectory(BackupsDirectory);
         Directory.CreateDirectory(ExportsDirectory);
+        Directory.CreateDirectory(WorkflowsDirectory);
+        Directory.CreateDirectory(WorkflowSnapshotsDirectory);
+        Directory.CreateDirectory(WorkflowTestCasesDirectory);
     }
 }

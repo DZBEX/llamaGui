@@ -1,0 +1,288 @@
+<UserControl x:Class="LlamaLauncher.App.Views.BenchmarkView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:LlamaLauncher.App.Converters">
+    <UserControl.Resources>
+        <conv:BenchmarkStateTextConverter x:Key="BenchmarkStateText" />
+    </UserControl.Resources>
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 配置卡 -->
+        <Border Grid.Row="0" Style="{DynamicResource App.CardBorder}" Padding="10">
+            <StackPanel>
+                <WrapPanel>
+                    <TextBlock Text="实例" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <ComboBox Width="300"
+                              ItemsSource="{Binding Instances}"
+                              SelectedItem="{Binding SelectedInstance, Mode=TwoWay}"
+                              DisplayMemberPath="DisplayText"
+                              IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBool}}"
+                              VerticalAlignment="Center" />
+                    <TextBlock Text="提示长度(tokens)" VerticalAlignment="Center" Margin="12,0,6,0" />
+                    <TextBox Width="130"
+                             Text="{Binding PromptTokensText, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="以逗号分隔多个档位，例如：512, 2048（最多 6 档）"
+                             IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBool}}"
+                             VerticalAlignment="Center" />
+                    <TextBlock Text="生成长度" VerticalAlignment="Center" Margin="12,0,6,0" />
+                    <TextBox Width="60"
+                             Text="{Binding GenerateTokens}"
+                             IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBool}}"
+                             VerticalAlignment="Center" />
+                    <TextBlock Text="重复" VerticalAlignment="Center" Margin="12,0,6,0" />
+                    <TextBox Width="45"
+                             Text="{Binding Repetitions}"
+                             IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBool}}"
+                             VerticalAlignment="Center" />
+                    <TextBlock Text="预热" VerticalAlignment="Center" Margin="12,0,6,0" />
+                    <TextBox Width="45"
+                             Text="{Binding WarmupRuns}"
+                             IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBool}}"
+                             VerticalAlignment="Center" />
+                    <TextBlock Text="冷却(秒)" VerticalAlignment="Center" Margin="12,0,6,0" />
+                    <TextBox Width="45"
+                             Text="{Binding CooldownSeconds}"
+                             IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBool}}"
+                             VerticalAlignment="Center" />
+                </WrapPanel>
+
+                <WrapPanel Margin="0,8,0,0">
+                    <Button Content="开始测试"
+                            Command="{Binding RunBenchmarkCommand}"
+                            Style="{DynamicResource App.PrimaryButtonStyle}" />
+                    <Button Content="取消"
+                            Command="{Binding CancelBenchmarkCommand}"
+                            Style="{DynamicResource App.ToolbarButtonStyle}" />
+                    <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
+                    <TextBlock Text="预设" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <Button Content="快速 512"
+                            Command="{Binding ApplyPresetCommand}"
+                            CommandParameter="quick"
+                            Style="{DynamicResource App.ToolbarButtonStyle}" />
+                    <Button Content="标准 512+2048"
+                            Command="{Binding ApplyPresetCommand}"
+                            CommandParameter="standard"
+                            Style="{DynamicResource App.ToolbarButtonStyle}" />
+                    <Button Content="长上下文 2048+4096"
+                            Command="{Binding ApplyPresetCommand}"
+                            CommandParameter="long"
+                            Style="{DynamicResource App.ToolbarButtonStyle}" />
+                    <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
+                    <Button Content="刷新"
+                            Command="{Binding RefreshCommand}"
+                            Style="{DynamicResource App.ToolbarButtonStyle}" />
+                </WrapPanel>
+
+                <TextBlock FontSize="11"
+                           Margin="0,6,0,0"
+                           TextWrapping="Wrap"
+                           Style="{DynamicResource App.SecondaryText}"
+                           Text="通过 llama-server 的 /completion 端点测量：提示处理速度（token/s）、生成速度（token/s）、首 token 延迟与单次总耗时。每次请求禁用提示缓存（cache_prompt=false）并附带随机前缀，保证真实执行提示处理；速度取自服务端 timings，首 token 与总耗时为客户端实测。测量期间目标实例的推理会被占用。" />
+            </StackPanel>
+        </Border>
+
+        <!-- 结果与历史 -->
+        <TabControl Grid.Row="1" Margin="0,10,0,0" Background="Transparent" BorderThickness="0">
+            <TabItem Header="本次测试">
+                <Grid Margin="0,8,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding ProgressText}"
+                                       Margin="10,0,0,0"
+                                       Style="{DynamicResource App.SecondaryText}" />
+                        </StackPanel>
+                        <ProgressBar Height="6"
+                                     Margin="0,6,0,0"
+                                     Minimum="0"
+                                     Maximum="1"
+                                     Value="{Binding ProgressValue}" />
+                        <TextBlock Text="{Binding CurrentResultText}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,8,0,0"
+                                   Style="{DynamicResource App.SecondaryText}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <Button Content="复制报告（Markdown）"
+                                    Command="{Binding CopyReportCommand}"
+                                    CommandParameter="current"
+                                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                            <Button Content="导出 JSON…"
+                                    Command="{Binding ExportReportCommand}"
+                                    CommandParameter="current"
+                                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1"
+                               Text="档位汇总（均值 ± 标准差；不含预热与失败样本）"
+                               FontWeight="SemiBold"
+                               Margin="0,10,0,4" />
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding CurrentGroups}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              IsReadOnly="True"
+                              MaxHeight="160"
+                              HeadersVisibility="Column">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="目标提示(tokens)" Binding="{Binding PromptText}" Width="130" />
+                            <DataGridTextColumn Header="实际提示(平均)" Binding="{Binding ActualPromptText}" Width="120" />
+                            <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="140" />
+                            <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="140" />
+                            <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="140" />
+                            <DataGridTextColumn Header="单次总耗时(ms)" Binding="{Binding TotalText}" Width="150" />
+                            <DataGridTextColumn Header="样本" Binding="{Binding SampleText}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock Grid.Row="3" Text="样本明细" FontWeight="SemiBold" Margin="0,10,0,4" />
+                    <DataGrid Grid.Row="4"
+                              ItemsSource="{Binding CurrentSamples}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="目标提示" Binding="{Binding PromptText}" Width="90" />
+                            <DataGridTextColumn Header="序号" Binding="{Binding KindText}" Width="80" />
+                            <DataGridTextColumn Header="实际提示" Binding="{Binding ActualPromptText}" Width="90" />
+                            <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="120" />
+                            <DataGridTextColumn Header="生成(tokens)" Binding="{Binding GeneratedText}" Width="100" />
+                            <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="120" />
+                            <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="110" />
+                            <DataGridTextColumn Header="总耗时(ms)" Binding="{Binding TotalText}" Width="110" />
+                            <DataGridTextColumn Header="备注" Binding="{Binding ErrorText}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="历史记录">
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="330" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{DynamicResource App.CardBorder}">
+                        <DockPanel>
+                            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+                                <Button Content="刷新"
+                                        Command="{Binding RefreshCommand}"
+                                        Style="{DynamicResource App.ToolbarButtonStyle}" />
+                                <Button Content="删除"
+                                        Command="{Binding DeleteHistoryCommand}"
+                                        Style="{DynamicResource App.DestructiveButtonStyle}" />
+                            </WrapPanel>
+                            <ListBox ItemsSource="{Binding History}"
+                                     SelectedItem="{Binding SelectedHistory, Mode=TwoWay}"
+                                     BorderThickness="0"
+                                     Background="Transparent"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,2">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding StartedUtc, StringFormat={}{0:MM-dd HH:mm}, ConverterCulture=zh-CN}"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding State, Converter={StaticResource BenchmarkStateText}}"
+                                                           Margin="8,0,0,0" />
+                                            </StackPanel>
+                                            <TextBlock FontSize="11"
+                                                       Style="{DynamicResource App.CaptionText}"
+                                                       TextTrimming="CharacterEllipsis">
+                                                <Run Text="{Binding InstanceNameSnapshot, Mode=OneWay}" />
+                                                <Run Text="{Binding ModelNameSnapshot, Mode=OneWay}" />
+                                                <Run Text="{Binding VersionLabel, Mode=OneWay}" />
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{DynamicResource App.CardBorder}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Text="{Binding HistoryDetailText}"
+                                       TextWrapping="Wrap"
+                                       FontWeight="SemiBold" />
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,6,0,0">
+                                <Button Content="复制报告（Markdown）"
+                                        Command="{Binding CopyReportCommand}"
+                                        CommandParameter="history"
+                                        Style="{DynamicResource App.ToolbarButtonStyle}" />
+                                <Button Content="导出 JSON…"
+                                        Command="{Binding ExportReportCommand}"
+                                        CommandParameter="history"
+                                        Style="{DynamicResource App.ToolbarButtonStyle}" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="2" Text="档位汇总" FontWeight="SemiBold" Margin="0,10,0,4" />
+                            <DataGrid Grid.Row="3"
+                                      ItemsSource="{Binding HistoryGroups}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      IsReadOnly="True"
+                                      MaxHeight="140"
+                                      HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="目标提示(tokens)" Binding="{Binding PromptText}" Width="130" />
+                                    <DataGridTextColumn Header="实际提示(平均)" Binding="{Binding ActualPromptText}" Width="120" />
+                                    <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="140" />
+                                    <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="140" />
+                                    <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="140" />
+                                    <DataGridTextColumn Header="单次总耗时(ms)" Binding="{Binding TotalText}" Width="150" />
+                                    <DataGridTextColumn Header="样本" Binding="{Binding SampleText}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <DataGrid Grid.Row="4"
+                                      Margin="0,10,0,0"
+                                      ItemsSource="{Binding HistorySamples}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      IsReadOnly="True"
+                                      HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="目标提示" Binding="{Binding PromptText}" Width="90" />
+                                    <DataGridTextColumn Header="序号" Binding="{Binding KindText}" Width="80" />
+                                    <DataGridTextColumn Header="实际提示" Binding="{Binding ActualPromptText}" Width="90" />
+                                    <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="120" />
+                                    <DataGridTextColumn Header="生成(tokens)" Binding="{Binding GeneratedText}" Width="100" />
+                                    <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="120" />
+                                    <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="110" />
+                                    <DataGridTextColumn Header="总耗时(ms)" Binding="{Binding TotalText}" Width="110" />
+                                    <DataGridTextColumn Header="备注" Binding="{Binding ErrorText}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

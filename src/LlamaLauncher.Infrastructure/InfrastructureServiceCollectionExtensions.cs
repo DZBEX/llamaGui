@@ -19,9 +19,12 @@ using LlamaLauncher.Infrastructure.Sqlite;
 using LlamaLauncher.Infrastructure.SystemInfo;
 using LlamaLauncher.Infrastructure.Updates;
 using LlamaLauncher.Application.Instances;
+using LlamaLauncher.Application.Benchmarks;
 using LlamaLauncher.Application.Chat;
 using LlamaLauncher.Application.Updates;
 using LlamaLauncher.Application.Models;
+using LlamaLauncher.Application.Workflows;
+using LlamaLauncher.Infrastructure.Workflows;
 using Microsoft.Extensions.Logging;
 
 namespace LlamaLauncher.Infrastructure;
@@ -61,6 +64,25 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IUpdateOperationRepository, SqliteUpdateOperationRepository>();
         services.AddSingleton<ISettingsRepository, SqliteSettingsRepository>();
 
+        // 决策模型实验室：工作流定义 / 测试用例 / 运行历史
+        services.AddSingleton<IWorkflowDefinitionStore, JsonWorkflowDefinitionStore>();
+        services.AddSingleton<IWorkflowTestCaseStore, JsonWorkflowTestCaseStore>();
+        services.AddSingleton<IWorkflowRunStore, SqliteWorkflowRunStore>();
+
+        // 决策模型实验室：模型调用与执行引擎
+        services.AddSingleton<IModelDecisionClient>(sp =>
+            new DecisionModelClient(sp.GetRequiredService<ILogger<DecisionModelClient>>()));
+        services.AddSingleton<IWorkflowModelResolver, InstanceModelResolver>();
+        services.AddSingleton<IWorkflowAlgorithmRegistry>(_ =>
+            new WorkflowAlgorithmRegistry(new IWorkflowAlgorithm[] { new SampleRankingAlgorithm() }));
+        services.AddSingleton<IEnumerable<INodeExecutor>>(_ => WorkflowExecutors.CreateDefault());
+        services.AddSingleton(sp => new WorkflowValidator(sp.GetRequiredService<IEnumerable<INodeExecutor>>()));
+        services.AddSingleton(sp => new WorkflowEngine(
+            sp.GetRequiredService<IEnumerable<INodeExecutor>>(),
+            sp.GetRequiredService<WorkflowValidator>(),
+            sp.GetRequiredService<ILogger<WorkflowEngine>>()));
+        services.AddSingleton<WorkflowRunnerService>();
+
         // 应用服务
         services.AddSingleton<IGgufMetadataReader, GgufMetadataReader>();
         services.AddSingleton<IModelCatalogService, ModelCatalogService>();
@@ -83,6 +105,12 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IResourceMonitorService, ResourceMonitorService>();
         services.AddSingleton<IChatCompletionClient>(sp =>
             new StreamingChatClient(sp.GetRequiredService<ILogger<StreamingChatClient>>()));
+        services.AddSingleton<IBenchmarkClient>(sp =>
+            new LlamaServerBenchmarkClient(
+                sp.GetRequiredService<TimeProvider>(),
+                sp.GetRequiredService<ILogger<LlamaServerBenchmarkClient>>()));
+        services.AddSingleton<IBenchmarkRunStore, SqliteBenchmarkRunStore>();
+        services.AddSingleton<BenchmarkRunnerService>();
         services.AddSingleton<IConversationService, ConversationService>();
         services.AddSingleton<IChatSessionService, ChatSessionService>();
         services.AddSingleton<IReleaseFeedService>(sp =>

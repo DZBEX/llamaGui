@@ -1,0 +1,351 @@
+<UserControl x:Class="LlamaLauncher.App.Views.WorkflowDesignerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:LlamaLauncher.App.Controls"
+             xmlns:vmlab="clr-namespace:LlamaLauncher.App.ViewModels.Lab"
+             xmlns:views="clr-namespace:LlamaLauncher.App.Views">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="NodeSpecificTemplates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <!-- 节点属性编辑器（抽象基类 DataTemplate 覆盖全部具体编辑器类型） -->
+            <DataTemplate DataType="{x:Type vmlab:NodeConfigEditor}">
+                <views:NodeEditorPanel />
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 工具栏 -->
+        <Border Grid.Row="0" Style="{DynamicResource App.CardBorder}" Padding="8">
+            <WrapPanel VerticalAlignment="Center">
+                <Button Content="新建" Command="{Binding NewWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <ComboBox Width="170" Margin="6,0,0,0" VerticalAlignment="Center"
+                          ItemsSource="{Binding Workflows}"
+                          SelectedItem="{Binding SelectedWorkflow, Mode=TwoWay}"
+                          DisplayMemberPath="Name"
+                          ToolTip="选择要打开的工作流" />
+                <Button Content="打开" Command="{Binding OpenWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Content="保存" Command="{Binding SaveWorkflowCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" Margin="6,0,0,0" />
+                <Button Content="另存版本快照" Command="{Binding SaveAsVersionCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Content="删除" Command="{Binding DeleteWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
+                <Button Content="导入" Command="{Binding ImportWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Content="导出" Command="{Binding ExportWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
+                <Button Content="↶ 撤销" Command="{Binding UndoCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Content="↷ 重做" Command="{Binding RedoCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
+                <Button Content="校验工作流" Command="{Binding ValidateCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Content="自动布局" Command="{Binding AutoLayoutCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Content="适配" Command="{Binding FitCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Content="＋" Command="{Binding ZoomInCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Content="－" Command="{Binding ZoomOutCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
+                <Button Content="刷新服务列表" Command="{Binding RefreshContextCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <TextBlock Text="{Binding SnapshotInfoText}" VerticalAlignment="Center" Margin="8,0,0,0"
+                           Style="{DynamicResource App.CaptionText}" />
+                <TextBlock Text="未保存的修改" VerticalAlignment="Center" Margin="8,0,0,0" FontSize="11"
+                           Foreground="{DynamicResource App.State.Loading}"
+                           Visibility="{Binding IsDirty, Converter={StaticResource BoolToVisibility}}" />
+            </WrapPanel>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="238" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="372" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 节点库 -->
+            <Border Grid.Column="0" Style="{DynamicResource App.CardBorder}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="节点库" FontWeight="SemiBold" />
+                    <StackPanel Grid.Row="1" Margin="0,6,0,6">
+                        <TextBox Text="{Binding NodeSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="搜索节点（名称 / 类型 ID / 说明）" />
+                        <ComboBox Margin="0,6,0,0"
+                                  ItemsSource="{Binding CategoryFilters}"
+                                  SelectedItem="{Binding NodeCategoryFilter, Mode=TwoWay}" />
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding NodeLibrary}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,0,0,8">
+                                        <TextBlock Text="{Binding Category}" FontWeight="SemiBold" FontSize="12"
+                                                   Style="{DynamicResource App.SecondaryText}" />
+                                        <ItemsControl ItemsSource="{Binding Items}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Style="{DynamicResource App.CardBorder}"
+                                                            Margin="0,4,0,0"
+                                                            Padding="8,6"
+                                                            Cursor="Hand"
+                                                            ToolTip="{Binding Description}"
+                                                            MouseLeftButtonDown="OnLibraryItemMouseDown"
+                                                            MouseMove="OnLibraryItemMouseMove"
+                                                            MouseLeftButtonUp="OnLibraryItemMouseUp">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Glyph}" Width="20" />
+                                                            <TextBlock Text="{Binding DisplayName}" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- 画布 + 运行控制 -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Style="{DynamicResource App.CardBorder}" Padding="8">
+                    <WrapPanel VerticalAlignment="Center">
+                        <Button Content="▶ 运行" Command="{Binding StartRunCommand}" Style="{DynamicResource App.PrimaryButtonStyle}"
+                                IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}" />
+                        <Button Content="单步启动" Command="{Binding StartStepRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
+                                IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}" />
+                        <Button Content="从选中节点开始" Command="{Binding StartFromNodeCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
+                                IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}" />
+                        <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
+                        <Button Content="⏸ 暂停" Command="{Binding PauseRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Button Content="继续" Command="{Binding ResumeRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Button Content="单步" Command="{Binding StepRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Button Content="⏹ 停止" Command="{Binding StopRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Button Content="清除轨迹" Command="{Binding ClearRunVisualsCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
+                        <TextBlock VerticalAlignment="Center" Margin="2,0,0,0">
+                            <Run Text="状态：" Foreground="{DynamicResource App.Text.Secondary}" />
+                            <Run Text="{Binding RunStateText, Mode=OneWay}" FontWeight="SemiBold" />
+                            <Run Text=" · 模式：" Foreground="{DynamicResource App.Text.Secondary}" />
+                            <Run Text="{Binding RunTestMode, Mode=OneWay}" Foreground="{DynamicResource App.Text.Secondary}" />
+                            <Run Text="{Binding PauseReasonText, Mode=OneWay}" Foreground="{DynamicResource App.Text.Secondary}" />
+                        </TextBlock>
+                        <Button Content="切换断点" Command="{Binding ToggleBreakpointCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" Margin="8,0,0,0" />
+                    </WrapPanel>
+                </Border>
+
+                <Border Grid.Row="1" Margin="0,10,0,0" Style="{DynamicResource App.CardBorder}" Padding="0">
+                    <controls:WorkflowCanvasControl x:Name="CanvasHost" />
+                </Border>
+            </Grid>
+
+            <!-- 属性 / 运行 / 校验 / 日志 -->
+            <Border Grid.Column="4" Style="{DynamicResource App.CardBorder}">
+                <TabControl Background="Transparent" BorderThickness="0">
+                    <TabItem Header="属性">
+                        <Grid Margin="0,8,0,0">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                          Visibility="{Binding PropertyPanelMode, Converter={StaticResource EnumEqualsToVisibility}, ConverterParameter=workflow}">
+                                <StackPanel>
+                                    <TextBlock Text="工作流属性" FontWeight="SemiBold" />
+                                    <TextBlock Text="名称" Margin="0,6,0,0" />
+                                    <TextBox Text="{Binding WorkflowNameText, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="说明" Margin="0,6,0,0" />
+                                    <TextBox Text="{Binding WorkflowDescriptionText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="40" />
+                                    <TextBlock Text="标签（逗号分隔）" Margin="0,6,0,0" />
+                                    <TextBox Text="{Binding WorkflowTagsText, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="备注" Margin="0,6,0,0" />
+                                    <TextBox Text="{Binding WorkflowNotesText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="40" />
+                                    <TextBlock Text="工作流输入" FontWeight="SemiBold" Margin="0,10,0,4" />
+                                    <DataGrid x:Name="InputGrid" ItemsSource="{Binding InputVariables}" MinHeight="110" MaxHeight="180" CanUserAddRows="False" AutoGenerateColumns="False">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="112" />
+                                            <DataGridTemplateColumn Header="类型" Width="88">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <ComboBox ItemsSource="{Binding DataContext.ValueTypeOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                  SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" />
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                            <DataGridCheckBoxColumn Header="必填" Binding="{Binding Required, UpdateSourceTrigger=PropertyChanged}" Width="44" />
+                                            <DataGridTextColumn Header="默认值" Binding="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}" Width="96" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                        <Button Content="添加输入" Command="{Binding AddInputVariableCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                                        <Button Content="删除选中" Command="{Binding RemoveInputVariableCommand}"
+                                                CommandParameter="{Binding ElementName=InputGrid, Path=SelectedItem}"
+                                                Style="{DynamicResource App.ToolbarButtonStyle}" />
+                                    </StackPanel>
+                                    <TextBlock Text="工作流输出（说明用；实际输出由结束节点映射）" FontWeight="SemiBold" Margin="0,10,0,4" />
+                                    <DataGrid x:Name="OutputGrid" ItemsSource="{Binding OutputVariables}" MinHeight="80" MaxHeight="140" CanUserAddRows="False" AutoGenerateColumns="False">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="150" />
+                                            <DataGridTemplateColumn Header="类型" Width="88">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <ComboBox ItemsSource="{Binding DataContext.ValueTypeOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                  SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}" />
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                        <Button Content="添加输出" Command="{Binding AddOutputVariableCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                                        <Button Content="删除选中" Command="{Binding RemoveOutputVariableCommand}"
+                                                CommandParameter="{Binding ElementName=OutputGrid, Path=SelectedItem}"
+                                                Style="{DynamicResource App.ToolbarButtonStyle}" />
+                                    </StackPanel>
+                                    <TextBlock Text="提示：表达式与映射可用 input.&lt;名称&gt; 引用输入；画布节点可在本页配置。"
+                                               Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                          Visibility="{Binding PropertyPanelMode, Converter={StaticResource EnumEqualsToVisibility}, ConverterParameter=edge}">
+                                <StackPanel>
+                                    <TextBlock Text="连线属性" FontWeight="SemiBold" />
+                                    <TextBlock Text="分支标识（条件/并行/人工确认等分支节点的出线必须选择分支）" Margin="0,6,0,0" />
+                                    <TextBox Text="{Binding EdgeBranchId, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="说明" Margin="0,6,0,0" />
+                                    <TextBox Text="{Binding EdgeLabelText, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button Content="删除连线" Command="{Binding DeleteSelectionCommand}" Margin="0,10,0,0"
+                                            HorizontalAlignment="Left" Style="{DynamicResource App.DestructiveButtonStyle}" />
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <ContentControl Content="{Binding NodeEditor}"
+                                            Visibility="{Binding PropertyPanelMode, Converter={StaticResource EnumEqualsToVisibility}, ConverterParameter=node}" />
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="运行">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,8,0,0">
+                            <StackPanel>
+                                <TextBlock Text="运行输入（JSON）" FontWeight="SemiBold" />
+                                <TextBox Text="{Binding RunInputsJson, UpdateSourceTrigger=PropertyChanged}"
+                                         FontFamily="Consolas" MinHeight="70" AcceptsReturn="True" />
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                    <Button Content="从工作流输入生成模板" Command="{Binding GenerateRunInputsTemplateCommand}"
+                                            Style="{DynamicResource App.ToolbarButtonStyle}" />
+                                    <TextBlock Text="测试模式" VerticalAlignment="Center" Margin="10,0,6,0" />
+                                    <ComboBox Width="120" ItemsSource="{Binding RunTestModes}"
+                                              SelectedItem="{Binding RunTestMode, Mode=TwoWay}" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding RunModeHint}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                           Style="{DynamicResource App.CaptionText}" />
+                                <TextBlock Text="{Binding RunSummaryText}" TextWrapping="Wrap" Margin="0,8,0,0" FontSize="12" />
+                                <TextBlock Text="节点运行状态" FontWeight="SemiBold" Margin="0,10,0,4" />
+                                <DataGrid ItemsSource="{Binding NodeStates}" MinHeight="140" MaxHeight="230" CanUserAddRows="False" AutoGenerateColumns="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="节点" Binding="{Binding Name}" Width="96" />
+                                        <DataGridTextColumn Header="状态" Binding="{Binding StateText}" Width="64" />
+                                        <DataGridTextColumn Header="耗时" Binding="{Binding DurationText}" Width="56" />
+                                        <DataGridTextColumn Header="重试" Binding="{Binding Retries}" Width="32" />
+                                        <DataGridTextColumn Header="错误" Binding="{Binding Error}" Width="92" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <TextBlock Text="节点详情（在画布中选择节点）" FontWeight="SemiBold" Margin="0,10,0,4" />
+                                <TextBlock Text="{Binding DetailTitle}" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding DetailTiming}" TextWrapping="Wrap" Style="{DynamicResource App.SecondaryText}" FontSize="12" />
+                                <TextBlock Text="输入" Margin="0,6,0,2" />
+                                <TextBox Text="{Binding DetailInput}" IsReadOnly="True" FontFamily="Consolas" FontSize="11" MinHeight="60" MaxHeight="140" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                                <TextBlock Text="输出" Margin="0,6,0,2" />
+                                <TextBox Text="{Binding DetailOutput}" IsReadOnly="True" FontFamily="Consolas" FontSize="11" MinHeight="60" MaxHeight="140" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                                <TextBlock Text="写入变量" Margin="0,6,0,2" />
+                                <TextBox Text="{Binding DetailVariables}" IsReadOnly="True" FontFamily="Consolas" FontSize="11" MinHeight="40" MaxHeight="100" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                                <TextBlock Text="模型诊断" Margin="0,6,0,2" />
+                                <TextBox Text="{Binding DetailDiagnostics}" IsReadOnly="True" FontFamily="Consolas" FontSize="11" MinHeight="40" MaxHeight="100" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                                <TextBlock Text="错误" Margin="0,6,0,2" />
+                                <TextBox Text="{Binding DetailError}" IsReadOnly="True" FontFamily="Consolas" FontSize="11" MinHeight="40" MaxHeight="120" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                         Foreground="{DynamicResource App.State.Error}" />
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                    <Button Content="复制输入" Command="{Binding CopyDetailCommand}" CommandParameter="input" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                                    <Button Content="复制输出" Command="{Binding CopyDetailCommand}" CommandParameter="output" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                                    <Button Content="复制诊断" Command="{Binding CopyDetailCommand}" CommandParameter="diagnostics" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem Header="校验">
+                        <Grid Margin="0,8,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0">
+                                <TextBlock Text="{Binding IssuesSummaryText}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                                <TextBlock Text="双击问题可定位到节点。" Style="{DynamicResource App.CaptionText}" />
+                            </StackPanel>
+                            <DataGrid Grid.Row="1" Margin="0,6,0,0"
+                                      ItemsSource="{Binding Issues}"
+                                      AutoGenerateColumns="False" CanUserAddRows="False"
+                                      MouseDoubleClick="OnIssueDoubleClick">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="级别" Binding="{Binding SeverityText}" Width="44" />
+                                    <DataGridTextColumn Header="代码" Binding="{Binding Code}" Width="88" />
+                                    <DataGridTextColumn Header="说明" Binding="{Binding Message}" Width="124" />
+                                    <DataGridTextColumn Header="建议" Binding="{Binding Hint}" Width="86" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="日志">
+                        <Grid Margin="0,8,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <ComboBox Width="112" SelectedIndex="{Binding LogsLevelFilter, Mode=TwoWay}">
+                                    <ComboBoxItem Content="全部" />
+                                    <ComboBoxItem Content="信息及以上" />
+                                    <ComboBoxItem Content="警告及以上" />
+                                    <ComboBoxItem Content="仅错误" />
+                                </ComboBox>
+                                <TextBox Width="180" Margin="6,0,0,0" Text="{Binding LogsSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="按消息或节点 ID 过滤" />
+                            </StackPanel>
+                            <ListBox x:Name="LogList" Grid.Row="1" Margin="0,6,0,0"
+                                     ItemsSource="{Binding RunLogs}"
+                                     ItemContainerStyle="{DynamicResource App.LogLineStyle}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock FontFamily="Consolas" FontSize="11" TextWrapping="Wrap">
+                                            <Run Text="{Binding TimeText, Mode=OneWay}" Foreground="{DynamicResource App.Text.Secondary}" />
+                                            <Run Text=" [" Foreground="{DynamicResource App.Text.Secondary}" />
+                                            <Run Text="{Binding LevelText, Mode=OneWay}" />
+                                            <Run Text="] " Foreground="{DynamicResource App.Text.Secondary}" />
+                                            <Run Text="{Binding NodeText, Mode=OneWay}" Foreground="{DynamicResource App.Text.Secondary}" />
+                                            <Run Text=" " />
+                                            <Run Text="{Binding Message, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
