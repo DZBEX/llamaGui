@@ -1,3 +1,5 @@
+<img src="src/LlamaLauncher.App/Assets/LlamaLauncher.png" width="88" alt="LlamaLauncher 应用图标">
+
 # LlamaLauncher
 
 llama.cpp 的 Windows 桌面启动器（WPF / .NET 8）：管理本地 GGUF 模型、多实例 `llama-server.exe`、启动配置、内置流式聊天、硬件与能力探测、以及 llama.cpp 程序版本的检查、安装、切换与回滚。
@@ -21,7 +23,7 @@ llama.cpp 的 Windows 桌面启动器（WPF / .NET 8）：管理本地 GGUF 模�
 
 ```powershell
 dotnet build LlamaLauncher.sln -c Release         # Release 构建（0 警告 0 错误）
-pwsh -File scripts/build.ps1                      # 构建 + 全部测试（单元/集成/UI 共 306 项）
+pwsh -File scripts/build.ps1                      # 构建 + 全部测试（单元/集成/UI 共 361 项）
 ```
 
 ## 运行
