@@ -55,6 +55,14 @@ public interface ILlamaUpdateService
         IProgress<DownloadProgressInfo>? progress = null,
         CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// 扫描版本目录（runtimes\llama.cpp）并登记尚未记录的本地 llama-server.exe（探测能力、写回版本标签）。
+    /// 无默认版本时，首个探测可用的版本自动设为默认（与“首个下载安装自动成为默认”一致）。
+    /// 用于接管手动拷入版本目录的已解压版本。返回本次新登记的记录。
+    /// </summary>
+    Task<IReadOnlyList<LlamaCppInstallation>> DiscoverLocalVersionsAsync(
+        CancellationToken cancellationToken = default);
+
     /// <summary>切换默认版本（记录旧默认以便回滚）。</summary>
     Task SetDefaultAsync(Guid installationId, CancellationToken cancellationToken = default);
 

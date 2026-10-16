@@ -117,6 +117,13 @@ public static partial class HelpTextParser
             return null;
         }
 
+        // 官方新格式：version: 0.2.0-dev (build 10618, commit eb25b7263) → 取 build 号（b10618）
+        var buildMatch = Regex.Match(versionText, @"\bbuild\s+([0-9]+)");
+        if (buildMatch.Success)
+        {
+            return "b" + buildMatch.Groups[1].Value;
+        }
+
         var match = Regex.Match(versionText, @"version:\s*([0-9]+)");
         if (match.Success)
         {

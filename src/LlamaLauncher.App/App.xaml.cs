@@ -2,6 +2,7 @@ using System.Windows;
 using LlamaLauncher.Application.Abstractions;
 using LlamaLauncher.Application.Instances;
 using LlamaLauncher.Application.Services;
+using LlamaLauncher.Application.Updates;
 using LlamaLauncher.App.Controls;
 using LlamaLauncher.App.Services;
 using LlamaLauncher.App.ViewModels;
@@ -61,6 +62,14 @@ public partial class App : System.Windows.Application
 
             var settings = await settingsService.LoadAsync().ConfigureAwait(true);
             services.GetRequiredService<IThemeService>().Apply(settings.Theme);
+
+            // 目录覆盖（llama.cpp 版本目录 / 下载目录）：在实例恢复、本地版本发现等使用目录之前应用
+            foreach (var warning in services
+                         .GetRequiredService<IAppPaths>()
+                         .ApplyDirectoryOverrides(settings.RuntimesDirectory, settings.DownloadsDirectory))
+            {
+                notifications.Notify(warning);
+            }
 
             // 代码块复制走统一的剪贴板服务（带失败反馈）
             var clipboard = services.GetRequiredService<IClipboardService>();
@@ -142,8 +151,11 @@ public partial class App : System.Windows.Application
 
             if (settings.AutoCheckUpdates)
             {
-                _ = AutoCheckUpdatesAsync(services, settings.UpdateChannel);
+                _ = AutoCheckUpdatesAsync(services);
             }
+
+            // 本地版本目录发现（后台）：接管手动拷入 runtimes\llama.cpp 的已解压版本
+            _ = AutoDiscoverLocalVersionsAsync(services);
         }
         catch (Exception ex)
         {
@@ -163,14 +175,38 @@ public partial class App : System.Windows.Application
         }
     }
 
-    private static async Task AutoCheckUpdatesAsync(IServiceProvider services, Domain.UpdateChannel channel)
+    /// <summary>启动后台自动检查：按设置中的“检查间隔（小时）”节流，成功后记录检查时间。</summary>
+    private static async Task AutoCheckUpdatesAsync(IServiceProvider services)
     {
         try
         {
             var updates = services.GetRequiredService<ILlamaUpdateService>();
+            var settingsService = services.GetRequiredService<ISettingsService>();
             var notifications = services.GetRequiredService<INotificationService>();
-            var result = await updates.CheckForUpdatesAsync(channel).ConfigureAwait(false);
-            if (result.Success && result.UpdateAvailable && result.LatestRelease is { } latest)
+            var timeProvider = services.GetRequiredService<TimeProvider>();
+
+            var settings = await settingsService.LoadAsync().ConfigureAwait(false);
+            if (!settings.AutoCheckUpdates
+                || !UpdateCheckSchedule.ShouldCheck(
+                    settings.LastUpdateCheckUtc,
+                    settings.UpdateCheckIntervalHours,
+                    timeProvider.GetUtcNow()))
+            {
+                return;
+            }
+
+            var result = await updates.CheckForUpdatesAsync(settings.UpdateChannel).ConfigureAwait(false);
+            if (!result.Success)
+            {
+                return;
+            }
+
+            // 记录检查时间：间隔内的重启不再重复请求（未登录配额仅 60 次/小时）
+            settings = await settingsService.LoadAsync().ConfigureAwait(false);
+            settings.LastUpdateCheckUtc = result.CheckedUtc.ToString("O");
+            await settingsService.SaveAsync(settings).ConfigureAwait(false);
+
+            if (result.UpdateAvailable && result.LatestRelease is { } latest)
             {
                 notifications.Notify($"检测到 llama.cpp 新版本 {latest.TagName}（可在“版本管理”页安装）。");
             }
@@ -178,6 +214,34 @@ public partial class App : System.Windows.Application
         catch (Exception)
         {
             // 自动检查失败静默处理（离线环境属正常）
+        }
+    }
+
+    /// <summary>启动后台扫描：把版本目录中手动拷入的已解压版本探测并登记到列表（失败静默）。</summary>
+    private static async Task AutoDiscoverLocalVersionsAsync(IServiceProvider services)
+    {
+        try
+        {
+            var updates = services.GetRequiredService<ILlamaUpdateService>();
+            var discovered = await updates.DiscoverLocalVersionsAsync().ConfigureAwait(false);
+            if (discovered.Count == 0)
+            {
+                return;
+            }
+
+            services.GetRequiredService<INotificationService>().Notify(
+                $"已在版本目录中发现并登记 {discovered.Count} 个 llama.cpp 本地版本：" +
+                string.Join("、", discovered.Select(i => i.VersionLabel)) + "。");
+
+            var installations = services.GetRequiredService<ILlamaInstallationService>();
+            var currentDefault = await installations.GetDefaultAsync().ConfigureAwait(false);
+            var shell = services.GetRequiredService<ShellViewModel>();
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(
+                () => shell.SetDefaultVersion(currentDefault?.VersionLabel));
+        }
+        catch (Exception)
+        {
+            // 本地扫描失败静默处理（目录不存在/被占用等属正常情况）
         }
     }
 

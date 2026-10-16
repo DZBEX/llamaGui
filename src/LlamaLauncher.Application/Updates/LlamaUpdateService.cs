@@ -25,6 +25,7 @@ public sealed class LlamaUpdateService : ILlamaUpdateService
     private readonly IZipExtractor _extractor;
     private readonly ILlamaBinaryProbeService _probe;
     private readonly IInstallationRepository _installations;
+    private readonly ILlamaInstallationService _installationService;
     private readonly IProfileRepository _profiles;
     private readonly IInstanceRepository _instances;
     private readonly IUpdateOperationRepository _operations;
@@ -39,6 +40,7 @@ public sealed class LlamaUpdateService : ILlamaUpdateService
         IZipExtractor extractor,
         ILlamaBinaryProbeService probe,
         IInstallationRepository installations,
+        ILlamaInstallationService installationService,
         IProfileRepository profiles,
         IInstanceRepository instances,
         IUpdateOperationRepository operations,
@@ -52,6 +54,7 @@ public sealed class LlamaUpdateService : ILlamaUpdateService
         _extractor = extractor;
         _probe = probe;
         _installations = installations;
+        _installationService = installationService;
         _profiles = profiles;
         _instances = instances;
         _operations = operations;
@@ -311,6 +314,147 @@ public sealed class LlamaUpdateService : ILlamaUpdateService
             await _operations.UpdateAsync(operation, CancellationToken.None).ConfigureAwait(false);
             throw new UpdateException($"导入失败：{ex.Message}", ex);
         }
+    }
+
+    public async Task<IReadOnlyList<LlamaCppInstallation>> DiscoverLocalVersionsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var discovered = new List<LlamaCppInstallation>();
+        if (!Directory.Exists(_paths.RuntimesDirectory))
+        {
+            return discovered;
+        }
+
+        var existing = await _installations.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var knownPaths = new HashSet<string>(
+            existing.Select(i => Path.GetFullPath(i.ExecutablePath)),
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var directory in Directory
+                     .EnumerateDirectories(_paths.RuntimesDirectory)
+                     .OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var executablePath = Path.Combine(directory, "llama-server.exe");
+            if (!File.Exists(executablePath))
+            {
+                continue;
+            }
+
+            var fullPath = Path.GetFullPath(executablePath);
+            if (!knownPaths.Add(fullPath))
+            {
+                continue;
+            }
+
+            try
+            {
+                // 复用外部登记流程：校验路径 → 能力探测 → 写库
+                var installation = await _installationService
+                    .RegisterExternalAsync(fullPath, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (ApplyFolderLabelFallback(installation, Path.GetFileName(directory)))
+                {
+                    await _installations.UpsertAsync(installation, cancellationToken).ConfigureAwait(false);
+                }
+
+                discovered.Add(installation);
+                _logger.LogInformation(
+                    "已发现并登记本地 llama.cpp 版本 {Version}（{Path}）",
+                    installation.VersionLabel,
+                    fullPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "登记本地 llama.cpp 版本失败：{Path}", fullPath);
+            }
+        }
+
+        if (discovered.Count == 0)
+        {
+            return discovered;
+        }
+
+        // 与“首个下载安装自动成为默认”一致：没有默认版本时，取首个探测可用的版本
+        var hasDefault = await _installations.GetDefaultAsync(cancellationToken).ConfigureAwait(false) is not null;
+        if (!hasDefault
+            && discovered.FirstOrDefault(i => i.Status == InstallationStatus.Available) is { } firstAvailable)
+        {
+            await _installations.SetDefaultAsync(firstAvailable.Id, cancellationToken).ConfigureAwait(false);
+            firstAvailable.IsDefault = true;
+            _logger.LogInformation("已将发现的首个可用版本 {Version} 设为默认", firstAvailable.VersionLabel);
+        }
+
+        // 同步镜像文件（与安装/切换流程保持一致）
+        var all = await _installations.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var manifest = _manifest.Load();
+        if (all.FirstOrDefault(i => i.IsDefault) is { } currentDefault)
+        {
+            manifest.DefaultInstallationId = currentDefault.Id;
+        }
+
+        manifest.Entries = all.Select(i => new InstallationManifestEntry
+        {
+            Id = i.Id,
+            VersionLabel = i.VersionLabel,
+            Directory = i.Directory,
+            ExecutablePath = i.ExecutablePath,
+            Sha256 = i.Sha256,
+        }).ToList();
+        _manifest.Save(manifest);
+
+        return discovered;
+    }
+
+    /// <summary>
+    /// 版本目录命名约定为“&lt;版本标签&gt;-&lt;指纹&gt;”（如 b10618-91b16d71）：
+    /// 该命名下以目录名标签为准（比 --version 文本更可靠）；否则仅在探测未得到有效标签时用目录名兜底。
+    /// 返回是否修改了版本标签。
+    /// </summary>
+    private static bool ApplyFolderLabelFallback(LlamaCppInstallation installation, string folderName)
+    {
+        var managedLabel = TryExtractManagedLabel(folderName);
+        if (managedLabel is not null)
+        {
+            if (string.Equals(installation.VersionLabel, managedLabel, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            installation.VersionLabel = managedLabel;
+            return true;
+        }
+
+        if (installation.VersionLabel is not ("未知" or "探测中" or ""))
+        {
+            return false;
+        }
+
+        var trimmed = folderName.Trim();
+        if (trimmed.Length == 0)
+        {
+            return false;
+        }
+
+        installation.VersionLabel = trimmed.Length > 40 ? trimmed[..40] : trimmed;
+        return true;
+    }
+
+    private static string? TryExtractManagedLabel(string folderName)
+    {
+        var dash = folderName.IndexOf('-');
+        if (dash <= 0)
+        {
+            return null;
+        }
+
+        var prefix = folderName[..dash];
+        return prefix.Length is > 1 and <= 16
+               && prefix[0] is 'b' or 'B'
+               && prefix[1..].All(char.IsAsciiDigit)
+            ? "b" + prefix[1..]
+            : null;
     }
 
     public async Task SetDefaultAsync(Guid installationId, CancellationToken cancellationToken = default)

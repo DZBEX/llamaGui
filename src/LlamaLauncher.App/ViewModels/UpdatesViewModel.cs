@@ -497,6 +497,21 @@ public sealed partial class UpdatesViewModel : ViewModelBase, IPageViewModel
         }
     }
 
+    /// <summary>扫描版本目录，把手动拷入的已解压版本登记到列表。</summary>
+    [RelayCommand]
+    private async Task ScanLocalVersionsAsync()
+    {
+        await RunBusyAsync("正在扫描版本目录（runtimes\\llama.cpp）…", async () =>
+        {
+            var discovered = await _updates.DiscoverLocalVersionsAsync();
+            await RefreshInstalledAsync();
+            Notifications?.Notify(discovered.Count == 0
+                ? "扫描完成：未发现新的本地版本。"
+                : $"已发现并登记 {discovered.Count} 个本地版本：" +
+                  string.Join("、", discovered.Select(i => i.VersionLabel)) + "。");
+        });
+    }
+
     [RelayCommand]
     private async Task SetDefaultAsync()
     {

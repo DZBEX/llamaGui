@@ -91,6 +91,8 @@ public sealed class HelpTextParserTests
     [Theory]
     [InlineData("version: 4321 (abcdef1)", "b4321")]
     [InlineData("version: 12", "b12")]
+    [InlineData("version: 0.2.0-dev (build 10618, commit eb25b7263)", "b10618")]
+    [InlineData("version: 0.2.0-dev (build 10618, commit eb25b7263)\nbuilt with Clang 20.1.8 for Windows x86_64", "b10618")]
     [InlineData("load_backend: loaded CPU backend", "load_backend: loaded CPU backend")]
     [InlineData(null, null)]
     [InlineData("   ", null)]

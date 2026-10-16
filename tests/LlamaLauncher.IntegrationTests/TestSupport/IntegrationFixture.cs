@@ -235,6 +235,7 @@ public sealed class IntegrationFixture : IDisposable
             new SafeZipExtractor(),
             Probe,
             InstallationsRepo,
+            InstallationService,
             Profiles,
             InstancesRepo,
             UpdateOperations,

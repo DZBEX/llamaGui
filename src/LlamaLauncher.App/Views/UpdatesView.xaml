@@ -20,6 +20,8 @@
                         <Button Content="检查更新" Command="{Binding CheckForUpdatesCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" Margin="10,0,0,0" />
                         <Button Content="打开官方发布页" Command="{Binding OpenOfficialPageCommand}" />
                         <Button Content="导入本地压缩包…" Command="{Binding ImportLocalCommand}" />
+                        <Button Content="扫描本地版本" Command="{Binding ScanLocalVersionsCommand}"
+                                ToolTip="扫描版本目录（runtimes\llama.cpp），把手动拷入的已解压版本登记到下方列表" />
                     </WrapPanel>
                     <TextBlock Text="{Binding CheckStatusText}" Margin="0,8,0,0" TextWrapping="Wrap" />
                     <TextBlock Text="{Binding LastCheckText}" Style="{DynamicResource App.CaptionText}" Margin="0,2,0,0" />

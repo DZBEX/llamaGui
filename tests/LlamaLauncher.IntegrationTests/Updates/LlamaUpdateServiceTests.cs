@@ -146,6 +146,30 @@ public sealed class LlamaUpdateServiceTests
             },
         };
 
+    /// <summary>把测试子进程（含运行所需的 dll/配置）释放为某个版本目录里的 llama-server.exe。</summary>
+    private static void CopyChildProcessInto(string targetDirectory)
+    {
+        Directory.CreateDirectory(targetDirectory);
+        File.Copy(
+            IntegrationFixture.ChildExecutablePath,
+            Path.Combine(targetDirectory, "llama-server.exe"),
+            overwrite: true);
+        var baseDirectory = Path.GetDirectoryName(IntegrationFixture.ChildExecutablePath)!;
+        foreach (var companion in new[]
+                 {
+                     "LlamaLauncher.TestChildProcess.dll",
+                     "LlamaLauncher.TestChildProcess.runtimeconfig.json",
+                     "LlamaLauncher.TestChildProcess.deps.json",
+                 })
+        {
+            var source = Path.Combine(baseDirectory, companion);
+            if (File.Exists(source))
+            {
+                File.Copy(source, Path.Combine(targetDirectory, companion), overwrite: true);
+            }
+        }
+    }
+
     [Fact]
     public async Task FullFlow_InstallsProbesAndBecomesDefault()
     {
@@ -530,5 +554,177 @@ public sealed class LlamaUpdateServiceTests
         Assert.True(result.Success);
         Assert.False(result.UpdateAvailable);
         Assert.Equal("b5000", result.CurrentVersionLabel);
+    }
+
+    [Fact]
+    public async Task CheckForUpdates_PropagatesCacheFallbackWarning()
+    {
+        using var fixture = new IntegrationFixture();
+        const string warning = "GitHub 请求频率已达上限，当前显示 2026-10-17 10:00 获取的缓存数据（限额约 10:30 恢复（约 30 分钟））。";
+        var feed = new FakeReleaseFeed
+        {
+            Warning = warning,
+            FromCache = true,
+        };
+        feed.Releases.Add(CreateRelease(
+            "b4000",
+            "llama-b4000-bin-win-cpu-x64.zip",
+            "https://github.com/ggml-org/llama.cpp/releases/download/b4000/llama-b4000-bin-win-cpu-x64.zip",
+            null));
+        var service = fixture.CreateUpdateService(feed, new FakeDownloadService());
+
+        var result = await service.CheckForUpdatesAsync(UpdateChannel.Stable);
+
+        Assert.True(result.Success);
+        Assert.True(result.UpdateAvailable);
+        Assert.Equal(warning, result.Warning);
+    }
+
+    [Fact]
+    public async Task DiscoverLocalVersions_RegistersFolders_IsIdempotent_AndBecomesDefault()
+    {
+        using var fixture = new IntegrationFixture();
+        try
+        {
+            // 模拟用户手动拷入的版本目录：runtimes\llama.cpp\<标签>-<指纹>\llama-server.exe
+            var versionDirectory = Path.Combine(fixture.Paths.RuntimesDirectory, "b9999-deadbeef");
+            CopyChildProcessInto(versionDirectory);
+            Directory.CreateDirectory(Path.Combine(fixture.Paths.RuntimesDirectory, "dlls-only-no-exe"));
+
+            var service = fixture.CreateUpdateService(new FakeReleaseFeed(), new FakeDownloadService());
+
+            var discovered = await service.DiscoverLocalVersionsAsync();
+
+            var installation = Assert.Single(discovered);
+            // 托管目录命名（b9999-…）优先于 --version 文本中的标签
+            Assert.Equal("b9999", installation.VersionLabel);
+            Assert.Equal(InstallationStatus.Available, installation.Status);
+            Assert.Equal(
+                Path.Combine(versionDirectory, "llama-server.exe"),
+                installation.ExecutablePath);
+            Assert.True(installation.IsDefault, "无默认版本时首个可用版本应自动设为默认。");
+
+            // 写回数据库（标签覆盖已持久化）
+            var persisted = Assert.Single(await fixture.InstallationsRepo.GetAllAsync());
+            Assert.Equal("b9999", persisted.VersionLabel);
+            Assert.True(persisted.IsDefault);
+
+            // 镜像文件同步
+            var manifest = fixture.ManifestStore.Load();
+            Assert.Contains(manifest.Entries, e => e.Id == installation.Id && e.VersionLabel == "b9999");
+
+            // 幂等：再次扫描不重复登记；无 exe 的目录被忽略
+            Assert.Empty(await service.DiscoverLocalVersionsAsync());
+            Assert.Single(await fixture.InstallationsRepo.GetAllAsync());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("LLAMALAUNCHER_TEST_VERSION", null);
+        }
+    }
+
+    [Fact]
+    public async Task DiscoverLocalVersions_UsesFolderNameWhenProbeHasNoVersion_AndKeepsExistingDefault()
+    {
+        using var fixture = new IntegrationFixture();
+        try
+        {
+            // 已有默认版本（外部登记）：发现流程不得改默认
+            var seed = await fixture.InstallationService.RegisterExternalAsync(IntegrationFixture.ChildExecutablePath);
+            await fixture.InstallationsRepo.SetDefaultAsync(seed.Id);
+
+            // 探测输出为空白 → 解析不到版本标签，应回退为目录名
+            fixture.SetEnvironment("LLAMALAUNCHER_TEST_VERSION", "   ");
+            var versionDirectory = Path.Combine(fixture.Paths.RuntimesDirectory, "my-build");
+            CopyChildProcessInto(versionDirectory);
+
+            var service = fixture.CreateUpdateService(new FakeReleaseFeed(), new FakeDownloadService());
+
+            var discovered = await service.DiscoverLocalVersionsAsync();
+
+            var installation = Assert.Single(discovered);
+            Assert.Equal("my-build", installation.VersionLabel);
+            Assert.False(installation.IsDefault);
+            var currentDefault = await fixture.InstallationsRepo.GetDefaultAsync();
+            Assert.Equal(seed.Id, currentDefault!.Id);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("LLAMALAUNCHER_TEST_VERSION", null);
+        }
+    }
+
+    [Fact]
+    public async Task DiscoverLocalVersions_UsesCustomRuntimesDirectory()
+    {
+        using var fixture = new IntegrationFixture();
+        var customRuntimes = fixture.Directory.Combine("custom-runtimes");
+        fixture.Paths.ApplyDirectoryOverrides(customRuntimes, null);
+
+        var versionDirectory = Path.Combine(customRuntimes, "b8888-cafebabe");
+        CopyChildProcessInto(versionDirectory);
+        // 默认目录里的版本不应再被扫描（覆盖已生效）
+        CopyChildProcessInto(Path.Combine(fixture.Paths.DefaultRuntimesDirectory, "b7777-aa"));
+
+        var service = fixture.CreateUpdateService(new FakeReleaseFeed(), new FakeDownloadService());
+
+        var discovered = await service.DiscoverLocalVersionsAsync();
+
+        var installation = Assert.Single(discovered);
+        Assert.Equal("b8888", installation.VersionLabel);
+        Assert.StartsWith(
+            Path.GetFullPath(customRuntimes),
+            installation.ExecutablePath,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task DeleteInstallation_HandlesMovedRuntimesDirectory()
+    {
+        using var fixture = new IntegrationFixture();
+
+        // 在默认版本目录里放一个“此前安装”的版本
+        var defaultVersionDirectory = Path.Combine(fixture.Paths.DefaultRuntimesDirectory, "b6666-abcdef");
+        CopyChildProcessInto(defaultVersionDirectory);
+        var installation = new LlamaCppInstallation
+        {
+            Id = Guid.NewGuid(),
+            VersionLabel = "b6666",
+            Directory = defaultVersionDirectory,
+            ExecutablePath = Path.Combine(defaultVersionDirectory, "llama-server.exe"),
+            SourceKind = InstallationSourceKind.OfficialRelease,
+            Status = InstallationStatus.Available,
+            InstalledUtc = fixture.TimeProvider.GetUtcNow(),
+        };
+        await fixture.InstallationsRepo.UpsertAsync(installation);
+
+        // 用户随后把版本目录改到其他位置
+        fixture.Paths.ApplyDirectoryOverrides(fixture.Directory.Combine("moved-runtimes"), null);
+        var service = fixture.CreateUpdateService(new FakeReleaseFeed(), new FakeDownloadService());
+
+        // 旧默认目录下的版本仍可连同文件一起删除
+        await service.DeleteInstallationAsync(installation.Id, deleteFiles: true);
+
+        Assert.False(Directory.Exists(defaultVersionDirectory));
+        Assert.Null(await fixture.InstallationsRepo.GetByIdAsync(installation.Id));
+
+        // 两个版本根之外的路径依旧拒绝删除文件（记录移除、文件保留）
+        var outsideDirectory = fixture.Directory.Combine("outside-runtimes");
+        CopyChildProcessInto(outsideDirectory);
+        var outsideInstallation = new LlamaCppInstallation
+        {
+            Id = Guid.NewGuid(),
+            VersionLabel = "b5555",
+            Directory = outsideDirectory,
+            ExecutablePath = Path.Combine(outsideDirectory, "llama-server.exe"),
+            SourceKind = InstallationSourceKind.OfficialRelease,
+            Status = InstallationStatus.Available,
+            InstalledUtc = fixture.TimeProvider.GetUtcNow(),
+        };
+        await fixture.InstallationsRepo.UpsertAsync(outsideInstallation);
+
+        await Assert.ThrowsAsync<UpdateException>(
+            () => service.DeleteInstallationAsync(outsideInstallation.Id, deleteFiles: true));
+        Assert.True(Directory.Exists(outsideDirectory));
     }
 }
