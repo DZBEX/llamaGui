@@ -19,12 +19,18 @@ public sealed class ApplicationServicesTests
         settings.Theme = "light";
         settings.CloseToTray = false;
         settings.UpdateChannel = UpdateChannel.Prerelease;
+        settings.RuntimesDirectory = @"D:\custom\runtimes\llama.cpp";
+        settings.DownloadsDirectory = @"D:\custom\downloads";
+        settings.ModelsDirectory = @"D:\models";
         await fixture.SettingsService.SaveAsync(settings);
 
         var reloaded = await fixture.SettingsService.LoadAsync();
         Assert.Equal("light", reloaded.Theme);
         Assert.False(reloaded.CloseToTray);
         Assert.Equal(UpdateChannel.Prerelease, reloaded.UpdateChannel);
+        Assert.Equal(@"D:\custom\runtimes\llama.cpp", reloaded.RuntimesDirectory);
+        Assert.Equal(@"D:\custom\downloads", reloaded.DownloadsDirectory);
+        Assert.Equal(@"D:\models", reloaded.ModelsDirectory);
     }
 
     [Fact]

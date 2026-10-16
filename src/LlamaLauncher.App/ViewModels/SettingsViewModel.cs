@@ -76,7 +76,28 @@ public sealed partial class SettingsViewModel : ViewModelBase, IPageViewModel
     private string _apiKeyStatus = "（未配置）";
 
     [ObservableProperty]
+    private string _gitHubTokenStatus = "（未配置，使用未登录配额：每小时 60 次）";
+
+    [ObservableProperty]
     private string _dataRootText = string.Empty;
+
+    [ObservableProperty]
+    private string _runtimesDirectoryText = string.Empty;
+
+    [ObservableProperty]
+    private string _downloadsDirectoryText = string.Empty;
+
+    [ObservableProperty]
+    private string _modelsDirectoryText = string.Empty;
+
+    [ObservableProperty]
+    private string _runtimesDirectoryHint = string.Empty;
+
+    [ObservableProperty]
+    private string _downloadsDirectoryHint = string.Empty;
+
+    [ObservableProperty]
+    private string _modelsDirectoryHint = string.Empty;
 
     [ObservableProperty]
     private bool _isPortableMode;
@@ -137,6 +158,12 @@ public sealed partial class SettingsViewModel : ViewModelBase, IPageViewModel
 
     public ObservableCollection<BackupRow> Backups { get; } = new();
 
+    private string? _runtimesDirectorySetting;
+
+    private string? _downloadsDirectorySetting;
+
+    private string? _modelsDirectorySetting;
+
     public string AppVersionText =>
         "LlamaLauncher " + (typeof(SettingsViewModel).Assembly.GetName().Version?.ToString(3) ?? "0.0.0");
 
@@ -160,7 +187,17 @@ public sealed partial class SettingsViewModel : ViewModelBase, IPageViewModel
         LogMaxSizeText = (settings.LogMaxFileBytes / 1024 / 1024).ToString();
         LogRotatedCountText = settings.LogMaxRotatedFiles.ToString();
         StartWithWindows = IsStartWithWindowsEnabled();
+
+        _runtimesDirectorySetting = string.IsNullOrWhiteSpace(settings.RuntimesDirectory) ? null : settings.RuntimesDirectory;
+        _downloadsDirectorySetting = string.IsNullOrWhiteSpace(settings.DownloadsDirectory) ? null : settings.DownloadsDirectory;
+        _modelsDirectorySetting = string.IsNullOrWhiteSpace(settings.ModelsDirectory) ? null : settings.ModelsDirectory;
+        RuntimesDirectoryText = _paths.RuntimesDirectory;
+        DownloadsDirectoryText = _paths.DownloadsDirectory;
+        ModelsDirectoryText = _modelsDirectorySetting ?? "（未设置：默认使用上次扫描/添加的目录）";
+        RefreshDirectoryHints();
+
         await RefreshApiKeyStatusAsync();
+        await RefreshGitHubTokenStatusAsync();
         RefreshBackups();
     }
 
@@ -201,7 +238,44 @@ public sealed partial class SettingsViewModel : ViewModelBase, IPageViewModel
                 settings.LogMaxRotatedFiles = rotated;
             }
 
+            settings.RuntimesDirectory = _runtimesDirectorySetting;
+            settings.DownloadsDirectory = _downloadsDirectorySetting;
+            settings.ModelsDirectory = _modelsDirectorySetting;
+
             await _settings.SaveAsync(settings);
+
+            // 目录覆盖立即生效；若自定义目录不可用则回退默认并把设置改回，避免“显示与实际不一致”
+            var warnings = _paths.ApplyDirectoryOverrides(settings.RuntimesDirectory, settings.DownloadsDirectory);
+            var settingsAdjusted = false;
+            if (_runtimesDirectorySetting is not null
+                && !PathsEqual(_paths.RuntimesDirectory, _runtimesDirectorySetting))
+            {
+                _runtimesDirectorySetting = null;
+                settings.RuntimesDirectory = null;
+                settingsAdjusted = true;
+            }
+
+            if (_downloadsDirectorySetting is not null
+                && !PathsEqual(_paths.DownloadsDirectory, _downloadsDirectorySetting))
+            {
+                _downloadsDirectorySetting = null;
+                settings.DownloadsDirectory = null;
+                settingsAdjusted = true;
+            }
+
+            if (settingsAdjusted)
+            {
+                await _settings.SaveAsync(settings);
+            }
+
+            foreach (var warning in warnings)
+            {
+                Notifications?.Notify(warning);
+            }
+
+            RuntimesDirectoryText = _paths.RuntimesDirectory;
+            DownloadsDirectoryText = _paths.DownloadsDirectory;
+            RefreshDirectoryHints();
 
             _themeService.Apply(settings.Theme);
             _resources.Interval = TimeSpan.FromSeconds(settings.ResourceSampleIntervalSeconds);
@@ -235,6 +309,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IPageViewModel
 
         var defaults = new AppSettingsModel();
         await _settings.SaveAsync(defaults);
+        _paths.ApplyDirectoryOverrides(null, null);
         _themeService.Apply(defaults.Theme);
         await OnActivatedAsync();
         Notifications?.Notify("设置已恢复默认值。");
@@ -282,6 +357,51 @@ public sealed partial class SettingsViewModel : ViewModelBase, IPageViewModel
         Notifications?.Notify("默认 API Key 已删除。");
     }
 
+    /// <summary>可选：配置 GitHub 令牌，提高更新检查的 API 频率上限（未登录 60 次/小时 → 登录 5000 次/小时）。</summary>
+    [RelayCommand]
+    private async Task SetGitHubTokenAsync()
+    {
+        var value = await Dialogs!.PromptAsync(
+            "配置 GitHub 令牌（可选）",
+            "令牌仅用于只读查询 llama.cpp 官方 Releases（api.github.com），用于提高更新检查的频率上限：\n" +
+            "未登录 60 次/小时 → 登录 5000 次/小时，且数据未变化（304）时不计入配额。\n" +
+            "可在 GitHub → Settings → Developer settings → Personal access tokens 创建；\n" +
+            "公共仓库只读查询不需要勾选任何权限（classic 令牌不选 scope、或 fine-grained 令牌的 Public Repositories 只读）。\n" +
+            "令牌将使用 Windows DPAPI 加密存储，仅本机当前用户可解密，不写入日志、导出与诊断包。");
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        await RunBusyAsync("正在保存 GitHub 令牌…", async () =>
+        {
+            await _secrets.SetAsync(SecretNames.GitHubToken, value.Trim());
+            await RefreshGitHubTokenStatusAsync();
+            Notifications?.Notify("GitHub 令牌已保存（DPAPI 保护）。");
+        });
+    }
+
+    [RelayCommand]
+    private async Task DeleteGitHubTokenAsync()
+    {
+        var confirmed = await Dialogs!.ConfirmAsync(new ConfirmDialogOptions
+        {
+            Title = "删除 GitHub 令牌",
+            Message = "将删除本机保存的 GitHub 令牌，更新检查恢复为未登录请求（每小时 60 次上限）。",
+            PrimaryButtonText = "删除",
+            SecondaryButtonText = "取消",
+            IsDestructive = true,
+        });
+        if (!confirmed)
+        {
+            return;
+        }
+
+        await _secrets.DeleteAsync(SecretNames.GitHubToken);
+        await RefreshGitHubTokenStatusAsync();
+        Notifications?.Notify("GitHub 令牌已删除。");
+    }
+
     [RelayCommand]
     private void OpenDataFolder() => OpenInExplorer(_paths.DataRoot);
 
@@ -290,6 +410,144 @@ public sealed partial class SettingsViewModel : ViewModelBase, IPageViewModel
 
     [RelayCommand]
     private void OpenRuntimesFolder() => OpenInExplorer(_paths.RuntimesDirectory);
+
+    [RelayCommand]
+    private void OpenDownloadsFolder() => OpenInExplorer(_paths.DownloadsDirectory);
+
+    [RelayCommand]
+    private void OpenModelsFolder()
+    {
+        if (string.IsNullOrWhiteSpace(_modelsDirectorySetting))
+        {
+            Notifications?.Notify("尚未设置模型目录，请先点击“更改…”选择目录。");
+            return;
+        }
+
+        OpenInExplorer(_modelsDirectorySetting);
+    }
+
+    [RelayCommand]
+    private async Task PickRuntimesDirectoryAsync()
+    {
+        var folder = await PickDirectoryAsync("选择 llama.cpp 版本目录", RuntimesDirectoryText);
+        if (folder is null)
+        {
+            return;
+        }
+
+        _runtimesDirectorySetting = folder;
+        RuntimesDirectoryText = folder;
+        RefreshDirectoryHints();
+        StatusText = "版本目录已更改，点击“保存设置”生效（已安装版本不受影响）。";
+    }
+
+    [RelayCommand]
+    private void ResetRuntimesDirectory()
+    {
+        _runtimesDirectorySetting = null;
+        RuntimesDirectoryText = _paths.DefaultRuntimesDirectory;
+        RefreshDirectoryHints();
+        StatusText = "版本目录已恢复默认，点击“保存设置”生效。";
+    }
+
+    [RelayCommand]
+    private async Task PickDownloadsDirectoryAsync()
+    {
+        var folder = await PickDirectoryAsync("选择更新下载目录", DownloadsDirectoryText);
+        if (folder is null)
+        {
+            return;
+        }
+
+        _downloadsDirectorySetting = folder;
+        DownloadsDirectoryText = folder;
+        RefreshDirectoryHints();
+        StatusText = "下载目录已更改，点击“保存设置”生效。";
+    }
+
+    [RelayCommand]
+    private void ResetDownloadsDirectory()
+    {
+        _downloadsDirectorySetting = null;
+        DownloadsDirectoryText = _paths.DefaultDownloadsDirectory;
+        RefreshDirectoryHints();
+        StatusText = "下载目录已恢复默认，点击“保存设置”生效。";
+    }
+
+    [RelayCommand]
+    private async Task PickModelsDirectoryAsync()
+    {
+        var folder = await PickDirectoryAsync(
+            "选择模型目录",
+            string.IsNullOrWhiteSpace(_modelsDirectorySetting) ? _paths.DataRoot : _modelsDirectorySetting);
+        if (folder is null)
+        {
+            return;
+        }
+
+        _modelsDirectorySetting = folder;
+        ModelsDirectoryText = folder;
+        RefreshDirectoryHints();
+        StatusText = "模型目录已更改，点击“保存设置”生效。";
+    }
+
+    [RelayCommand]
+    private void ResetModelsDirectory()
+    {
+        _modelsDirectorySetting = null;
+        ModelsDirectoryText = "（未设置：默认使用上次扫描/添加的目录）";
+        RefreshDirectoryHints();
+        StatusText = "模型目录已清除，点击“保存设置”生效。";
+    }
+
+    private async Task<string?> PickDirectoryAsync(string title, string initialDirectory)
+    {
+        var folder = Dialogs!.PickFolder(title, initialDirectory);
+        if (string.IsNullOrWhiteSpace(folder))
+        {
+            return null;
+        }
+
+        var fullPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder));
+        if (Path.GetDirectoryName(fullPath) is null)
+        {
+            await Dialogs.ShowWarningAsync("目录无效", "请选择具体目录，而不是盘符根目录。");
+            return null;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(fullPath);
+        }
+        catch (Exception ex)
+        {
+            await Dialogs.ShowErrorAsync("目录不可用", $"无法创建或访问目录：\n{fullPath}\n\n{ex.Message}");
+            return null;
+        }
+
+        return fullPath;
+    }
+
+    private void RefreshDirectoryHints()
+    {
+        RuntimesDirectoryHint = _runtimesDirectorySetting is null
+            ? "默认目录（数据目录下）：新安装与本地发现的版本会放入此目录。"
+            : PathsEqual(RuntimesDirectoryText, _runtimesDirectorySetting)
+                ? $"自定义目录（默认：{_paths.DefaultRuntimesDirectory}）：新安装与本地发现的版本会放入此目录，已安装版本不受影响。"
+                : $"配置的自定义目录当前不可用，本次已回退默认：{_paths.DefaultRuntimesDirectory}。";
+
+        DownloadsDirectoryHint = _downloadsDirectorySetting is null
+            ? "默认目录（数据目录下）：更新包在此临时下载。"
+            : $"自定义目录（默认：{_paths.DefaultDownloadsDirectory}）：更新包在此临时下载。";
+
+        ModelsDirectoryHint = "模型库“添加文件/扫描目录”的默认起始目录；未设置时沿用上次使用的目录。";
+    }
+
+    private static bool PathsEqual(string left, string right)
+        => string.Equals(
+            Path.TrimEndingDirectorySeparator(Path.GetFullPath(left)),
+            Path.TrimEndingDirectorySeparator(Path.GetFullPath(right)),
+            StringComparison.OrdinalIgnoreCase);
 
     [RelayCommand]
     private void OpenBackupsFolder() => OpenInExplorer(_paths.BackupsDirectory);
@@ -453,6 +711,21 @@ public sealed partial class SettingsViewModel : ViewModelBase, IPageViewModel
         catch (Exception ex)
         {
             ApiKeyStatus = "无法读取密钥状态：" + ex.Message;
+        }
+    }
+
+    private async Task RefreshGitHubTokenStatusAsync()
+    {
+        try
+        {
+            var exists = await _secrets.ExistsAsync(SecretNames.GitHubToken);
+            GitHubTokenStatus = exists
+                ? "已配置（DPAPI 加密存储，值为 ******）"
+                : "（未配置，使用未登录配额：每小时 60 次）";
+        }
+        catch (Exception ex)
+        {
+            GitHubTokenStatus = "无法读取令牌状态：" + ex.Message;
         }
     }
 

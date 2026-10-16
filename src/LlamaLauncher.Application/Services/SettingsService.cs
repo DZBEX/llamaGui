@@ -41,6 +41,15 @@ public sealed class AppSettingsModel
     /// <summary>退出应用时停止由本应用启动的服务（安全默认）。</summary>
     public bool StopServicesOnExit { get; set; } = true;
 
+    /// <summary>llama.cpp 版本目录（null = 数据目录下 runtimes\llama.cpp）。</summary>
+    public string? RuntimesDirectory { get; set; }
+
+    /// <summary>更新包下载目录（null = 数据目录下 downloads）。</summary>
+    public string? DownloadsDirectory { get; set; }
+
+    /// <summary>模型目录（模型库“添加文件/扫描目录”的默认起始目录；null = 沿用上次使用目录）。</summary>
+    public string? ModelsDirectory { get; set; }
+
     public string? LastModelScanDirectory { get; set; }
 
     public string? LastUpdateCheckUtc { get; set; }

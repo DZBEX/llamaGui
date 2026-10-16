@@ -43,6 +43,57 @@
                 </StackPanel>
             </Border>
 
+            <!-- 路径设置 -->
+            <Border Style="{DynamicResource App.CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="路径设置" FontWeight="SemiBold" />
+                    <TextBlock Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Text="可把 llama.cpp 版本、更新下载与模型目录放到其他磁盘；修改后点击底部“保存设置”立即生效，“恢复默认”回到数据目录下的默认路径。" />
+
+                    <TextBlock Text="llama.cpp 版本目录" Margin="0,12,0,0" />
+                    <DockPanel Margin="0,4,0,0">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Content="更改…" Command="{Binding PickRuntimesDirectoryCommand}" />
+                            <Button Content="恢复默认" Command="{Binding ResetRuntimesDirectoryCommand}" />
+                            <Button Content="打开" Command="{Binding OpenRuntimesFolderCommand}" />
+                        </StackPanel>
+                        <TextBox Text="{Binding RuntimesDirectoryText}" IsReadOnly="True" />
+                    </DockPanel>
+                    <TextBlock Text="{Binding RuntimesDirectoryHint}"
+                               Style="{DynamicResource App.CaptionText}"
+                               TextWrapping="Wrap"
+                               Margin="0,4,0,0" />
+
+                    <TextBlock Text="更新下载目录" Margin="0,12,0,0" />
+                    <DockPanel Margin="0,4,0,0">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Content="更改…" Command="{Binding PickDownloadsDirectoryCommand}" />
+                            <Button Content="恢复默认" Command="{Binding ResetDownloadsDirectoryCommand}" />
+                            <Button Content="打开" Command="{Binding OpenDownloadsFolderCommand}" />
+                        </StackPanel>
+                        <TextBox Text="{Binding DownloadsDirectoryText}" IsReadOnly="True" />
+                    </DockPanel>
+                    <TextBlock Text="{Binding DownloadsDirectoryHint}"
+                               Style="{DynamicResource App.CaptionText}"
+                               TextWrapping="Wrap"
+                               Margin="0,4,0,0" />
+
+                    <TextBlock Text="模型目录" Margin="0,12,0,0" />
+                    <DockPanel Margin="0,4,0,0">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Content="更改…" Command="{Binding PickModelsDirectoryCommand}" />
+                            <Button Content="恢复默认" Command="{Binding ResetModelsDirectoryCommand}" />
+                            <Button Content="打开" Command="{Binding OpenModelsFolderCommand}" />
+                        </StackPanel>
+                        <TextBox Text="{Binding ModelsDirectoryText}" IsReadOnly="True" />
+                    </DockPanel>
+                    <TextBlock Text="{Binding ModelsDirectoryHint}"
+                               Style="{DynamicResource App.CaptionText}"
+                               TextWrapping="Wrap"
+                               Margin="0,4,0,0" />
+                </StackPanel>
+            </Border>
+
             <!-- 资源与日志 -->
             <Border Style="{DynamicResource App.CardBorder}" Margin="0,0,0,12">
                 <StackPanel>
@@ -75,6 +126,15 @@
                         <TextBlock Text="检查间隔（小时）：" VerticalAlignment="Center" Margin="16,0,0,0" />
                         <TextBox Width="60" Text="{Binding UpdateIntervalText, UpdateSourceTrigger=PropertyChanged}" />
                     </WrapPanel>
+                    <TextBlock Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Text="检查间隔同时约束启动时的自动检查（间隔内重启不会重复请求 GitHub）。" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock Text="{Binding GitHubTokenStatus, StringFormat=GitHub 令牌：{0}}" VerticalAlignment="Center" />
+                        <Button Content="设置 / 更新令牌" Command="{Binding SetGitHubTokenCommand}" Margin="12,0,0,0" />
+                        <Button Content="删除令牌" Command="{Binding DeleteGitHubTokenCommand}" Style="{DynamicResource App.DestructiveButtonStyle}" />
+                    </WrapPanel>
+                    <TextBlock Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Text="可选：令牌仅用于只读查询官方 Releases，把频率上限从未登录 60 次/小时提高到 5000 次/小时（数据未变化时 304 不计配额）；使用 Windows DPAPI（当前用户）加密存储，不写入日志、导出与诊断包。" />
                 </StackPanel>
             </Border>
 

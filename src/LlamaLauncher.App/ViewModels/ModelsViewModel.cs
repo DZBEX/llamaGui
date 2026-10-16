@@ -141,10 +141,13 @@ public sealed partial class ModelsViewModel : ViewModelBase, IPageViewModel
     private async Task AddFileAsync()
     {
         var settings = await _settings.LoadAsync();
+        var initialDirectory = string.IsNullOrWhiteSpace(settings.ModelsDirectory)
+            ? settings.LastModelScanDirectory
+            : settings.ModelsDirectory;
         var path = Dialogs!.PickOpenFile(
             "选择 GGUF 模型文件",
             "GGUF 模型 (*.gguf)|*.gguf|所有文件|*.*",
-            settings.LastModelScanDirectory);
+            initialDirectory);
         if (path is null)
         {
             return;
@@ -163,7 +166,10 @@ public sealed partial class ModelsViewModel : ViewModelBase, IPageViewModel
     private async Task ScanDirectoryAsync()
     {
         var settings = await _settings.LoadAsync();
-        var directory = Dialogs!.PickFolder("选择模型扫描目录", settings.LastModelScanDirectory);
+        var initialDirectory = string.IsNullOrWhiteSpace(settings.ModelsDirectory)
+            ? settings.LastModelScanDirectory
+            : settings.ModelsDirectory;
+        var directory = Dialogs!.PickFolder("选择模型扫描目录", initialDirectory);
         if (directory is null)
         {
             return;

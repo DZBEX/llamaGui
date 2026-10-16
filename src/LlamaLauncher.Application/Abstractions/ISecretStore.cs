@@ -19,4 +19,7 @@ public static class SecretNames
 {
     /// <summary>默认 API Key。</summary>
     public const string DefaultApiKey = "llamalauncher.apiKey";
+
+    /// <summary>可选：GitHub API 令牌（仅用于 llama.cpp 更新检查，提高未登录 60 次/小时的频率上限）。</summary>
+    public const string GitHubToken = "llamalauncher.githubToken";
 }

@@ -12,8 +12,17 @@ public interface IAppPaths
     /// <summary>日志目录。</summary>
     string LogsDirectory { get; }
 
+    /// <summary>缓存目录（如 GitHub Releases 元数据缓存）。</summary>
+    string CacheDirectory { get; }
+
     /// <summary>更新临时下载目录。</summary>
     string DownloadsDirectory { get; }
+
+    /// <summary>默认 llama.cpp 版本目录（数据目录下，忽略自定义覆盖）。</summary>
+    string DefaultRuntimesDirectory { get; }
+
+    /// <summary>默认更新下载目录（数据目录下，忽略自定义覆盖）。</summary>
+    string DefaultDownloadsDirectory { get; }
 
     /// <summary>llama.cpp 各版本安装目录的父目录。</summary>
     string RuntimesDirectory { get; }
@@ -32,4 +41,10 @@ public interface IAppPaths
 
     /// <summary>确保所有目录存在。</summary>
     void EnsureCreated();
+
+    /// <summary>
+    /// 应用目录覆盖（null/空 = 恢复默认）。可写性校验失败时回退默认并返回提示；
+    /// 返回值非空表示存在需要告知用户的回退项。
+    /// </summary>
+    IReadOnlyList<string> ApplyDirectoryOverrides(string? runtimesDirectory, string? downloadsDirectory);
 }

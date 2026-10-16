@@ -36,9 +36,15 @@ public sealed class AppPaths : IAppPaths
 
     public string LogsDirectory => Path.Combine(DataRoot, "logs");
 
-    public string DownloadsDirectory => Path.Combine(DataRoot, "downloads");
+    public string CacheDirectory => Path.Combine(DataRoot, "cache");
 
-    public string RuntimesDirectory => Path.Combine(DataRoot, "runtimes", "llama.cpp");
+    public string DefaultRuntimesDirectory => Path.Combine(DataRoot, "runtimes", "llama.cpp");
+
+    public string DefaultDownloadsDirectory => Path.Combine(DataRoot, "downloads");
+
+    public string DownloadsDirectory => _downloadsDirectoryOverride ?? DefaultDownloadsDirectory;
+
+    public string RuntimesDirectory => _runtimesDirectoryOverride ?? DefaultRuntimesDirectory;
 
     public string ManifestsDirectory => Path.Combine(DataRoot, "manifests");
 
@@ -48,10 +54,44 @@ public sealed class AppPaths : IAppPaths
 
     public string ExportsDirectory => Path.Combine(DataRoot, "exports");
 
+    private string? _runtimesDirectoryOverride;
+
+    private string? _downloadsDirectoryOverride;
+
+    /// <inheritdoc />
+    public IReadOnlyList<string> ApplyDirectoryOverrides(string? runtimesDirectory, string? downloadsDirectory)
+    {
+        var warnings = new List<string>();
+        _runtimesDirectoryOverride = TryApplyOverride("llama.cpp 版本目录", runtimesDirectory, warnings);
+        _downloadsDirectoryOverride = TryApplyOverride("下载目录", downloadsDirectory, warnings);
+        return warnings;
+    }
+
+    private static string? TryApplyOverride(string label, string? directory, List<string> warnings)
+    {
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            return null;
+        }
+
+        try
+        {
+            var fullPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory.Trim()));
+            Directory.CreateDirectory(fullPath);
+            return fullPath;
+        }
+        catch (Exception ex)
+        {
+            warnings.Add($"自定义{label}不可用（{directory}：{ex.Message}），本次已回退为默认目录。");
+            return null;
+        }
+    }
+
     public void EnsureCreated()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(DatabasePath)!);
         Directory.CreateDirectory(LogsDirectory);
+        Directory.CreateDirectory(CacheDirectory);
         Directory.CreateDirectory(DownloadsDirectory);
         Directory.CreateDirectory(RuntimesDirectory);
         Directory.CreateDirectory(ManifestsDirectory);

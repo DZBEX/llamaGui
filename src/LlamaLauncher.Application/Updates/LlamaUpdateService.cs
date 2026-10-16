@@ -435,14 +435,18 @@ public sealed class LlamaUpdateService : ILlamaUpdateService
 
         if (deleteFiles)
         {
-            var runtimesRoot = Path.GetFullPath(_paths.RuntimesDirectory).TrimEnd('\\') + Path.DirectorySeparatorChar;
             var targetDirectory = Path.GetFullPath(installation.Directory);
             if (installation.SourceKind == InstallationSourceKind.ExternalPath)
             {
                 throw new UpdateException("外部登记的程序不会删除磁盘文件（记录已移除）。");
             }
 
-            if (!targetDirectory.StartsWith(runtimesRoot, StringComparison.OrdinalIgnoreCase))
+            // 允许删除当前与默认版本目录下的文件（自定义目录变更后仍可清理旧版本）
+            var runtimesRoots = new[] { _paths.RuntimesDirectory, _paths.DefaultRuntimesDirectory }
+                .Select(root => Path.GetFullPath(root).TrimEnd('\\') + Path.DirectorySeparatorChar)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (!runtimesRoots.Any(root => targetDirectory.StartsWith(root, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new UpdateException(
                     $"出于安全考虑，拒绝删除运行目录之外的路径：{targetDirectory}（记录已移除）。");
