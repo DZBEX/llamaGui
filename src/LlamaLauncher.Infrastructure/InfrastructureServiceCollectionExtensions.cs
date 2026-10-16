@@ -88,7 +88,9 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IReleaseFeedService>(sp =>
             new GitHubReleaseFeedService(
                 sp.GetRequiredService<TimeProvider>(),
-                sp.GetRequiredService<ILogger<GitHubReleaseFeedService>>()));
+                sp.GetRequiredService<ILogger<GitHubReleaseFeedService>>(),
+                sp.GetRequiredService<IAppPaths>(),
+                sp.GetRequiredService<ISecretStore>()));
         services.AddSingleton<IDownloadService>(sp =>
             new HttpDownloadService(sp.GetRequiredService<ILogger<HttpDownloadService>>()));
         services.AddSingleton<IZipExtractor, SafeZipExtractor>();

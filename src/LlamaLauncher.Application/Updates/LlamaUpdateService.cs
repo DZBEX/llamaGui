@@ -84,7 +84,10 @@ public sealed class LlamaUpdateService : ILlamaUpdateService
             operation.Error = feed.Error;
             operation.CompletedUtc = _timeProvider.GetUtcNow();
             await _operations.AddAsync(operation, cancellationToken).ConfigureAwait(false);
-            return new UpdateCheckResult(false, false, current?.VersionLabel, null, feed.Error, now);
+            return new UpdateCheckResult(false, false, current?.VersionLabel, null, feed.Error, now)
+            {
+                Warning = feed.Warning,
+            };
         }
 
         // 找到最新的、包含可用 Windows x64 资产的发行
@@ -106,7 +109,10 @@ public sealed class LlamaUpdateService : ILlamaUpdateService
             operation.Error = message;
             operation.CompletedUtc = _timeProvider.GetUtcNow();
             await _operations.AddAsync(operation, cancellationToken).ConfigureAwait(false);
-            return new UpdateCheckResult(true, false, current?.VersionLabel, null, message, now);
+            return new UpdateCheckResult(true, false, current?.VersionLabel, null, message, now)
+            {
+                Warning = feed.Warning,
+            };
         }
 
         var updateAvailable = current is null
@@ -116,7 +122,10 @@ public sealed class LlamaUpdateService : ILlamaUpdateService
         operation.CompletedUtc = _timeProvider.GetUtcNow();
         await _operations.AddAsync(operation, cancellationToken).ConfigureAwait(false);
 
-        return new UpdateCheckResult(true, updateAvailable, current?.VersionLabel, latest, null, now);
+        return new UpdateCheckResult(true, updateAvailable, current?.VersionLabel, latest, null, now)
+        {
+            Warning = feed.Warning,
+        };
     }
 
     public async Task<LlamaCppInstallation> DownloadAndInstallAsync(

@@ -40,7 +40,14 @@ public sealed record ReleaseFeedResult(
     bool Success,
     IReadOnlyList<ReleaseInfo> Releases,
     string? Error,
-    DateTimeOffset FetchedUtc);
+    DateTimeOffset FetchedUtc)
+{
+    /// <summary>数据是否来自本地缓存（未与 GitHub 实时核对）。</summary>
+    public bool FromCache { get; init; }
+
+    /// <summary>成功但有需要用户知晓的提示（如：频率上限期间显示缓存数据）；无提示时为 null。</summary>
+    public string? Warning { get; init; }
+}
 
 /// <summary>资产筛选后的候选项（含判定依据，供用户确认）。</summary>
 public sealed class AssetCandidate
@@ -82,4 +89,8 @@ public sealed record UpdateCheckResult(
     string? CurrentVersionLabel,
     ReleaseInfo? LatestRelease,
     string? Error,
-    DateTimeOffset CheckedUtc);
+    DateTimeOffset CheckedUtc)
+{
+    /// <summary>成功但有提示（如展示的是缓存数据）；无提示时为 null。</summary>
+    public string? Warning { get; init; }
+}

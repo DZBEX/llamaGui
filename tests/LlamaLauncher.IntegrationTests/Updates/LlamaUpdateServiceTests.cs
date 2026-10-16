@@ -18,13 +18,24 @@ public sealed class LlamaUpdateServiceTests
 
         public string? Error { get; set; }
 
+        public string? Warning { get; set; }
+
+        public bool FromCache { get; set; }
+
         public Task<ReleaseFeedResult> GetReleasesAsync(
             UpdateChannel channel,
             int maxReleases = 30,
             CancellationToken cancellationToken = default)
             => Task.FromResult(Error is null
                 ? new ReleaseFeedResult(true, Releases, null, DateTimeOffset.UtcNow)
-                : new ReleaseFeedResult(false, Array.Empty<ReleaseInfo>(), Error, DateTimeOffset.UtcNow));
+                {
+                    Warning = Warning,
+                    FromCache = FromCache,
+                }
+                : new ReleaseFeedResult(false, Array.Empty<ReleaseInfo>(), Error, DateTimeOffset.UtcNow)
+                {
+                    Warning = Warning,
+                });
     }
 
     private sealed class FakeDownloadService : IDownloadService

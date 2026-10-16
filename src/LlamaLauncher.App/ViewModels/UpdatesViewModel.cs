@@ -175,6 +175,12 @@ public sealed partial class UpdatesViewModel : ViewModelBase, IPageViewModel
                 CheckStatusText = result.Error ?? "没有可用的 Windows x64 资产。";
             }
 
+            // 频率上限/离线等场景下回退缓存数据时，明确告知用户（避免把缓存误认为实时结果）
+            if (result.Warning is { Length: > 0 } warning)
+            {
+                CheckStatusText += " " + warning;
+            }
+
             await RefreshHistoryAsync();
         });
     }
