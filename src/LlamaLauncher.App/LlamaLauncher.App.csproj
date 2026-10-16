@@ -7,6 +7,7 @@
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <AssemblyName>LlamaLauncher</AssemblyName>
     <RootNamespace>LlamaLauncher.App</RootNamespace>
+    <ApplicationIcon>Assets\LlamaLauncher.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <SatelliteResourceLanguages>en;zh-Hans</SatelliteResourceLanguages>
   </PropertyGroup>
@@ -20,6 +21,10 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Markdig" Version="0.37.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+  </ItemGroup>
+  <!-- 应用图标：ApplicationIcon 写入 exe（资源管理器/快捷方式/安装包），Resource 供 WPF 窗口与托盘加载 -->
+  <ItemGroup>
+    <Resource Include="Assets\LlamaLauncher.ico" />
   </ItemGroup>
   <!-- 移除 WinForms SDK 注入的隐式 using，避免与 WPF 类型（UserControl/Color 等）产生歧义 -->
   <ItemGroup>

@@ -1,6 +1,7 @@
 <Window x:Class="LlamaLauncher.App.Views.ProfileEditorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="/Assets/LlamaLauncher.ico"
         Title="编辑启动配置"
         Height="760" Width="880"
         WindowStartupLocation="CenterOwner"

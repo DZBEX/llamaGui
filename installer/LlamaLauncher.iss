@@ -28,6 +28,7 @@ OutputBaseFilename=LlamaLauncher-Setup-{#AppVersion}-x64
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=..\src\LlamaLauncher.App\Assets\LlamaLauncher.ico
 UninstallDisplayIcon={app}\LlamaLauncher.exe
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible

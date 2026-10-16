@@ -1,6 +1,7 @@
 <Window x:Class="LlamaLauncher.App.Dialogs.InstanceCreateDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="/Assets/LlamaLauncher.ico"
         Title="新建服务实例"
         SizeToContent="Height"
         Width="560"

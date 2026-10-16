@@ -10,7 +10,8 @@ namespace LlamaLauncher.App.Services;
 
 /// <summary>
 /// 系统托盘（WinForms NotifyIcon，与 WPF 共用 UI 线程消息泵）。
-/// 菜单：显示主窗口、实例快捷启停/聊天、退出。图标为运行时绘制，无外部资源依赖。
+/// 菜单：显示主窗口、实例快捷启停/聊天、退出。
+/// 图标使用应用图标资源（Assets/LlamaLauncher.ico，与 exe/窗口同一套）；资源不可用时回退为程序化绘制。
 /// </summary>
 public sealed class TrayService : IDisposable
 {
@@ -19,6 +20,7 @@ public sealed class TrayService : IDisposable
     private readonly INotificationService _notifications;
     private readonly ILogger<TrayService> _logger;
     private readonly NotifyIcon _notifyIcon;
+    private Icon? _trayIcon;
     private IntPtr _iconHandle;
 
     public TrayService(
@@ -32,10 +34,11 @@ public sealed class TrayService : IDisposable
         _notifications = notifications;
         _logger = logger;
 
+        _trayIcon = CreateTrayIcon();
         _notifyIcon = new NotifyIcon
         {
             Text = "LlamaLauncher",
-            Icon = CreateTrayIcon(),
+            Icon = _trayIcon,
             Visible = false,
         };
         _notifyIcon.DoubleClick += (_, _) => _lifecycle.ShowMainWindow();
@@ -63,6 +66,8 @@ public sealed class TrayService : IDisposable
     {
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
+        _trayIcon?.Dispose();
+        _trayIcon = null;
         if (_iconHandle != IntPtr.Zero)
         {
             DestroyIcon(_iconHandle);
@@ -170,6 +175,30 @@ public sealed class TrayService : IDisposable
     };
 
     private Icon CreateTrayIcon()
+    {
+        // 优先加载应用图标资源（WPF pack URI），保证托盘与 exe/窗口图标一致
+        try
+        {
+            var assemblyName = typeof(TrayService).Assembly.GetName().Name;
+            var uri = new Uri(
+                $"pack://application:,,,/{assemblyName};component/Assets/LlamaLauncher.ico",
+                UriKind.Absolute);
+            if (System.Windows.Application.GetResourceStream(uri) is { } resource)
+            {
+                using var stream = resource.Stream;
+                return new Icon(stream, SystemInformation.SmallIconSize);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "加载应用图标资源失败，回退为程序化托盘图标");
+        }
+
+        return CreateFallbackTrayIcon();
+    }
+
+    /// <summary>程序化回退图标（品牌蓝圆角方块 + “LL”），仅在资源加载失败时使用。</summary>
+    private Icon CreateFallbackTrayIcon()
     {
         using var bitmap = new Bitmap(32, 32);
         using (var graphics = Graphics.FromImage(bitmap))

@@ -5,6 +5,7 @@
         xmlns:views="clr-namespace:LlamaLauncher.App.Views"
         xmlns:conv="clr-namespace:LlamaLauncher.App.Converters"
         Title="LlamaLauncher — llama.cpp 启动器"
+        Icon="/Assets/LlamaLauncher.ico"
         Height="760" Width="1320"
         MinHeight="600" MinWidth="1080"
         WindowStartupLocation="CenterScreen"

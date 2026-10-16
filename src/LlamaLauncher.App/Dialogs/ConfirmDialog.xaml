@@ -1,6 +1,7 @@
 <Window x:Class="LlamaLauncher.App.Dialogs.ConfirmDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="/Assets/LlamaLauncher.ico"
         SizeToContent="Height"
         Width="520"
         WindowStartupLocation="CenterOwner"
