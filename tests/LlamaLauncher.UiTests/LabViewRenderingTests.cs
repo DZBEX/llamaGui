@@ -74,6 +74,12 @@ public sealed class LabViewRenderingTests
 
                     Mark("done");
                     Mark("probe-star=" + ProbeStarColumnWidth());
+
+                    // 回归：带分支标签连线的工作流画布渲染。
+                    // 历史缺陷：分支连线中点通过 GetFlattenedPathGeometry().Figures[0] 计算，
+                    // 退化路径会得到空 Figures 并在渲染回调中抛异常（未处理 → 进程崩溃）。
+                    RenderAndSaveCanvasWithBranchEdges();
+                    Mark("canvas-branches-ok");
                 }
                 finally
                 {
@@ -106,6 +112,65 @@ public sealed class LabViewRenderingTests
         "运行历史" => "history",
         _ => "tab",
     };
+
+    /// <summary>渲染包含分支标签连线的画布（回归历史渲染崩溃缺陷）。</summary>
+    private static void RenderAndSaveCanvasWithBranchEdges()
+    {
+        var workflow = new LlamaLauncher.Domain.Workflows.WorkflowDefinition
+        {
+            Id = "canvas-branch-test",
+            Name = "分支渲染回归",
+        };
+        workflow.Nodes.Add(LlamaLauncher.Domain.Workflows.NodeTypeCatalog.CreateNode(
+            LlamaLauncher.Domain.Workflows.NodeTypeCatalog.Start, "n1", 60, 120));
+        var decision = LlamaLauncher.Domain.Workflows.NodeTypeCatalog.CreateNode(
+            LlamaLauncher.Domain.Workflows.NodeTypeCatalog.Decision, "n2", 320, 120);
+        workflow.Nodes.Add(decision);
+        var rules = LlamaLauncher.Domain.Workflows.NodeTypeCatalog.CreateNode(
+            LlamaLauncher.Domain.Workflows.NodeTypeCatalog.Rules, "n3", 600, 120);
+        rules.Config = LlamaLauncher.Domain.Workflows.WorkflowJson.ToConfigObject(
+            new LlamaLauncher.Domain.Workflows.RulesNodeConfig
+            {
+                OnFailure = LlamaLauncher.Domain.Workflows.RuleFailureAction.Branch,
+            });
+        workflow.Nodes.Add(rules);
+        workflow.Nodes.Add(LlamaLauncher.Domain.Workflows.NodeTypeCatalog.CreateNode(
+            LlamaLauncher.Domain.Workflows.NodeTypeCatalog.Transform, "n4", 860, 60));
+        workflow.Nodes.Add(LlamaLauncher.Domain.Workflows.NodeTypeCatalog.CreateNode(
+            LlamaLauncher.Domain.Workflows.NodeTypeCatalog.Transform, "n5", 860, 220));
+        workflow.Edges.Add(new LlamaLauncher.Domain.Workflows.WorkflowEdge
+        {
+            Id = "e1", SourceNodeId = "n1", TargetNodeId = "n2",
+        });
+        workflow.Edges.Add(new LlamaLauncher.Domain.Workflows.WorkflowEdge
+        {
+            Id = "e2", SourceNodeId = "n2", TargetNodeId = "n3",
+        });
+        workflow.Edges.Add(new LlamaLauncher.Domain.Workflows.WorkflowEdge
+        {
+            Id = "e3", SourceNodeId = "n3", TargetNodeId = "n4", BranchId = "pass",
+        });
+        workflow.Edges.Add(new LlamaLauncher.Domain.Workflows.WorkflowEdge
+        {
+            Id = "e4", SourceNodeId = "n3", TargetNodeId = "n5", BranchId = "fail",
+        });
+
+        var canvas = new App.Controls.WorkflowCanvasControl { Width = 1000, Height = 520 };
+        canvas.SetDefinition(workflow);
+        canvas.Measure(new Size(1000, 520));
+        canvas.Arrange(new Rect(0, 0, 1000, 520));
+        canvas.UpdateLayout();
+
+        var bitmap = new RenderTargetBitmap(1000, 520, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(canvas);
+
+        var directory = Path.Combine(FindRepoRoot(), "artifacts", "lab-preview");
+        Directory.CreateDirectory(directory);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using var stream = File.Create(Path.Combine(directory, "lab-06-canvas-branches.png"));
+        encoder.Save(stream);
+    }
 
     /// <summary>
     /// 探针：记录星号列在离屏布局下的实际宽度。

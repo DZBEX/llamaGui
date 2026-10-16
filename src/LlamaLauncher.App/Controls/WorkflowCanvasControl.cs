@@ -422,23 +422,9 @@ public sealed class WorkflowCanvasControl : FrameworkElement
     }
 
     private static Point MidPoint(Point[] bezierPoints)
-    {
-        var geometry = new StreamGeometry();
-        using (var ctx = geometry.Open())
-        {
-            ctx.BeginFigure(bezierPoints[0], false, false);
-            ctx.BezierTo(bezierPoints[1], bezierPoints[2], bezierPoints[3], true, false);
-        }
-
-        geometry.Freeze();
-        var mid = geometry.GetFlattenedPathGeometry()
-            .Figures[0]
-            .Segments
-            .OfType<PolyLineSegment>()
-            .SelectMany(s => s.Points)
-            .ToList();
-        return mid.Count > 0 ? mid[mid.Count / 2] : bezierPoints[0];
-    }
+        // 纯数学求中点（t=0.5）。此前用 GetFlattenedPathGeometry().Figures[0]，
+        // 部分分支连线会得到空 Figures，随后在渲染回调中抛异常导致进程崩溃（见回归测试）。
+        => Bezier(bezierPoints, 0.5);
 
     private static Geometry BuildArrow(Point control, Point tip)
     {
