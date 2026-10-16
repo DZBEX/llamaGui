@@ -93,6 +93,8 @@
 
 1. **真实 llama-server.exe 与真实 GGUF**：本机未提供真实二进制/模型，端到端加载与聊天用受控模拟进程完成；
    真实 GPU 加载、`--list-devices` 实际输出、显存指标需在用户环境验证。
+   （更新：决策模型实验室与模型性能基准已用真实二进制 + 真实模型实测，见 5.4 与 7.5；
+   长期运行的显存指标与更多模型家族建议按需复核。）
 2. **安装版（Setup.exe）构建与干净环境安装/卸载**：依赖 Inno Setup；脚本与配置已完备。
 3. **WebView2**：未使用（Markdown 采用 FlowDocument 渲染，无此依赖）。
 4. **局域网真实设备访问**：界面/校验/威胁确认流程已实现并有测试；跨设备网络连通性需实机验证。
@@ -181,3 +183,19 @@
 
 - `dotnet build LlamaLauncher.sln -c Release` → 0 警告 0 错误；`pwsh -File scripts/build.ps1` 全部通过。
 - 发布产物 `LlamaLauncher.exe --smoke-test`（真实宿主 + 迁移 v3 + 恢复流程 + 主题/设置加载）→ 输出 `SMOKE_OK`、退出码 0。
+
+### 7.5 真实环境端到端（2026-10-17，实测）
+
+- **环境**：真实 `llama-server.exe`（b11577，本机官方安装）+ 真实模型
+  `D:\LLM\models\MiniCPM5-2B-Q4_K_M.gguf`（1.56 GB，GPU 后端，`-c 4096`，端口 18123）。
+- **验证方式**：`artifacts/e2e-benchmark`（一次性控制台工具，位于 gitignored 的 `artifacts/`）直接调用产品代码路径：
+  `LlamaServerBenchmarkClient` + `BenchmarkRunnerService` + `SqliteBenchmarkRunStore`。
+  先做客户端直测（512 档两轮 + 2048 档一轮），再运行完整编排（512/2048 × 预热 1 + 重复 2）落 SQLite 并重载校验；
+  工具按结论输出 `E2E_OK` / `E2E_FAILED`。
+- **结果（E2E_OK）**：
+  - 客户端直测：真实 timings 完整解析（prompt_n 510/511，pp 1654/7084 t/s，tg 118/127 t/s，TTFT 352/86 ms）；
+    512 两轮 prompt_n 一致（510/511），**每轮均为真实 prefill（随机前缀 + cache_prompt=false 生效）**；
+  - 完整编排：6/6 样本成功、状态 Succeeded、总耗时 4.1 s；记录含模型快照 `MiniCPM5-2B-Q4_K_M.gguf`
+    与版本快照 `b11577`；SQLite 重载样本数与状态一致；
+  - 观察：首轮请求明显更慢（含首次 CUDA 预热，pp 1654 vs 预热后 ~7100 t/s），验证“预热不计入统计”的必要性；
+    2048 目标档实际 prompt_n=1680——字符数估算与真实 tokenizer 存在偏差属预期（结果与报告如实展示“目标/实际”）。

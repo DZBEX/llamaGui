@@ -288,6 +288,7 @@ public sealed partial class BenchmarkViewModel : ViewModelBase, IPageViewModel, 
                 BenchmarkRunState.Succeeded when record.ErrorSummary is null => "测试完成，结果已保存。",
                 BenchmarkRunState.Succeeded => "测试完成（存在失败样本或提前中止，详见结果说明）。",
                 BenchmarkRunState.Failed => "测试失败：" + (record.ErrorSummary ?? "未知原因。"),
+                BenchmarkRunState.Canceled => "已取消（保留已完成的样本）。",
                 _ => "已结束。",
             };
             Notifications?.Notify(

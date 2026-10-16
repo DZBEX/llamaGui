@@ -29,7 +29,7 @@ llama.cpp 的 Windows 桌面启动器（WPF / .NET 8）：管理本地 GGUF 模�
 
 ```powershell
 dotnet build LlamaLauncher.sln -c Release         # Release 构建（0 警告 0 错误）
-pwsh -File scripts/build.ps1                      # 构建 + 全部测试（单元/集成/UI 共 361 项）
+pwsh -File scripts/build.ps1                      # 构建 + 全部测试（单元/集成/UI 共 510 项）
 ```
 
 ## 运行
