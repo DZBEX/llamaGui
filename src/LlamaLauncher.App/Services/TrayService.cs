@@ -20,6 +20,7 @@ public sealed class TrayService : IDisposable
     private readonly INotificationService _notifications;
     private readonly ILogger<TrayService> _logger;
     private readonly NotifyIcon _notifyIcon;
+    private readonly Font _menuFont;
     private Icon? _trayIcon;
     private IntPtr _iconHandle;
 
@@ -34,6 +35,7 @@ public sealed class TrayService : IDisposable
         _notifications = notifications;
         _logger = logger;
 
+        _menuFont = new Font("Microsoft YaHei UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
         _trayIcon = CreateTrayIcon();
         _notifyIcon = new NotifyIcon
         {
@@ -66,6 +68,7 @@ public sealed class TrayService : IDisposable
     {
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
+        _menuFont.Dispose();
         _trayIcon?.Dispose();
         _trayIcon = null;
         if (_iconHandle != IntPtr.Zero)
@@ -77,7 +80,16 @@ public sealed class TrayService : IDisposable
 
     private ContextMenuStrip BuildMenu()
     {
-        var menu = new ContextMenuStrip();
+        var menu = new ContextMenuStrip
+        {
+            AutoSize = true,
+            DropShadowEnabled = true,
+            Font = _menuFont,
+            Padding = new Padding(4),
+            ShowCheckMargin = false,
+            ShowImageMargin = false,
+            Renderer = new TrayMenuRenderer(ResolveMenuPalette()),
+        };
         menu.Opening += (_, _) => RebuildMenu(menu);
         RebuildMenu(menu);
         return menu;
@@ -85,9 +97,16 @@ public sealed class TrayService : IDisposable
 
     private void RebuildMenu(ContextMenuStrip menu)
     {
+        var palette = ResolveMenuPalette();
+        var renderer = new TrayMenuRenderer(palette);
+        menu.Renderer = renderer;
+        menu.BackColor = palette.Surface;
+        menu.ForeColor = palette.TextPrimary;
+        menu.Font = _menuFont;
+        menu.Padding = new Padding(4);
         menu.Items.Clear();
 
-        var showItem = new ToolStripMenuItem("显示主窗口");
+        var showItem = CreateMenuItem("显示主窗口", palette);
         showItem.Click += (_, _) => _lifecycle.ShowMainWindow();
         menu.Items.Add(showItem);
 
@@ -96,42 +115,105 @@ public sealed class TrayService : IDisposable
         var instances = _instances.GetInstances();
         if (instances.Count == 0)
         {
-            var empty = new ToolStripMenuItem("（暂无实例）") { Enabled = false };
+            var empty = CreateMenuItem("（暂无实例）", palette);
+            empty.Enabled = false;
             menu.Items.Add(empty);
         }
         else
         {
             foreach (var instance in instances)
             {
-                var item = new ToolStripMenuItem($"{instance.Name}（{StateText(instance.State)}）");
+                var item = CreateMenuItem($"{instance.Name}（{StateText(instance.State)}）", palette);
                 if (instance.IsActive)
                 {
-                    var stopItem = new ToolStripMenuItem("停止");
+                    var stopItem = CreateMenuItem("停止", palette);
                     stopItem.Click += async (_, _) => await SafeStopAsync(instance.Id).ConfigureAwait(false);
                     item.DropDownItems.Add(stopItem);
                 }
                 else
                 {
-                    var startItem = new ToolStripMenuItem("启动");
+                    var startItem = CreateMenuItem("启动", palette);
                     startItem.Click += async (_, _) => await SafeStartAsync(instance.Id).ConfigureAwait(false);
                     item.DropDownItems.Add(startItem);
                     if (instance.State is InstanceState.Failed or InstanceState.ExitedUnexpectedly)
                     {
-                        item.DropDownItems.Add(new ToolStripMenuItem(instance.Record.LastError ?? "（无错误信息）")
-                        {
-                            Enabled = false,
-                        });
+                        var errorItem = CreateMenuItem(instance.Record.LastError ?? "（无错误信息）", palette);
+                        errorItem.Enabled = false;
+                        item.DropDownItems.Add(errorItem);
                     }
                 }
 
+                ApplySubmenuStyle(item, renderer, palette);
                 menu.Items.Add(item);
             }
         }
 
         menu.Items.Add(new ToolStripSeparator());
-        var exitItem = new ToolStripMenuItem("退出 LlamaLauncher");
+        var exitItem = CreateMenuItem("退出 LlamaLauncher", palette);
         exitItem.Click += async (_, _) => await _lifecycle.RequestExitAsync().ConfigureAwait(false);
         menu.Items.Add(exitItem);
+    }
+
+    private ToolStripMenuItem CreateMenuItem(string text, TrayMenuPalette palette)
+    {
+        var item = new ToolStripMenuItem(text)
+        {
+            AutoSize = true,
+            ForeColor = palette.TextPrimary,
+            Font = _menuFont,
+            Padding = new Padding(8, 4, 8, 4),
+        };
+        return item;
+    }
+
+    private void ApplySubmenuStyle(
+        ToolStripMenuItem parent,
+        TrayMenuRenderer renderer,
+        TrayMenuPalette palette)
+    {
+        parent.DropDown.Renderer = renderer;
+        parent.DropDown.BackColor = palette.Surface;
+        parent.DropDown.ForeColor = palette.TextPrimary;
+        parent.DropDown.Padding = new Padding(4);
+        if (parent.DropDown is ToolStripDropDownMenu dropDownMenu)
+        {
+            dropDownMenu.ShowCheckMargin = false;
+            dropDownMenu.ShowImageMargin = false;
+        }
+
+        foreach (ToolStripItem item in parent.DropDownItems)
+        {
+            item.ForeColor = palette.TextPrimary;
+            item.Font = _menuFont;
+            item.Padding = new Padding(8, 4, 8, 4);
+        }
+    }
+
+    internal static TrayMenuPalette ResolveMenuPalette()
+    {
+        var surface = ReadThemeColor("App.Surface", Color.FromArgb(35, 38, 41));
+        var border = ReadThemeColor("App.Border", Color.FromArgb(58, 63, 69));
+        var textPrimary = ReadThemeColor("App.Text.Primary", Color.FromArgb(232, 234, 237));
+        var textSecondary = ReadThemeColor("App.Text.Secondary", Color.FromArgb(170, 176, 184));
+        var accent = ReadThemeColor("App.Accent", Color.FromArgb(76, 141, 255));
+        return new TrayMenuPalette(surface, border, textPrimary, textSecondary, accent, Color.White);
+    }
+
+    private static Color ReadThemeColor(string key, Color fallback)
+    {
+        try
+        {
+            if (System.Windows.Application.Current?.TryFindResource(key) is System.Windows.Media.SolidColorBrush brush)
+            {
+                var color = brush.Color;
+                return Color.FromArgb(color.A, color.R, color.G, color.B);
+            }
+        }
+        catch (Exception)
+        {
+        }
+
+        return fallback;
     }
 
     private async Task SafeStartAsync(Guid instanceId)
