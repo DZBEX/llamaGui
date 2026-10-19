@@ -44,7 +44,13 @@ public sealed partial class WorkflowDesignerViewModel
         ? "模拟模式：不会调用模型；决策节点需要模拟响应（可在“测试用例”页配置后用批量测试运行）。"
         : "本地模型模式：真实调用已启动的 llama-server 实例（决策节点需绑定或存在就绪实例）。";
 
-    partial void OnRunTestModeChanged(WorkflowTestMode value) => OnPropertyChanged(nameof(RunModeHint));
+    public string RunModeText => RunTestMode == WorkflowTestMode.Simulated ? "模拟" : "本地模型";
+
+    partial void OnRunTestModeChanged(WorkflowTestMode value)
+    {
+        OnPropertyChanged(nameof(RunModeHint));
+        OnPropertyChanged(nameof(RunModeText));
+    }
 
     [ObservableProperty]
     private int _logsLevelFilter;

@@ -72,6 +72,49 @@ public sealed class LabViewRenderingTests
                         Mark("rendered-" + (i + 1));
                     }
 
+                    // 与应用截图一致的宽屏尺寸，验证单命令栏和侧栏在 1536×767 下无溢出。
+                    lab.CurrentTab = lab.Tabs.First(t => t.Page is WorkflowDesignerViewModel);
+                    view.Width = 1536;
+                    view.Height = 767;
+                    PumpLayout(view);
+                    if (FindDesignerView(view) is { } wideDesignerView)
+                    {
+                        wideDesignerView.InitializePreview();
+                        PumpLayout(view);
+                    }
+
+                    RenderAndSave(view, 1536, 767, "lab-07-designer-wide.png");
+                    Mark("rendered-wide");
+
+                    // 窄窗口：命令栏应整组换行，三组操作都不能被裁切或相互覆盖。
+                    view.Width = 1080;
+                    view.Height = 720;
+                    PumpLayout(view);
+                    if (FindDesignerView(view) is { } compactDesignerView)
+                    {
+                        compactDesignerView.InitializePreview();
+                        PumpLayout(view);
+                        RenderAndSave(view, 1080, 720, "lab-08-designer-compact.png");
+                        AssertCommandGroupsInsideBar(compactDesignerView);
+                    }
+                    Mark("rendered-compact");
+
+                    // 运行中：暂停/继续/单步/停止均保留文字，状态与模式仍在同一行可见。
+                    if (lab.Tabs.First(t => t.Page is WorkflowDesignerViewModel).Page is WorkflowDesignerViewModel runningVm)
+                    {
+                        runningVm.IsRunActive = true;
+                        runningVm.RunStateText = "运行中";
+                        PumpLayout(view);
+                        RenderAndSave(view, 1080, 720, "lab-09-designer-running.png");
+                        if (FindDesignerView(view) is { } runningDesignerView)
+                        {
+                            AssertCommandGroupsInsideBar(runningDesignerView);
+                        }
+                        runningVm.IsRunActive = false;
+                        runningVm.RunStateText = "未运行";
+                    }
+                    Mark("rendered-running");
+
                     Mark("done");
                     Mark("probe-star=" + ProbeStarColumnWidth());
 
@@ -280,6 +323,29 @@ public sealed class LabViewRenderingTests
         encoder.Frames.Add(BitmapFrame.Create(bitmap));
         using var stream = File.Create(Path.Combine(directory, fileName));
         encoder.Save(stream);
+    }
+
+    /// <summary>断言命令栏的三组操作均位于容器内，且没有被裁切成不可用的窄条。</summary>
+    private static void AssertCommandGroupsInsideBar(App.Views.WorkflowDesignerView designer)
+    {
+        var commandBar = designer.FindName("CommandBar") as FrameworkElement
+            ?? throw new InvalidOperationException("未找到命令栏 CommandBar。");
+        var barBounds = commandBar.TransformToAncestor(designer)
+            .TransformBounds(new Rect(new Point(0, 0), commandBar.RenderSize));
+
+        foreach (var name in new[] { "WorkflowCommandGroup", "RunCommandGroup", "CanvasCommandGroup" })
+        {
+            var group = designer.FindName(name) as FrameworkElement
+                ?? throw new InvalidOperationException($"未找到命令组 {name}。");
+            var bounds = group.TransformToAncestor(designer)
+                .TransformBounds(new Rect(new Point(0, 0), group.RenderSize));
+            Assert.True(group.ActualWidth > 100, $"{name} 宽度过窄（{group.ActualWidth:0.#}），操作可能被裁切。");
+            Assert.True(bounds.Left >= barBounds.Left - 0.5
+                        && bounds.Top >= barBounds.Top - 0.5
+                        && bounds.Right <= barBounds.Right + 0.5
+                        && bounds.Bottom <= barBounds.Bottom + 0.5,
+                $"{name} 超出命令栏范围：组 {bounds}，命令栏 {barBounds}。");
+        }
     }
 
     private static string FindRepoRoot()

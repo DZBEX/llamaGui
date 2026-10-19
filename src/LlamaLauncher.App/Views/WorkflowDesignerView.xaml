@@ -13,6 +13,126 @@
             <DataTemplate DataType="{x:Type vmlab:NodeConfigEditor}">
                 <views:NodeEditorPanel />
             </DataTemplate>
+            <Style x:Key="DesignerBarButton" TargetType="Button">
+                <Setter Property="Height" Value="30" />
+                <Setter Property="MinWidth" Value="30" />
+                <Setter Property="Padding" Value="8,0" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Root"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="5"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter Margin="{TemplateBinding Padding}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource App.Surface}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Root" Property="Opacity" Value="0.72" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Root" Property="Opacity" Value="0.36" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="DesignerBarIconButton" TargetType="Button" BasedOn="{StaticResource DesignerBarButton}">
+                <Setter Property="Width" Value="30" />
+                <Setter Property="Padding" Value="0" />
+            </Style>
+            <Style x:Key="DesignerBarTextButton" TargetType="Button" BasedOn="{StaticResource DesignerBarButton}">
+                <Setter Property="Padding" Value="9,0" />
+            </Style>
+            <Style x:Key="DesignerBarSectionLabel" TargetType="TextBlock">
+                <Setter Property="Margin" Value="4,0,6,0" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
+            </Style>
+            <Style x:Key="DesignerBarToggleButton" TargetType="ToggleButton">
+                <Setter Property="Width" Value="30" />
+                <Setter Property="Height" Value="30" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="Root"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="5"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter
+                                    Margin="{TemplateBinding Padding}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource App.Surface}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource App.Surface}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource App.Accent}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Root" Property="Opacity" Value="0.72" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="DesignerBarTextToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource DesignerBarToggleButton}">
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="MinWidth" Value="30" />
+                <Setter Property="Padding" Value="8,0" />
+                <Setter Property="FontSize" Value="12" />
+            </Style>
+            <Style x:Key="DesignerBarGroup" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource App.Surface.Alt}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource App.Border}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="3" />
+            </Style>
+            <Style x:Key="DesignerBarSeparator" TargetType="Rectangle">
+                <Setter Property="Width" Value="1" />
+                <Setter Property="Height" Value="16" />
+                <Setter Property="Margin" Value="4,0" />
+                <Setter Property="Fill" Value="{DynamicResource App.Border}" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="DesignerRailButton" TargetType="Button" BasedOn="{StaticResource App.ToolbarButtonStyle}">
+                <Setter Property="Width" Value="26" />
+                <Setter Property="Height" Value="26" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="0,0,0,6" />
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -22,103 +142,321 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- 工具栏 -->
-        <Border Grid.Row="0" Style="{DynamicResource App.CardBorder}" Padding="8">
-            <WrapPanel VerticalAlignment="Center">
-                <Button Content="新建" Command="{Binding NewWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <ComboBox Width="170" Margin="6,0,0,0" VerticalAlignment="Center"
-                          ItemsSource="{Binding Workflows}"
-                          SelectedItem="{Binding SelectedWorkflow, Mode=TwoWay}"
-                          DisplayMemberPath="Name"
-                          ToolTip="选择要打开的工作流" />
-                <Button Content="打开" Command="{Binding OpenWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="保存" Command="{Binding SaveWorkflowCommand}" Style="{DynamicResource App.PrimaryButtonStyle}" Margin="6,0,0,0" />
-                <Button Content="另存版本快照" Command="{Binding SaveAsVersionCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="删除" Command="{Binding DeleteWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
-                <Button Content="导入" Command="{Binding ImportWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="导出" Command="{Binding ExportWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
-                <Button Command="{Binding UndoCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
-                        AutomationProperties.Name="撤销">
-                    <StackPanel Orientation="Horizontal">
-                        <controls:AppIcon Icon="ui-undo" Width="13" Height="13" Margin="0,0,6,0"
-                                          VerticalAlignment="Center"
-                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                        <TextBlock Text="撤销" VerticalAlignment="Center" />
+        <!-- 命令栏：三组高频操作直接显示名称；空间不足时以整组为单位换行，避免图标和文字被挤在一起。 -->
+        <Border x:Name="CommandBar"
+                Grid.Row="0"
+                Padding="6,4"
+                Background="{DynamicResource App.Surface}"
+                BorderBrush="{DynamicResource App.Border}"
+                BorderThickness="1"
+                CornerRadius="10">
+            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- 工作流 -->
+                <Border x:Name="WorkflowCommandGroup"
+                        Margin="0,0,6,4"
+                        Style="{DynamicResource DesignerBarGroup}">
+                    <StackPanel Height="32" Orientation="Horizontal">
+                        <TextBlock Style="{DynamicResource DesignerBarSectionLabel}" Text="工作流" />
+                        <Grid Width="236" VerticalAlignment="Center">
+                            <ComboBox Height="30"
+                                      ItemsSource="{Binding Workflows}"
+                                      SelectedItem="{Binding SelectedWorkflow, Mode=TwoWay}"
+                                      DisplayMemberPath="Name"
+                                      ToolTip="{Binding SnapshotInfoText}"
+                                      AutomationProperties.Name="当前工作流" />
+                            <TextBlock Margin="10,0,28,0"
+                                       VerticalAlignment="Center"
+                                       Text="选择工作流，或点“新建”"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource App.Text.Secondary}"
+                                       IsHitTestVisible="False"
+                                       Visibility="{Binding SelectedWorkflow, Converter={StaticResource NullOrEmptyToVisibility}, ConverterParameter=invert}" />
+                        </Grid>
+                        <Button Content="新建"
+                                Command="{Binding NewWorkflowCommand}"
+                                Style="{DynamicResource DesignerBarTextButton}"
+                                Margin="5,0,0,0" />
+                        <Button Content="打开"
+                                Command="{Binding OpenWorkflowCommand}"
+                                Style="{DynamicResource DesignerBarTextButton}"
+                                ToolTip="打开已保存的工作流" />
+                        <Button Content="保存"
+                                Command="{Binding SaveWorkflowCommand}"
+                                Style="{DynamicResource DesignerBarTextButton}"
+                                ToolTip="保存当前工作流" />
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="3,0,2,0"
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding IsDirty, Converter={StaticResource BoolToVisibility}}">
+                            <Ellipse Width="6" Height="6" Margin="0,0,5,0"
+                                     Fill="{DynamicResource App.State.Loading}" />
+                            <TextBlock Text="未保存"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource App.State.Loading}" />
+                        </StackPanel>
+                        <Button Style="{DynamicResource DesignerBarIconButton}"
+                                controls:ContextMenuBehavior.OpenOnLeftClick="True"
+                                ToolTip="更多工作流操作：版本快照、导入导出与删除（左键或右键打开）"
+                                AutomationProperties.Name="更多工作流操作"
+                                AutomationProperties.HelpText="左键或右键打开菜单">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="3" Height="3" Margin="0,0,3,0"
+                                         Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                <Ellipse Width="3" Height="3" Margin="0,0,3,0"
+                                         Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                <Ellipse Width="3" Height="3"
+                                         Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            </StackPanel>
+                            <Button.ContextMenu>
+                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                    <MenuItem Header="另存版本快照" Command="{Binding SaveAsVersionCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="导入工作流…" Command="{Binding ImportWorkflowCommand}" />
+                                    <MenuItem Header="导出工作流…" Command="{Binding ExportWorkflowCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="删除工作流" Command="{Binding DeleteWorkflowCommand}" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                     </StackPanel>
-                </Button>
-                <Button Command="{Binding RedoCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
-                        AutomationProperties.Name="重做">
-                    <StackPanel Orientation="Horizontal">
-                        <controls:AppIcon Icon="ui-redo" Width="13" Height="13" Margin="0,0,6,0"
-                                          VerticalAlignment="Center"
-                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                        <TextBlock Text="重做" VerticalAlignment="Center" />
+                </Border>
+
+                <!-- 调试 -->
+                <Border x:Name="RunCommandGroup"
+                        Margin="0,0,6,4"
+                        Style="{DynamicResource DesignerBarGroup}">
+                    <StackPanel Height="32" Orientation="Horizontal">
+                        <TextBlock Style="{DynamicResource DesignerBarSectionLabel}" Text="调试" />
+                        <StackPanel Orientation="Horizontal"
+                                    Visibility="{Binding IsRunActive, Converter={StaticResource InverseBoolToVisibility}}">
+                            <Button Command="{Binding StartRunCommand}"
+                                    Style="{DynamicResource App.PrimaryButtonStyle}"
+                                    Height="30"
+                                    Padding="11,0"
+                                    Margin="0"
+                                    ToolTip="校验并运行整个工作流"
+                                    AutomationProperties.Name="运行">
+                                <StackPanel Orientation="Horizontal">
+                                    <controls:AppIcon Icon="state-play"
+                                                      Width="11"
+                                                      Height="11"
+                                                      Margin="0,0,6,0"
+                                                      VerticalAlignment="Center"
+                                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    <TextBlock Text="运行" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Content="单步运行"
+                                    Command="{Binding StartStepRunCommand}"
+                                    Style="{DynamicResource DesignerBarTextButton}"
+                                    ToolTip="从开始节点执行，并在每个节点后暂停" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Visibility="{Binding IsRunActive, Converter={StaticResource BoolToVisibility}}">
+                            <Button Content="暂停"
+                                    Command="{Binding PauseRunCommand}"
+                                    Style="{DynamicResource DesignerBarTextButton}"
+                                    ToolTip="在当前节点结束后暂停" />
+                            <Button Content="继续"
+                                    Command="{Binding ResumeRunCommand}"
+                                    Style="{DynamicResource DesignerBarTextButton}"
+                                    ToolTip="继续运行到下一个断点或结束" />
+                            <Button Content="单步"
+                                    Command="{Binding StepRunCommand}"
+                                    Style="{DynamicResource DesignerBarTextButton}"
+                                    ToolTip="只执行下一个节点后暂停" />
+                            <Button Content="停止"
+                                    Command="{Binding StopRunCommand}"
+                                    Style="{DynamicResource DesignerBarTextButton}"
+                                    ToolTip="取消当前运行" />
+                        </StackPanel>
+
+                        <Border Margin="5,0,0,0"
+                                Padding="8,0"
+                                Height="30"
+                                VerticalAlignment="Center"
+                                CornerRadius="6"
+                                Background="{DynamicResource App.Surface}"
+                                BorderBrush="{DynamicResource App.Border}"
+                                BorderThickness="1"
+                                ToolTip="{Binding RunModeHint}">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="6" Height="6" Margin="0,0,6,0" VerticalAlignment="Center">
+                                    <Ellipse.Style>
+                                        <Style TargetType="Ellipse">
+                                            <Setter Property="Fill" Value="{DynamicResource App.Text.Secondary}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunActive}" Value="True">
+                                                    <Setter Property="Fill" Value="{DynamicResource App.Accent}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+                                <TextBlock FontSize="11.5" VerticalAlignment="Center">
+                                    <Run Text="{Binding RunStateText, Mode=OneWay}" FontWeight="SemiBold" />
+                                    <Run Text=" · " Foreground="{DynamicResource App.Text.Secondary}" />
+                                    <Run Text="{Binding RunModeText, Mode=OneWay}" Foreground="{DynamicResource App.Text.Secondary}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <Button Style="{DynamicResource DesignerBarIconButton}"
+                                controls:ContextMenuBehavior.OpenOnLeftClick="True"
+                                ToolTip="更多调试操作：从选中节点开始、断点、轨迹与刷新服务列表（左键或右键打开）"
+                                AutomationProperties.Name="更多调试操作"
+                                AutomationProperties.HelpText="左键或右键打开菜单">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="3" Height="3" Margin="0,0,3,0"
+                                         Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                <Ellipse Width="3" Height="3" Margin="0,0,3,0"
+                                         Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                <Ellipse Width="3" Height="3"
+                                         Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            </StackPanel>
+                            <Button.ContextMenu>
+                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                    <MenuItem Header="从选中节点开始"
+                                              Command="{Binding StartFromNodeCommand}"
+                                              IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}" />
+                                    <MenuItem Header="切换断点" Command="{Binding ToggleBreakpointCommand}" />
+                                    <MenuItem Header="清除运行轨迹" Command="{Binding ClearRunVisualsCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="刷新服务列表" Command="{Binding RefreshContextCommand}" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                     </StackPanel>
-                </Button>
-                <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
-                <Button Content="校验工作流" Command="{Binding ValidateCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="自动布局" Command="{Binding AutoLayoutCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="适配" Command="{Binding FitCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Command="{Binding ZoomInCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" ToolTip="放大画布"
-                        AutomationProperties.Name="放大画布">
-                    <controls:AppIcon Icon="ui-plus" Width="13" Height="13"
-                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                </Button>
-                <Button Command="{Binding ZoomOutCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" ToolTip="缩小画布"
-                        AutomationProperties.Name="缩小画布">
-                    <controls:AppIcon Icon="ui-minus" Width="13" Height="13"
-                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                </Button>
-                <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
-                <Button Content="刷新服务列表" Command="{Binding RefreshContextCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <TextBlock Text="{Binding SnapshotInfoText}" VerticalAlignment="Center" Margin="8,0,0,0"
-                           Style="{DynamicResource App.CaptionText}" />
-                <TextBlock Text="未保存的修改" VerticalAlignment="Center" Margin="8,0,0,0" FontSize="11"
-                           Foreground="{DynamicResource App.State.Loading}"
-                           Visibility="{Binding IsDirty, Converter={StaticResource BoolToVisibility}}" />
+                </Border>
+
+                <!-- 画布工具 -->
+                <Border x:Name="CanvasCommandGroup"
+                        Margin="0,0,0,4"
+                        Style="{DynamicResource DesignerBarGroup}">
+                    <StackPanel Height="32" Orientation="Horizontal">
+                        <TextBlock Style="{DynamicResource DesignerBarSectionLabel}" Text="画布工具" />
+                        <Button Content="撤销"
+                                Command="{Binding UndoCommand}"
+                                Style="{DynamicResource DesignerBarTextButton}"
+                                ToolTip="撤销上一步编辑" />
+                        <Button Content="重做"
+                                Command="{Binding RedoCommand}"
+                                Style="{DynamicResource DesignerBarTextButton}"
+                                ToolTip="恢复已撤销的编辑" />
+                        <Rectangle Style="{DynamicResource DesignerBarSeparator}" />
+                        <Button Content="校验"
+                                Command="{Binding ValidateCommand}"
+                                Style="{DynamicResource DesignerBarTextButton}"
+                                ToolTip="检查节点配置、连线、分支与工作流映射" />
+                        <Button Content="自动布局"
+                                Command="{Binding AutoLayoutCommand}"
+                                Style="{DynamicResource DesignerBarTextButton}"
+                                ToolTip="按依赖关系重新排列画布节点" />
+                        <Button Content="适配画布"
+                                Command="{Binding FitCommand}"
+                                Style="{DynamicResource DesignerBarTextButton}"
+                                ToolTip="缩放并居中，让全部节点可见" />
+                        <Rectangle Style="{DynamicResource DesignerBarSeparator}" />
+                        <Button Command="{Binding ZoomOutCommand}"
+                                Style="{DynamicResource DesignerBarIconButton}"
+                                ToolTip="缩小画布"
+                                AutomationProperties.Name="缩小画布">
+                            <controls:AppIcon Icon="ui-minus"
+                                              Width="13"
+                                              Height="13"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        </Button>
+                        <Button Command="{Binding ZoomInCommand}"
+                                Style="{DynamicResource DesignerBarIconButton}"
+                                ToolTip="放大画布"
+                                AutomationProperties.Name="放大画布">
+                            <controls:AppIcon Icon="ui-plus"
+                                              Width="13"
+                                              Height="13"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        </Button>
+                        <Rectangle Style="{DynamicResource DesignerBarSeparator}" />
+                        <ToggleButton x:Name="PaletteToggle"
+                                      Content="节点库"
+                                      Margin="0,0,4,0"
+                                      IsChecked="True"
+                                      Style="{DynamicResource DesignerBarTextToggleButton}"
+                                      Click="OnTogglePaletteClick"
+                                      ToolTip="显示或隐藏左侧节点库"
+                                      AutomationProperties.Name="显示或隐藏节点库" />
+                        <ToggleButton x:Name="InspectorToggle"
+                                      Content="检查器"
+                                      IsChecked="True"
+                                      Style="{DynamicResource DesignerBarTextToggleButton}"
+                                      Click="OnToggleInspectorClick"
+                                      ToolTip="显示或隐藏右侧属性检查器"
+                                      AutomationProperties.Name="显示或隐藏属性检查器" />
+                    </StackPanel>
+                </Border>
             </WrapPanel>
         </Border>
 
-        <Grid Grid.Row="1" Margin="0,10,0,0">
+        <Grid Grid.Row="1" Margin="0,8,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="238" />
-                <ColumnDefinition Width="10" />
+                <ColumnDefinition x:Name="PaletteColumn" Width="208" />
+                <ColumnDefinition Width="8" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="372" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition x:Name="InspectorColumn" Width="360" />
             </Grid.ColumnDefinitions>
 
             <!-- 节点库 -->
-            <Border Grid.Column="0" Style="{DynamicResource App.CardBorder}">
+            <Border x:Name="PalettePanel" Grid.Column="0" Style="{DynamicResource App.CardBorder}" Padding="8">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="节点库" FontWeight="SemiBold" />
-                    <StackPanel Grid.Row="1" Margin="0,6,0,6">
+
+                    <Grid Grid.Row="0">
+                        <TextBlock Text="节点库" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <Button HorizontalAlignment="Right"
+                                Style="{DynamicResource DesignerRailButton}"
+                                Click="OnTogglePaletteClick"
+                                ToolTip="收起节点库"
+                                AutomationProperties.Name="收起节点库">
+                            <Path Data="M 6 0 L 0 6 L 6 12"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.4"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round" />
+                        </Button>
+                    </Grid>
+
+                    <StackPanel Grid.Row="1" Margin="0,4,0,4">
                         <TextBox Text="{Binding NodeSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="28"
                                  ToolTip="搜索节点（名称 / 类型 ID / 说明）" />
-                        <ComboBox Margin="0,6,0,0"
+                        <ComboBox Margin="0,4,0,0"
+                                  Height="28"
                                   ItemsSource="{Binding CategoryFilters}"
                                   SelectedItem="{Binding NodeCategoryFilter, Mode=TwoWay}" />
                     </StackPanel>
+
                     <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding NodeLibrary}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Margin="0,0,0,8">
-                                        <TextBlock Text="{Binding Category}" FontWeight="SemiBold" FontSize="12"
-                                                   Style="{DynamicResource App.SecondaryText}" />
+                                    <StackPanel Margin="0,0,0,6">
+                                        <TextBlock Text="{Binding Category}" FontWeight="SemiBold" FontSize="11"
+                                                   Margin="1,2,0,2"
+                                                   Style="{DynamicResource App.CaptionText}" />
                                         <ItemsControl ItemsSource="{Binding Items}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Border Style="{DynamicResource App.CardBorder}"
-                                                            Margin="0,4,0,0"
-                                                            Padding="8,6"
+                                                    <Border Margin="0,2,0,0"
+                                                            Padding="7,4"
+                                                            CornerRadius="5"
+                                                            Background="{DynamicResource App.Surface.Alt}"
+                                                            BorderBrush="{DynamicResource App.Border}"
+                                                            BorderThickness="1"
                                                             Cursor="Hand"
                                                             ToolTip="{Binding Description}"
                                                             MouseLeftButtonDown="OnLibraryItemMouseDown"
@@ -126,11 +464,13 @@
                                                             MouseLeftButtonUp="OnLibraryItemMouseUp">
                                                         <StackPanel Orientation="Horizontal">
                                                             <controls:AppIcon Icon="{Binding Icon}"
-                                                                              Width="15"
-                                                                              Height="15"
-                                                                              Margin="0,0,5,0"
+                                                                              Width="14"
+                                                                              Height="14"
+                                                                              Margin="0,0,6,0"
                                                                               VerticalAlignment="Center" />
-                                                            <TextBlock Text="{Binding DisplayName}" />
+                                                            <TextBlock Text="{Binding DisplayName}"
+                                                                       FontSize="12.5"
+                                                                       VerticalAlignment="Center" />
                                                         </StackPanel>
                                                     </Border>
                                                 </DataTemplate>
@@ -144,71 +484,60 @@
                 </Grid>
             </Border>
 
-            <!-- 画布 + 运行控制 -->
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+            <!-- 折叠后的节点库导航条 -->
+            <Border x:Name="PaletteRail"
+                    Grid.Column="0"
+                    Style="{DynamicResource App.CardBorder}"
+                    Padding="4"
+                    Visibility="Collapsed">
+                <StackPanel HorizontalAlignment="Center">
+                    <Button Style="{DynamicResource DesignerRailButton}"
+                            Click="OnTogglePaletteClick"
+                            ToolTip="展开节点库"
+                            AutomationProperties.Name="展开节点库">
+                        <Path Data="M 1 0 L 7 6 L 1 12"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="1.4"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" />
+                    </Button>
+                    <TextBlock Text="节&#x0a;点&#x0a;库"
+                               Margin="0,2,0,0"
+                               TextAlignment="Center"
+                               LineHeight="18"
+                               FontSize="11"
+                               Foreground="{DynamicResource App.Text.Secondary}" />
+                </StackPanel>
+            </Border>
 
-                <Border Grid.Row="0" Style="{DynamicResource App.CardBorder}" Padding="8">
-                    <WrapPanel VerticalAlignment="Center">
-                        <Button Command="{Binding StartRunCommand}" Style="{DynamicResource App.PrimaryButtonStyle}"
-                                AutomationProperties.Name="运行"
-                                IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}">
-                            <StackPanel Orientation="Horizontal">
-                                <controls:AppIcon Icon="state-play" Width="12" Height="12" Margin="0,0,6,0"
-                                                  VerticalAlignment="Center"
-                                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                                <TextBlock Text="运行" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                        <Button Content="单步启动" Command="{Binding StartStepRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
-                                IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}" />
-                        <Button Content="从选中节点开始" Command="{Binding StartFromNodeCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
-                                IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}" />
-                        <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
-                        <Button Command="{Binding PauseRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
-                                AutomationProperties.Name="暂停">
-                            <StackPanel Orientation="Horizontal">
-                                <controls:AppIcon Icon="state-pause" Width="12" Height="12" Margin="0,0,6,0"
-                                                  VerticalAlignment="Center"
-                                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                                <TextBlock Text="暂停" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                        <Button Content="继续" Command="{Binding ResumeRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                        <Button Content="单步" Command="{Binding StepRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                        <Button Command="{Binding StopRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
-                                AutomationProperties.Name="停止">
-                            <StackPanel Orientation="Horizontal">
-                                <controls:AppIcon Icon="state-stop" Width="12" Height="12" Margin="0,0,6,0"
-                                                  VerticalAlignment="Center"
-                                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                                <TextBlock Text="停止" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                        <Button Content="清除轨迹" Command="{Binding ClearRunVisualsCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                        <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
-                        <TextBlock VerticalAlignment="Center" Margin="2,0,0,0">
-                            <Run Text="状态：" Foreground="{DynamicResource App.Text.Secondary}" />
-                            <Run Text="{Binding RunStateText, Mode=OneWay}" FontWeight="SemiBold" />
-                            <Run Text=" · 模式：" Foreground="{DynamicResource App.Text.Secondary}" />
-                            <Run Text="{Binding RunTestMode, Mode=OneWay}" Foreground="{DynamicResource App.Text.Secondary}" />
-                            <Run Text="{Binding PauseReasonText, Mode=OneWay}" Foreground="{DynamicResource App.Text.Secondary}" />
-                        </TextBlock>
-                        <Button Content="切换断点" Command="{Binding ToggleBreakpointCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" Margin="8,0,0,0" />
-                    </WrapPanel>
-                </Border>
-
-                <Border Grid.Row="1" Margin="0,10,0,0" Style="{DynamicResource App.CardBorder}" Padding="0">
-                    <controls:WorkflowCanvasControl x:Name="CanvasHost" />
-                </Border>
-            </Grid>
+            <!-- 画布占满中间区域，运行控制已收进顶部命令栏。 -->
+            <Border Grid.Column="2" Style="{DynamicResource App.CardBorder}" Padding="0">
+                <controls:WorkflowCanvasControl x:Name="CanvasHost" />
+            </Border>
 
             <!-- 属性 / 运行 / 校验 / 日志 -->
-            <Border Grid.Column="4" Style="{DynamicResource App.CardBorder}">
-                <TabControl Background="Transparent" BorderThickness="0">
+            <Border x:Name="InspectorPanel" Grid.Column="4" Style="{DynamicResource App.CardBorder}" Padding="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <TextBlock Text="检查器" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <Button HorizontalAlignment="Right"
+                                Style="{DynamicResource DesignerRailButton}"
+                                Click="OnToggleInspectorClick"
+                                ToolTip="收起检查器"
+                                AutomationProperties.Name="收起检查器">
+                            <Path Data="M 1 0 L 7 6 L 1 12"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.4"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round" />
+                        </Button>
+                    </Grid>
+
+                    <TabControl Grid.Row="1" Margin="0,2,0,0" Background="Transparent" BorderThickness="0">
                     <TabItem Header="属性">
                         <Grid Margin="0,8,0,0">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
@@ -396,7 +725,34 @@
                             </ListBox>
                         </Grid>
                     </TabItem>
-                </TabControl>
+                    </TabControl>
+                </Grid>
+            </Border>
+
+            <!-- 折叠后的检查器导航条 -->
+            <Border x:Name="InspectorRail"
+                    Grid.Column="4"
+                    Style="{DynamicResource App.CardBorder}"
+                    Padding="4"
+                    Visibility="Collapsed">
+                <StackPanel HorizontalAlignment="Center">
+                    <Button Style="{DynamicResource DesignerRailButton}"
+                            Click="OnToggleInspectorClick"
+                            ToolTip="展开检查器"
+                            AutomationProperties.Name="展开检查器">
+                        <Path Data="M 6 0 L 0 6 L 6 12"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="1.4"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" />
+                    </Button>
+                    <TextBlock Text="检&#x0a;查&#x0a;器"
+                               Margin="0,2,0,0"
+                               TextAlignment="Center"
+                               LineHeight="18"
+                               FontSize="11"
+                               Foreground="{DynamicResource App.Text.Secondary}" />
+                </StackPanel>
             </Border>
         </Grid>
     </Grid>

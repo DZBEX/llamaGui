@@ -10,6 +10,9 @@ namespace LlamaLauncher.App.Views;
 /// <summary>工作流设计器视图：画布事件与 ViewModel 的桥接（拖放、选择同步、缩放/适配）。</summary>
 public partial class WorkflowDesignerView : UserControl
 {
+    private const double PaletteExpandedWidth = 208;
+    private const double InspectorExpandedWidth = 360;
+    private const double SideRailWidth = 40;
     private WorkflowDesignerViewModel? _vm;
     private Point _libraryDragStart;
     private NodeLibraryItem? _libraryDragItem;
@@ -145,6 +148,28 @@ public partial class WorkflowDesignerView : UserControl
 
     private void OnCanvasDeleteRequested(object? sender, EventArgs e)
         => _vm?.DeleteSelectionCommand.Execute(null);
+
+    private void OnTogglePaletteClick(object sender, RoutedEventArgs e)
+        => SetPaletteExpanded(PalettePanel.Visibility != Visibility.Visible);
+
+    private void OnToggleInspectorClick(object sender, RoutedEventArgs e)
+        => SetInspectorExpanded(InspectorPanel.Visibility != Visibility.Visible);
+
+    private void SetPaletteExpanded(bool expanded)
+    {
+        PalettePanel.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+        PaletteRail.Visibility = expanded ? Visibility.Collapsed : Visibility.Visible;
+        PaletteColumn.Width = new GridLength(expanded ? PaletteExpandedWidth : SideRailWidth);
+        PaletteToggle.IsChecked = expanded;
+    }
+
+    private void SetInspectorExpanded(bool expanded)
+    {
+        InspectorPanel.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+        InspectorRail.Visibility = expanded ? Visibility.Collapsed : Visibility.Visible;
+        InspectorColumn.Width = new GridLength(expanded ? InspectorExpandedWidth : SideRailWidth);
+        InspectorToggle.IsChecked = expanded;
+    }
 
     private void OnIssueDoubleClick(object sender, MouseButtonEventArgs e)
     {
