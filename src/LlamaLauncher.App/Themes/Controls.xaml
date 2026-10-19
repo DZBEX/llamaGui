@@ -1,12 +1,13 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:controls="clr-namespace:LlamaLauncher.App.Controls"
-                    xmlns:conv="clr-namespace:LlamaLauncher.App.Converters">
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:LlamaLauncher.App.Controls"
+    xmlns:conv="clr-namespace:LlamaLauncher.App.Converters">
 
-    <!-- 供样式内部使用（不依赖 App.xaml 资源，保证本字典可独立加载） -->
+    <!--  供样式内部使用（不依赖 App.xaml 资源，保证本字典可独立加载）  -->
     <conv:EmptyToNullConverter x:Key="App.EmptyToNull" />
 
-    <!-- 状态色（深/浅主题通用） -->
+    <!--  状态色（深/浅主题通用）  -->
     <SolidColorBrush x:Key="App.State.Ready" Color="#FF3FA65A" />
     <SolidColorBrush x:Key="App.State.Loading" Color="#FFD9A03C" />
     <SolidColorBrush x:Key="App.State.Error" Color="#FFD05050" />
@@ -23,28 +24,33 @@
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
-        <!-- 单行文本一律省略号收尾，避免窄列/窄容器把文字硬截断成“半个字” -->
+        <!--  单行文本一律省略号收尾，避免窄列/窄容器把文字硬截断成“半个字”  -->
         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
 
-    <!-- 表格单元格：省略号 + 悬停显示完整内容（文本为空时不弹提示） -->
+    <!--  表格单元格：省略号 + 悬停显示完整内容（文本为空时不弹提示）  -->
     <Style x:Key="App.CellText" TargetType="TextBlock">
         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-        <Setter Property="ToolTip"
-                Value="{Binding RelativeSource={RelativeSource Self}, Path=Text, Converter={StaticResource App.EmptyToNull}}" />
+        <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text, Converter={StaticResource App.EmptyToNull}}" />
     </Style>
 
-    <!-- 单色图标：PNG 蒙版 + 主题着色（浅色/深色主题共用同一份资源） -->
+    <!--  单色图标：PNG 蒙版 + 主题着色（浅色/深色主题共用同一份资源）  -->
     <Style TargetType="controls:AppIcon">
         <Setter Property="Fill" Value="{DynamicResource App.Text.Primary}" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
-    <Style x:Key="App.SecondaryText" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Style
+        x:Key="App.SecondaryText"
+        BasedOn="{StaticResource {x:Type TextBlock}}"
+        TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
     </Style>
 
-    <Style x:Key="App.CaptionText" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Style
+        x:Key="App.CaptionText"
+        BasedOn="{StaticResource {x:Type TextBlock}}"
+        TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
         <Setter Property="FontSize" Value="12" />
     </Style>
@@ -68,15 +74,17 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Root"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="6"
-                            SnapsToDevicePixels="True">
-                        <ContentPresenter Margin="{TemplateBinding Padding}"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="6"
+                        SnapsToDevicePixels="True">
+                        <ContentPresenter
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -94,19 +102,28 @@
         </Setter>
     </Style>
 
-    <Style x:Key="App.PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+    <Style
+        x:Key="App.PrimaryButtonStyle"
+        BasedOn="{StaticResource {x:Type Button}}"
+        TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource App.Accent}" />
         <Setter Property="Foreground" Value="#FFFFFFFF" />
         <Setter Property="BorderBrush" Value="{DynamicResource App.Accent}" />
     </Style>
 
-    <Style x:Key="App.DestructiveButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+    <Style
+        x:Key="App.DestructiveButtonStyle"
+        BasedOn="{StaticResource {x:Type Button}}"
+        TargetType="Button">
         <Setter Property="Background" Value="#FFB03A3A" />
         <Setter Property="Foreground" Value="#FFFFFFFF" />
         <Setter Property="BorderBrush" Value="#FFB03A3A" />
     </Style>
 
-    <Style x:Key="App.ToolbarButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+    <Style
+        x:Key="App.ToolbarButtonStyle"
+        BasedOn="{StaticResource {x:Type Button}}"
+        TargetType="Button">
         <Setter Property="Padding" Value="10,4" />
     </Style>
 
@@ -127,31 +144,34 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
-                    <StackPanel Orientation="Horizontal" Background="Transparent">
-                        <Border x:Name="Box"
-                                Width="16"
-                                Height="16"
-                                CornerRadius="4"
-                                Background="{DynamicResource App.Surface.Alt}"
-                                BorderBrush="{DynamicResource App.Border}"
-                                BorderThickness="1"
+                    <StackPanel Background="Transparent" Orientation="Horizontal">
+                        <Border
+                            x:Name="Box"
+                            Width="16"
+                            Height="16"
+                            VerticalAlignment="Center"
+                            Background="{DynamicResource App.Surface.Alt}"
+                            BorderBrush="{DynamicResource App.Border}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            SnapsToDevicePixels="True">
+                            <Path
+                                x:Name="Check"
+                                HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                SnapsToDevicePixels="True">
-                            <Path x:Name="Check"
-                                  Data="M 3.2 8.4 L 6.6 11.6 L 12.8 4.8"
-                                  Stroke="#FFFFFFFF"
-                                  StrokeThickness="1.9"
-                                  StrokeStartLineCap="Round"
-                                  StrokeEndLineCap="Round"
-                                  StrokeLineJoin="Round"
-                                  Stretch="None"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"
-                                  Visibility="Collapsed" />
+                                Data="M 3.2 8.4 L 6.6 11.6 L 12.8 4.8"
+                                Stretch="None"
+                                Stroke="#FFFFFFFF"
+                                StrokeEndLineCap="Round"
+                                StrokeLineJoin="Round"
+                                StrokeStartLineCap="Round"
+                                StrokeThickness="1.9"
+                                Visibility="Collapsed" />
                         </Border>
-                        <ContentPresenter Margin="8,0,0,0"
-                                          VerticalAlignment="Center"
-                                          RecognizesAccessKey="True" />
+                        <ContentPresenter
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            RecognizesAccessKey="True" />
                     </StackPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
@@ -175,7 +195,7 @@
         <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
     </Style>
 
-    <!-- ComboBox 下拉箭头区域的透明点击层 -->
+    <!--  ComboBox 下拉箭头区域的透明点击层  -->
     <Style x:Key="App.ComboToggleButtonStyle" TargetType="ToggleButton">
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Focusable" Value="False" />
@@ -185,12 +205,13 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Grid Background="Transparent">
-                        <Path HorizontalAlignment="Right"
-                              VerticalAlignment="Center"
-                              Margin="0,0,10,0"
-                              Data="M 0 0 L 4.5 4.5 L 9 0"
-                              Stroke="{DynamicResource App.Text.Secondary}"
-                              StrokeThickness="1.4" />
+                        <Path
+                            Margin="0,0,10,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Data="M 0 0 L 4.5 4.5 L 9 0"
+                            Stroke="{DynamicResource App.Text.Secondary}"
+                            StrokeThickness="1.4" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -198,8 +219,8 @@
     </Style>
 
     <!--
-      ComboBox 完整模板：默认主题的模板在深色背景下列表弹层仍是系统浅色，
-      会导致“白底浅字”。这里用主题画刷重写整块模板（含弹层与下拉箭头）。
+        ComboBox 完整模板：默认主题的模板在深色背景下列表弹层仍是系统浅色，
+        会导致“白底浅字”。这里用主题画刷重写整块模板（含弹层与下拉箭头）。
     -->
     <Style TargetType="ComboBox">
         <Setter Property="Background" Value="{DynamicResource App.Surface.Alt}" />
@@ -215,49 +236,53 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid x:Name="Root">
-                        <Border x:Name="Border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6">
+                        <Border
+                            x:Name="Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="26" />
                                 </Grid.ColumnDefinitions>
-                                <ContentPresenter x:Name="ContentSite"
-                                                  Grid.Column="0"
-                                                  Margin="8,4,30,4"
-                                                  HorizontalAlignment="Left"
-                                                  VerticalAlignment="Center"
-                                                  Content="{TemplateBinding SelectionBoxItem}"
-                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                                  ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                                  IsHitTestVisible="False" />
-                                <ToggleButton x:Name="DropDownToggle"
-                                              Grid.Column="0"
-                                              Grid.ColumnSpan="2"
-                                              Style="{StaticResource App.ComboToggleButtonStyle}"
-                                              IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
-                                <Popup x:Name="PART_Popup"
-                                       Grid.Column="0"
-                                       Grid.ColumnSpan="2"
-                                       AllowsTransparency="True"
-                                       Placement="Bottom"
-                                       VerticalOffset="2"
-                                       PopupAnimation="Fade"
-                                       StaysOpen="False"
-                                       Focusable="False"
-                                       IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
-                                    <Border MinWidth="{TemplateBinding ActualWidth}"
-                                            MaxHeight="320"
-                                            Margin="0,0,8,8"
-                                            Background="{DynamicResource App.Surface}"
-                                            BorderBrush="{DynamicResource App.Border}"
-                                            BorderThickness="1"
-                                            CornerRadius="6">
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                                      HorizontalScrollBarVisibility="Disabled">
+                                <ContentPresenter
+                                    x:Name="ContentSite"
+                                    Grid.Column="0"
+                                    Margin="8,4,30,4"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Content="{TemplateBinding SelectionBoxItem}"
+                                    ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                    ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                    IsHitTestVisible="False" />
+                                <ToggleButton
+                                    x:Name="DropDownToggle"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                    Style="{StaticResource App.ComboToggleButtonStyle}" />
+                                <Popup
+                                    x:Name="PART_Popup"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    AllowsTransparency="True"
+                                    Focusable="False"
+                                    IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                    Placement="Bottom"
+                                    PopupAnimation="Fade"
+                                    StaysOpen="False"
+                                    VerticalOffset="2">
+                                    <Border
+                                        MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="320"
+                                        Margin="0,0,8,8"
+                                        Background="{DynamicResource App.Surface}"
+                                        BorderBrush="{DynamicResource App.Border}"
+                                        BorderThickness="1"
+                                        CornerRadius="6">
+                                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                                             <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
                                         </ScrollViewer>
                                     </Border>
@@ -281,7 +306,7 @@
         </Setter>
     </Style>
 
-    <!-- ComboBoxItem 完整模板：普通项透明底 + 悬停/选中使用主题色，避免系统高亮在深色主题下的白字白底 -->
+    <!--  ComboBoxItem 完整模板：普通项透明底 + 悬停/选中使用主题色，避免系统高亮在深色主题下的白字白底  -->
     <Style TargetType="ComboBoxItem">
         <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
         <Setter Property="Padding" Value="10,6" />
@@ -289,16 +314,18 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem">
-                    <Border x:Name="ItemRoot"
-                            Margin="3,1"
-                            Padding="{TemplateBinding Padding}"
-                            CornerRadius="4"
-                            Background="Transparent">
-                        <ContentPresenter Content="{TemplateBinding Content}"
-                                          ContentTemplate="{TemplateBinding ContentTemplate}"
-                                          ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    <Border
+                        x:Name="ItemRoot"
+                        Margin="3,1"
+                        Padding="{TemplateBinding Padding}"
+                        Background="Transparent"
+                        CornerRadius="4">
+                        <ContentPresenter
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
@@ -339,8 +366,8 @@
     </Style>
 
     <!--
-      现代滚动条（全局生效）：细胶囊滑块、无箭头按钮、悬停/拖动加深，颜色随主题。
-      轨道区域用透明 RepeatButton 保留“点击空白翻页”的原生行为。
+        现代滚动条（全局生效）：细胶囊滑块、无箭头按钮、悬停/拖动加深，颜色随主题。
+        轨道区域用透明 RepeatButton 保留“点击空白翻页”的原生行为。
     -->
     <Style x:Key="App.ScrollBarPageButton" TargetType="RepeatButton">
         <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -362,10 +389,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
-                    <Border x:Name="ThumbBody"
-                            Background="{DynamicResource App.Scroll.Thumb}"
-                            CornerRadius="3"
-                            SnapsToDevicePixels="True" />
+                    <Border
+                        x:Name="ThumbBody"
+                        Background="{DynamicResource App.Scroll.Thumb}"
+                        CornerRadius="3"
+                        SnapsToDevicePixels="True" />
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="ThumbBody" Property="Background" Value="{DynamicResource App.Scroll.ThumbHover}" />
@@ -390,20 +418,23 @@
                     <Grid Background="Transparent" SnapsToDevicePixels="True">
                         <Track x:Name="PART_Track" IsDirectionReversed="True">
                             <Track.DecreaseRepeatButton>
-                                <RepeatButton x:Name="DecreasePage"
-                                              Style="{StaticResource App.ScrollBarPageButton}"
-                                              Command="ScrollBar.PageUpCommand" />
+                                <RepeatButton
+                                    x:Name="DecreasePage"
+                                    Command="ScrollBar.PageUpCommand"
+                                    Style="{StaticResource App.ScrollBarPageButton}" />
                             </Track.DecreaseRepeatButton>
                             <Track.Thumb>
-                                <Thumb x:Name="ThumbElement"
-                                       Style="{StaticResource App.ScrollBarThumb}"
-                                       Margin="3,2"
-                                       MinHeight="24" />
+                                <Thumb
+                                    x:Name="ThumbElement"
+                                    MinHeight="24"
+                                    Margin="3,2"
+                                    Style="{StaticResource App.ScrollBarThumb}" />
                             </Track.Thumb>
                             <Track.IncreaseRepeatButton>
-                                <RepeatButton x:Name="IncreasePage"
-                                              Style="{StaticResource App.ScrollBarPageButton}"
-                                              Command="ScrollBar.PageDownCommand" />
+                                <RepeatButton
+                                    x:Name="IncreasePage"
+                                    Command="ScrollBar.PageDownCommand"
+                                    Style="{StaticResource App.ScrollBarPageButton}" />
                             </Track.IncreaseRepeatButton>
                         </Track>
                     </Grid>
@@ -464,7 +495,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridCell">
-                    <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                    <Border Padding="{TemplateBinding Padding}" Background="Transparent">
                         <ContentPresenter VerticalAlignment="Center" />
                     </Border>
                 </ControlTemplate>
@@ -502,35 +533,38 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Expander">
                     <DockPanel Background="Transparent">
-                        <ToggleButton x:Name="HeaderSite"
-                                      DockPanel.Dock="Top"
-                                      Cursor="Hand"
-                                      Focusable="False"
-                                      ClickMode="Press"
-                                      Content="{TemplateBinding Header}"
-                                      ContentTemplate="{TemplateBinding HeaderTemplate}"
-                                      ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}"
-                                      IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                        <ToggleButton
+                            x:Name="HeaderSite"
+                            ClickMode="Press"
+                            Content="{TemplateBinding Header}"
+                            ContentTemplate="{TemplateBinding HeaderTemplate}"
+                            ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}"
+                            Cursor="Hand"
+                            DockPanel.Dock="Top"
+                            Focusable="False"
+                            IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
                             <ToggleButton.Template>
                                 <ControlTemplate TargetType="ToggleButton">
-                                    <Border Background="Transparent" Padding="0,2">
+                                    <Border Padding="0,2" Background="Transparent">
                                         <StackPanel Orientation="Horizontal">
-                                            <Path x:Name="Arrow"
-                                                  Data="M 0 0 L 4.5 4.5 L 9 0"
-                                                  Stroke="{DynamicResource App.Text.Secondary}"
-                                                  StrokeThickness="1.6"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Margin="3,1,9,0"
-                                                  VerticalAlignment="Center">
+                                            <Path
+                                                x:Name="Arrow"
+                                                Margin="3,1,9,0"
+                                                VerticalAlignment="Center"
+                                                Data="M 0 0 L 4.5 4.5 L 9 0"
+                                                Stroke="{DynamicResource App.Text.Secondary}"
+                                                StrokeEndLineCap="Round"
+                                                StrokeLineJoin="Round"
+                                                StrokeStartLineCap="Round"
+                                                StrokeThickness="1.6">
                                                 <Path.RenderTransform>
                                                     <RotateTransform Angle="-90" CenterX="4.5" CenterY="4.5" />
                                                 </Path.RenderTransform>
                                             </Path>
-                                            <ContentPresenter ContentSource="Content"
-                                                              VerticalAlignment="Center"
-                                                              RecognizesAccessKey="True" />
+                                            <ContentPresenter
+                                                VerticalAlignment="Center"
+                                                ContentSource="Content"
+                                                RecognizesAccessKey="True" />
                                         </StackPanel>
                                     </Border>
                                     <ControlTemplate.Triggers>
@@ -548,9 +582,10 @@
                                 </ControlTemplate>
                             </ToggleButton.Template>
                         </ToggleButton>
-                        <ContentPresenter x:Name="ExpandSite"
-                                          Visibility="Collapsed"
-                                          Margin="0,6,0,0" />
+                        <ContentPresenter
+                            x:Name="ExpandSite"
+                            Margin="0,6,0,0"
+                            Visibility="Collapsed" />
                     </DockPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsExpanded" Value="True">
@@ -565,6 +600,17 @@
     <Style TargetType="Separator">
         <Setter Property="Background" Value="{DynamicResource App.Border}" />
         <Setter Property="Margin" Value="0,6" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Separator">
+                    <Border
+                        Height="1"
+                        Background="{TemplateBinding Background}"
+                        SnapsToDevicePixels="True" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="App.NavListStyle" TargetType="ListBox">
@@ -580,10 +626,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
-                    <Border x:Name="Root"
-                            Background="Transparent"
-                            CornerRadius="6"
-                            Padding="{TemplateBinding Padding}">
+                    <Border
+                        x:Name="Root"
+                        Padding="{TemplateBinding Padding}"
+                        Background="Transparent"
+                        CornerRadius="6">
                         <ContentPresenter />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -607,6 +654,175 @@
         <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
     </Style>
 
+    <!--  右键菜单：主题化圆角面板、留白与高亮反馈  -->
+    <Style TargetType="ContextMenu">
+        <Setter Property="Background" Value="{DynamicResource App.Surface}" />
+        <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource App.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="MinWidth" Value="220" />
+        <Setter Property="FontFamily" Value="Microsoft YaHei UI, Segoe UI" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="HasDropShadow" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border
+                        x:Name="MenuRoot"
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="10"
+                        SnapsToDevicePixels="True">
+                        <ScrollViewer
+                            HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                            VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </ScrollViewer>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="MenuRoot" Property="Opacity" Value="0.6" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="MenuItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
+        <Setter Property="Padding" Value="9,7" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Grid>
+                        <Border
+                            x:Name="ItemRoot"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            SnapsToDevicePixels="True">
+                            <Grid TextElement.Foreground="{TemplateBinding Foreground}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="18" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="12" />
+                                </Grid.ColumnDefinitions>
+
+                                <ContentPresenter
+                                    x:Name="IconHost"
+                                    Width="14"
+                                    Height="14"
+                                    Margin="0,0,4,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    ContentSource="Icon" />
+                                <Path
+                                    x:Name="CheckGlyph"
+                                    Data="M 2,7 L 6,11 L 13,3"
+                                    Margin="1,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Stroke="{TemplateBinding Foreground}"
+                                    StrokeEndLineCap="Round"
+                                    StrokeLineJoin="Round"
+                                    StrokeStartLineCap="Round"
+                                    StrokeThickness="1.8"
+                                    Visibility="Collapsed" />
+                                <ContentPresenter
+                                    x:Name="HeaderHost"
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    ContentSource="Header"
+                                    RecognizesAccessKey="True" />
+                                <TextBlock
+                                    x:Name="GestureText"
+                                    Grid.Column="2"
+                                    Margin="24,0,6,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="11"
+                                    Foreground="{DynamicResource App.Text.Secondary}"
+                                    Text="{TemplateBinding InputGestureText}" />
+                                <Path
+                                    x:Name="SubmenuArrow"
+                                    Grid.Column="3"
+                                    Data="M 0,0 L 4,4 L 0,8"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Stroke="{DynamicResource App.Text.Secondary}"
+                                    StrokeEndLineCap="Round"
+                                    StrokeLineJoin="Round"
+                                    StrokeStartLineCap="Round"
+                                    StrokeThickness="1.3"
+                                    Visibility="Collapsed" />
+                            </Grid>
+                        </Border>
+
+                        <Popup
+                            x:Name="PART_Popup"
+                            AllowsTransparency="True"
+                            Focusable="False"
+                            IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                            Placement="Right"
+                            PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                            PopupAnimation="Fade"
+                            StaysOpen="False">
+                            <Border
+                                MinWidth="220"
+                                Padding="4"
+                                Background="{DynamicResource App.Surface}"
+                                BorderBrush="{DynamicResource App.Border}"
+                                BorderThickness="1"
+                                CornerRadius="10">
+                                <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="SubmenuArrow" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckGlyph" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="IconHost" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="ItemRoot" Property="Background" Value="{DynamicResource App.Accent}" />
+                            <Setter TargetName="ItemRoot" Property="BorderBrush" Value="{DynamicResource App.Accent}" />
+                            <Setter Property="Foreground" Value="#FFFFFFFF" />
+                            <Setter TargetName="GestureText" Property="Foreground" Value="#D9FFFFFF" />
+                            <Setter TargetName="SubmenuArrow" Property="Stroke" Value="#D9FFFFFF" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="ItemRoot" Property="Background" Value="Transparent" />
+                            <Setter TargetName="ItemRoot" Property="BorderBrush" Value="Transparent" />
+                            <Setter TargetName="ItemRoot" Property="Opacity" Value="0.5" />
+                            <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="App.ToolTipStyle" TargetType="ToolTip">
         <Setter Property="Background" Value="{DynamicResource App.Surface.Alt}" />
         <Setter Property="Foreground" Value="{DynamicResource App.Text.Primary}" />
@@ -614,7 +830,7 @@
         <Setter Property="MaxWidth" Value="420" />
     </Style>
 
-    <!-- 选项卡（决策模型实验室的属性/运行/校验/日志、详情/对比） -->
+    <!--  选项卡（决策模型实验室的属性/运行/校验/日志、详情/对比）  -->
     <Style TargetType="TabControl">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -626,16 +842,18 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
-                    <Border x:Name="Root"
-                            Margin="0,0,4,0"
-                            Padding="11,5"
-                            CornerRadius="6"
-                            Background="{DynamicResource App.Surface.Alt}"
-                            BorderBrush="Transparent"
-                            BorderThickness="1">
-                        <ContentPresenter ContentSource="Header"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
+                    <Border
+                        x:Name="Root"
+                        Margin="0,0,4,0"
+                        Padding="11,5"
+                        Background="{DynamicResource App.Surface.Alt}"
+                        BorderBrush="Transparent"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                        <ContentPresenter
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            ContentSource="Header" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
