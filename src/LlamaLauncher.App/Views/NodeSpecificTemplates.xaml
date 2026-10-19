@@ -1,41 +1,69 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:LlamaLauncher.App.ViewModels.Lab">
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="clr-namespace:LlamaLauncher.App.ViewModels.Lab">
 
-    <!-- 开始节点 -->
+    <!--  开始节点  -->
     <DataTemplate DataType="{x:Type vm:StartNodeEditor}">
-        <TextBlock Text="工作流输入变量在右侧“工作流属性”中定义（取消选择节点后可见）。运行时会校验必填输入。"
-                   TextWrapping="Wrap"
-                   Style="{DynamicResource App.SecondaryText}" />
+        <TextBlock
+            Style="{DynamicResource App.SecondaryText}"
+            Text="工作流输入变量在右侧“工作流属性”中定义（取消选择节点后可见）。运行时会校验必填输入。"
+            TextWrapping="Wrap" />
     </DataTemplate>
 
-    <!-- 结束节点 -->
+    <!--  结束节点  -->
     <DataTemplate DataType="{x:Type vm:EndNodeEditor}">
         <StackPanel>
             <TextBlock Text="结束状态" />
             <ComboBox ItemsSource="{Binding EndStatusOptions}" SelectedItem="{Binding Status, Mode=TwoWay}" />
-            <TextBlock Text="业务失败说明模板（可含 {{ input.x }} 占位符）" Margin="0,6,0,0" />
-            <TextBox Text="{Binding FailureMessageTemplate, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="34" />
-            <TextBlock Text="输出映射（目标输出名 → 来源表达式）" FontWeight="SemiBold" Margin="0,8,0,0" />
-            <DataGrid ItemsSource="{Binding OutputMappings}" MinHeight="110" MaxHeight="200" Margin="0,6,0,0" CanUserAddRows="False">
+            <TextBlock Margin="0,6,0,0" Text="业务失败说明模板（可含 {{ input.x }} 占位符）" />
+            <TextBox
+                MinHeight="34"
+                AcceptsReturn="True"
+                Text="{Binding FailureMessageTemplate, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock
+                Margin="0,8,0,0"
+                FontWeight="SemiBold"
+                Text="输出映射（目标输出名 → 来源表达式）" />
+            <DataGrid
+                MinHeight="110"
+                MaxHeight="200"
+                Margin="0,6,0,0"
+                CanUserAddRows="False"
+                ItemsSource="{Binding OutputMappings}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="输出名" Binding="{Binding Target, UpdateSourceTrigger=PropertyChanged}" Width="90" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridTextColumn Header="来源表达式" Binding="{Binding Source, UpdateSourceTrigger=PropertyChanged}" Width="140" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridTextColumn Header="默认值" Binding="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}" Width="96" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn
+                        Width="90"
+                        Binding="{Binding Target, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="输出名" />
+                    <DataGridTextColumn
+                        Width="140"
+                        Binding="{Binding Source, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="来源表达式" />
+                    <DataGridTextColumn
+                        Width="96"
+                        Binding="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="默认值" />
                 </DataGrid.Columns>
             </DataGrid>
-            <TextBlock Text="提示：输出映射的目标名会出现在运行输出中；表达式可用 up.&lt;节点ID&gt;.out… 引用上游结果。"
-                       Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+            <TextBlock
+                Margin="0,4,0,0"
+                Style="{DynamicResource App.CaptionText}"
+                Text="提示：输出映射的目标名会出现在运行输出中；表达式可用 up.&lt;节点ID&gt;.out… 引用上游结果。"
+                TextWrapping="Wrap" />
         </StackPanel>
     </DataTemplate>
 
-    <!-- 数据处理 -->
+    <!--  数据处理  -->
     <DataTemplate DataType="{x:Type vm:TransformNodeEditor}">
         <StackPanel>
             <TextBlock Text="基础输入表达式（留空 = 使用输入映射文档；例如 up.n2.out）" />
             <TextBox Text="{Binding BaseExpression, UpdateSourceTrigger=PropertyChanged}" />
             <DockPanel Margin="0,8,0,4">
-                <TextBlock Text="操作列表（按顺序执行）" FontWeight="SemiBold" />
+                <TextBlock FontWeight="SemiBold" Text="操作列表（按顺序执行）" />
             </DockPanel>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -43,306 +71,545 @@
                     <ColumnDefinition Width="8" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <ListBox Grid.Column="0"
-                         ItemsSource="{Binding Operations}"
-                         SelectedItem="{Binding SelectedOperation, Mode=TwoWay}"
-                         MinHeight="180"
-                         DisplayMemberPath="Display" />
-                <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" MaxHeight="320">
+                <ListBox
+                    Grid.Column="0"
+                    MinHeight="180"
+                    DisplayMemberPath="Display"
+                    ItemsSource="{Binding Operations}"
+                    SelectedItem="{Binding SelectedOperation, Mode=TwoWay}" />
+                <ScrollViewer
+                    Grid.Column="2"
+                    MaxHeight="320"
+                    VerticalScrollBarVisibility="Auto">
                     <StackPanel DataContext="{Binding SelectedOperation}">
                         <TextBlock Text="操作类型" />
-                        <ComboBox ItemsSource="{Binding DataContext.TransformKindOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                  SelectedItem="{Binding Kind, Mode=TwoWay}" />
-                        <TextBlock Text="说明（可选）" Margin="0,6,0,0" />
+                        <ComboBox ItemsSource="{Binding DataContext.TransformKindOptions, RelativeSource={RelativeSource AncestorType=UserControl}}" SelectedItem="{Binding Kind, Mode=TwoWay}" />
+                        <TextBlock Margin="0,6,0,0" Text="说明（可选）" />
                         <TextBox Text="{Binding Label, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Text="目标字段路径（a.b[0].c；部分操作留空 = 替换整个文档）" Margin="0,6,0,0" />
+                        <TextBlock Margin="0,6,0,0" Text="目标字段路径（a.b[0].c；部分操作留空 = 替换整个文档）" />
                         <TextBox Text="{Binding Target, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Text="来源表达式（可引用 doc.*、input.*、vars.*、up.*；Filter/Sort 可引用 item/index）" Margin="0,6,0,0" />
+                        <TextBlock Margin="0,6,0,0" Text="来源表达式（可引用 doc.*、input.*、vars.*、up.*；Filter/Sort 可引用 item/index）" />
                         <TextBox Text="{Binding Source, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Text="过滤谓词（Filter，布尔表达式）" Margin="0,6,0,0" />
+                        <TextBlock Margin="0,6,0,0" Text="过滤谓词（Filter，布尔表达式）" />
                         <TextBox Text="{Binding PredicateExpression, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Text="排序键（Sort，可空 = 按元素本身）" Margin="0,6,0,0" />
+                        <TextBlock Margin="0,6,0,0" Text="排序键（Sort，可空 = 按元素本身）" />
                         <TextBox Text="{Binding KeyExpression, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Text="字段列表（Pick，逗号分隔）" Margin="0,6,0,0" />
+                        <TextBlock Margin="0,6,0,0" Text="字段列表（Pick，逗号分隔）" />
                         <TextBox Text="{Binding FieldsText, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Text="默认值（Default，JSON）" Margin="0,6,0,0" />
+                        <TextBlock Margin="0,6,0,0" Text="默认值（Default，JSON）" />
                         <TextBox Text="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Text="分隔符（Split/Join，默认逗号）" Margin="0,6,0,0" />
+                        <TextBlock Margin="0,6,0,0" Text="分隔符（Split/Join，默认逗号）" />
                         <TextBox Text="{Binding Separator, UpdateSourceTrigger=PropertyChanged}" />
-                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                        <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
                             <CheckBox Content="降序（Sort）" IsChecked="{Binding Descending}" />
-                            <TextBlock Text="数量上限（Limit）" Margin="12,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock
+                                Margin="12,0,6,0"
+                                VerticalAlignment="Center"
+                                Text="数量上限（Limit）" />
                             <TextBox Width="64" Text="{Binding LimitText, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
-                        <TextBlock Text="模板文本（Template，支持 {{ path }} 占位符）" Margin="0,6,0,0" />
-                        <TextBox Text="{Binding TemplateText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="40" />
-                        <TextBlock Text="构造对象字段映射（BuildObject）" Margin="0,6,0,0" />
-                        <DataGrid ItemsSource="{Binding Mappings}" MinHeight="80" MaxHeight="140" CanUserAddRows="False"
-                                  AutoGenerateColumns="True" />
+                        <TextBlock Margin="0,6,0,0" Text="模板文本（Template，支持 {{ path }} 占位符）" />
+                        <TextBox
+                            MinHeight="40"
+                            AcceptsReturn="True"
+                            Text="{Binding TemplateText, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,6,0,0" Text="构造对象字段映射（BuildObject）" />
+                        <DataGrid
+                            MinHeight="80"
+                            MaxHeight="140"
+                            AutoGenerateColumns="True"
+                            CanUserAddRows="False"
+                            ItemsSource="{Binding Mappings}" />
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <Button Content="添加操作" Command="{Binding AddOperationCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="删除操作" Command="{Binding RemoveOperationCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="上移" Command="{Binding MoveOperationUpCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="下移" Command="{Binding MoveOperationDownCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <Button
+                    Command="{Binding AddOperationCommand}"
+                    Content="添加操作"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button
+                    Command="{Binding RemoveOperationCommand}"
+                    Content="删除操作"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button
+                    Command="{Binding MoveOperationUpCommand}"
+                    Content="上移"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button
+                    Command="{Binding MoveOperationDownCommand}"
+                    Content="下移"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
             </StackPanel>
         </StackPanel>
     </DataTemplate>
 
-    <!-- 条件分支 -->
+    <!--  条件分支  -->
     <DataTemplate DataType="{x:Type vm:ConditionNodeEditor}">
         <StackPanel>
-            <DataGrid ItemsSource="{Binding Branches}" SelectedItem="{Binding SelectedBranch, Mode=TwoWay}"
-                      MinHeight="120" MaxHeight="200" CanUserAddRows="False">
+            <DataGrid
+                MinHeight="120"
+                MaxHeight="200"
+                CanUserAddRows="False"
+                ItemsSource="{Binding Branches}"
+                SelectedItem="{Binding SelectedBranch, Mode=TwoWay}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="分支 ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridTextColumn Header="条件表达式" Binding="{Binding Condition, UpdateSourceTrigger=PropertyChanged}" Width="2*" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridCheckBoxColumn Header="默认" Binding="{Binding IsDefault, UpdateSourceTrigger=PropertyChanged}" Width="50" />
+                    <DataGridTextColumn
+                        Width="1*"
+                        Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="分支 ID" />
+                    <DataGridTextColumn
+                        Width="1*"
+                        Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="名称" />
+                    <DataGridTextColumn
+                        Width="2*"
+                        Binding="{Binding Condition, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="条件表达式" />
+                    <DataGridCheckBoxColumn
+                        Width="50"
+                        Binding="{Binding IsDefault, UpdateSourceTrigger=PropertyChanged}"
+                        Header="默认" />
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <Button Content="添加分支" Command="{Binding AddBranchCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="删除分支" Command="{Binding RemoveBranchCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <Button
+                    Command="{Binding AddBranchCommand}"
+                    Content="添加分支"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button
+                    Command="{Binding RemoveBranchCommand}"
+                    Content="删除分支"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
             </StackPanel>
-            <TextBlock Text="试算上下文（JSON；可填 input/vars/up/meta 根）" Margin="0,8,0,0" />
-            <TextBox Text="{Binding TrialContextJson, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas" MinHeight="46" AcceptsReturn="True" />
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <Button Content="试算选中分支" Command="{Binding TrialEvaluateCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <TextBlock Text="{Binding TrialResult}" Margin="8,0,0,0" VerticalAlignment="Center" FontFamily="Consolas" FontSize="12" />
+            <TextBlock Margin="0,8,0,0" Text="试算上下文（JSON；可填 input/vars/up/meta 根）" />
+            <TextBox
+                MinHeight="46"
+                AcceptsReturn="True"
+                FontFamily="Consolas"
+                Text="{Binding TrialContextJson, UpdateSourceTrigger=PropertyChanged}" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <Button
+                    Command="{Binding TrialEvaluateCommand}"
+                    Content="试算选中分支"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <TextBlock
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center"
+                    FontFamily="Consolas"
+                    FontSize="12"
+                    Text="{Binding TrialResult}" />
             </StackPanel>
-            <TextBlock Text="提示：连线必须在连线的“分支”属性中选择对应分支 ID；恰好一个分支应设为默认。"
-                       Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+            <TextBlock
+                Margin="0,4,0,0"
+                Style="{DynamicResource App.CaptionText}"
+                Text="提示：连线必须在连线的“分支”属性中选择对应分支 ID；恰好一个分支应设为默认。"
+                TextWrapping="Wrap" />
         </StackPanel>
     </DataTemplate>
 
-    <!-- 决策模型 -->
+    <!--  决策模型  -->
     <DataTemplate DataType="{x:Type vm:DecisionNodeEditor}">
         <StackPanel>
             <StackPanel Visibility="{Binding IsTemplateMode, Converter={StaticResource InverseBoolToVisibility}}">
                 <TextBlock Text="绑定模型服务实例（留空 = 使用第一个就绪实例）" />
-                <ComboBox ItemsSource="{Binding ModelOptions}"
-                          SelectedValuePath="InstanceId"
-                          SelectedValue="{Binding InstanceId, Mode=TwoWay}"
-                          DisplayMemberPath="DisplayName"
-                          IsEditable="True"
-                          Text="{Binding InstanceId, UpdateSourceTrigger=PropertyChanged}" />
+                <ComboBox
+                    DisplayMemberPath="DisplayName"
+                    IsEditable="True"
+                    ItemsSource="{Binding ModelOptions}"
+                    SelectedValue="{Binding InstanceId, Mode=TwoWay}"
+                    SelectedValuePath="InstanceId"
+                    Text="{Binding InstanceId, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
-            <TextBlock Text="state 文本模板（留空则使用输入映射的 state 字段；支持 {{ input.x }}）" Margin="0,6,0,0" />
-            <TextBox Text="{Binding StateTemplate, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="40" />
-            <TextBlock Text="state JSON 模板（可选，优先；渲染后解析为 JSON 对象）" Margin="0,6,0,0" />
-            <TextBox Text="{Binding StateJsonTemplate, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas" MinHeight="40" AcceptsReturn="True" />
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <TextBlock Text="请求超时（秒）" VerticalAlignment="Center" Margin="0,0,6,0" />
+            <TextBlock Margin="0,6,0,0" Text="state 文本模板（留空则使用输入映射的 state 字段；支持 {{ input.x }}）" />
+            <TextBox
+                MinHeight="40"
+                AcceptsReturn="True"
+                Text="{Binding StateTemplate, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Margin="0,6,0,0" Text="state JSON 模板（可选，优先；渲染后解析为 JSON 对象）" />
+            <TextBox
+                MinHeight="40"
+                AcceptsReturn="True"
+                FontFamily="Consolas"
+                Text="{Binding StateJsonTemplate, UpdateSourceTrigger=PropertyChanged}" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <TextBlock
+                    Margin="0,0,6,0"
+                    VerticalAlignment="Center"
+                    Text="请求超时（秒）" />
                 <TextBox Width="64" Text="{Binding TimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="响应上限（KB，0=默认）" VerticalAlignment="Center" Margin="12,0,6,0" />
+                <TextBlock
+                    Margin="12,0,6,0"
+                    VerticalAlignment="Center"
+                    Text="响应上限（KB，0=默认）" />
                 <TextBox Width="64" Text="{Binding MaxResponseKb, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
-            <TextBlock Text="问题列表（choice / score / noul）" FontWeight="SemiBold" Margin="0,10,0,4" />
+            <TextBlock
+                Margin="0,10,0,4"
+                FontWeight="SemiBold"
+                Text="问题列表（choice / score / noul）" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="170" />
                     <ColumnDefinition Width="8" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <ListBox Grid.Column="0" ItemsSource="{Binding Questions}"
-                         SelectedItem="{Binding SelectedQuestion, Mode=TwoWay}"
-                         MinHeight="140" DisplayMemberPath="Id" />
+                <ListBox
+                    Grid.Column="0"
+                    MinHeight="140"
+                    DisplayMemberPath="Id"
+                    ItemsSource="{Binding Questions}"
+                    SelectedItem="{Binding SelectedQuestion, Mode=TwoWay}" />
                 <StackPanel Grid.Column="2" DataContext="{Binding SelectedQuestion}">
                     <TextBlock Text="问题 ID" />
                     <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Text="类型" Margin="0,6,0,0" />
-                    <ComboBox ItemsSource="{Binding DataContext.QuestionTypes, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                              SelectedItem="{Binding Type, Mode=TwoWay}" IsEditable="True" />
-                    <TextBlock Text="问题说明（instructions，支持模板）" Margin="0,6,0,0" />
-                    <TextBox Text="{Binding Instructions, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="40" />
-                    <TextBlock Text="choice 选项（每行：key 或 key=描述）" Margin="0,6,0,0" />
-                    <TextBox Text="{Binding OptionsText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="48" FontFamily="Consolas" />
-                    <TextBlock Text="score 等级（每行一级，从低到高）" Margin="0,6,0,0" />
-                    <TextBox Text="{Binding LevelsText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="40" />
-                    <TextBlock Text="noul 描述（可选）" Margin="0,6,0,0" />
+                    <TextBlock Margin="0,6,0,0" Text="类型" />
+                    <ComboBox
+                        IsEditable="True"
+                        ItemsSource="{Binding DataContext.QuestionTypes, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        SelectedItem="{Binding Type, Mode=TwoWay}" />
+                    <TextBlock Margin="0,6,0,0" Text="问题说明（instructions，支持模板）" />
+                    <TextBox
+                        MinHeight="40"
+                        AcceptsReturn="True"
+                        Text="{Binding Instructions, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Margin="0,6,0,0" Text="choice 选项（每行：key 或 key=描述）" />
+                    <TextBox
+                        MinHeight="48"
+                        AcceptsReturn="True"
+                        FontFamily="Consolas"
+                        Text="{Binding OptionsText, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Margin="0,6,0,0" Text="score 等级（每行一级，从低到高）" />
+                    <TextBox
+                        MinHeight="40"
+                        AcceptsReturn="True"
+                        Text="{Binding LevelsText, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Margin="0,6,0,0" Text="noul 描述（可选）" />
                     <TextBox Text="{Binding TrueDescription, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBox Text="{Binding FalseDescription, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,0" />
+                    <TextBox Margin="0,4,0,0" Text="{Binding FalseDescription, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
             </Grid>
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <Button Content="添加问题" Command="{Binding AddQuestionCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="删除问题" Command="{Binding RemoveQuestionCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <Button
+                    Command="{Binding AddQuestionCommand}"
+                    Content="添加问题"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button
+                    Command="{Binding RemoveQuestionCommand}"
+                    Content="删除问题"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
             </StackPanel>
         </StackPanel>
     </DataTemplate>
 
-    <!-- 规则校验 -->
+    <!--  规则校验  -->
     <DataTemplate DataType="{x:Type vm:RulesNodeEditor}">
         <StackPanel>
             <TextBlock Text="失败处理" />
             <ComboBox ItemsSource="{Binding RuleFailureOptions}" SelectedItem="{Binding OnFailure, Mode=TwoWay}" />
-            <DataGrid ItemsSource="{Binding Rules}" SelectedItem="{Binding SelectedRule, Mode=TwoWay}"
-                      MinHeight="120" MaxHeight="200" Margin="0,6,0,0" CanUserAddRows="False">
+            <DataGrid
+                MinHeight="120"
+                MaxHeight="200"
+                Margin="0,6,0,0"
+                CanUserAddRows="False"
+                ItemsSource="{Binding Rules}"
+                SelectedItem="{Binding SelectedRule, Mode=TwoWay}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="44" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="70" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridTextColumn Header="条件" Binding="{Binding Condition, UpdateSourceTrigger=PropertyChanged}" Width="100" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridTemplateColumn Header="级别" Width="72">
+                    <DataGridTextColumn
+                        Width="44"
+                        Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="ID" />
+                    <DataGridTextColumn
+                        Width="70"
+                        Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="名称" />
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding Condition, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="条件" />
+                    <DataGridTemplateColumn Width="72" Header="级别">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox ItemsSource="{Binding DataContext.SeverityOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                          SelectedItem="{Binding Severity, UpdateSourceTrigger=PropertyChanged}" />
+                                <ComboBox ItemsSource="{Binding DataContext.SeverityOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}" SelectedItem="{Binding Severity, UpdateSourceTrigger=PropertyChanged}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="消息模板" Binding="{Binding MessageTemplate, UpdateSourceTrigger=PropertyChanged}" Width="58" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn
+                        Width="58"
+                        Binding="{Binding MessageTemplate, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="消息模板" />
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <Button Content="添加规则" Command="{Binding AddRuleCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="删除规则" Command="{Binding RemoveRuleCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <Button
+                    Command="{Binding AddRuleCommand}"
+                    Content="添加规则"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button
+                    Command="{Binding RemoveRuleCommand}"
+                    Content="删除规则"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
             </StackPanel>
-            <TextBlock Text="试算上下文（JSON）" Margin="0,8,0,0" />
-            <TextBox Text="{Binding TrialContextJson, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas" MinHeight="46" AcceptsReturn="True" />
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <Button Content="试算选中规则" Command="{Binding TrialEvaluateCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <TextBlock Text="{Binding TrialResult}" Margin="8,0,0,0" VerticalAlignment="Center" FontFamily="Consolas" FontSize="12" />
+            <TextBlock Margin="0,8,0,0" Text="试算上下文（JSON）" />
+            <TextBox
+                MinHeight="46"
+                AcceptsReturn="True"
+                FontFamily="Consolas"
+                Text="{Binding TrialContextJson, UpdateSourceTrigger=PropertyChanged}" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <Button
+                    Command="{Binding TrialEvaluateCommand}"
+                    Content="试算选中规则"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <TextBlock
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center"
+                    FontFamily="Consolas"
+                    FontSize="12"
+                    Text="{Binding TrialResult}" />
             </StackPanel>
         </StackPanel>
     </DataTemplate>
 
-    <!-- 算法求解 -->
+    <!--  算法求解  -->
     <DataTemplate DataType="{x:Type vm:AlgorithmNodeEditor}">
         <StackPanel>
             <TextBlock Text="求解器（内置示例求解器用于演示，可注册扩展）" />
-            <ComboBox ItemsSource="{Binding Solvers}"
-                      SelectedValuePath="Key"
-                      SelectedValue="{Binding SolverKey, Mode=TwoWay}"
-                      DisplayMemberPath="DisplayName" />
-            <TextBlock Text="输入 JSON 模板（支持 {{ 路径 }} 占位符；留空 = 使用输入映射）" Margin="0,6,0,0" />
-            <TextBox Text="{Binding InputJsonTemplate, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas" MinHeight="60" AcceptsReturn="True" />
-            <TextBlock Text="超时（秒）" Margin="0,6,0,0" />
-            <TextBox Width="80" HorizontalAlignment="Left" Text="{Binding TimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" />
+            <ComboBox
+                DisplayMemberPath="DisplayName"
+                ItemsSource="{Binding Solvers}"
+                SelectedValue="{Binding SolverKey, Mode=TwoWay}"
+                SelectedValuePath="Key" />
+            <TextBlock Margin="0,6,0,0" Text="输入 JSON 模板（支持 {{ 路径 }} 占位符；留空 = 使用输入映射）" />
+            <TextBox
+                MinHeight="60"
+                AcceptsReturn="True"
+                FontFamily="Consolas"
+                Text="{Binding InputJsonTemplate, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Margin="0,6,0,0" Text="超时（秒）" />
+            <TextBox
+                Width="80"
+                HorizontalAlignment="Left"
+                Text="{Binding TimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
     </DataTemplate>
 
-    <!-- 循环 -->
+    <!--  循环  -->
     <DataTemplate DataType="{x:Type vm:LoopNodeEditor}">
         <StackPanel>
             <TextBlock Text="模式" />
             <ComboBox ItemsSource="{Binding LoopModeOptions}" SelectedItem="{Binding Mode, Mode=TwoWay}" />
-            <TextBlock Text="数组来源表达式（如 input.items 或 up.n2.out.rows）" Margin="0,6,0,0" />
+            <TextBlock Margin="0,6,0,0" Text="数组来源表达式（如 input.items 或 up.n2.out.rows）" />
             <TextBox Text="{Binding ItemsExpression, UpdateSourceTrigger=PropertyChanged}" />
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <TextBlock Text="最大迭代（1–1000）" VerticalAlignment="Center" Margin="0,0,6,0" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <TextBlock
+                    Margin="0,0,6,0"
+                    VerticalAlignment="Center"
+                    Text="最大迭代（1–1000）" />
                 <TextBox Width="70" Text="{Binding MaxIterations, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="单项超时（秒，可空）" VerticalAlignment="Center" Margin="12,0,6,0" />
+                <TextBlock
+                    Margin="12,0,6,0"
+                    VerticalAlignment="Center"
+                    Text="单项超时（秒，可空）" />
                 <TextBox Width="70" Text="{Binding ItemTimeoutText, UpdateSourceTrigger=PropertyChanged}" />
-                <CheckBox Content="单项失败继续" IsChecked="{Binding ContinueOnItemError}" Margin="12,0,0,0" VerticalAlignment="Center" />
+                <CheckBox
+                    Margin="12,0,0,0"
+                    VerticalAlignment="Center"
+                    Content="单项失败继续"
+                    IsChecked="{Binding ContinueOnItemError}" />
             </StackPanel>
             <StackPanel Visibility="{Binding Mode, Converter={StaticResource EnumEqualsToVisibility}, ConverterParameter=SubWorkflow}">
-                <TextBlock Text="子工作流" Margin="0,6,0,0" />
-                <ComboBox ItemsSource="{Binding WorkflowOptions}"
-                          SelectedValuePath="WorkflowId"
-                          SelectedValue="{Binding SubWorkflowId, Mode=TwoWay}"
-                          DisplayMemberPath="Name" />
+                <TextBlock Margin="0,6,0,0" Text="子工作流" />
+                <ComboBox
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding WorkflowOptions}"
+                    SelectedValue="{Binding SubWorkflowId, Mode=TwoWay}"
+                    SelectedValuePath="WorkflowId" />
             </StackPanel>
             <StackPanel Visibility="{Binding Mode, Converter={StaticResource EnumEqualsToVisibility}, ConverterParameter=DecisionModel}">
-                <TextBlock Text="决策模板（state/问题中可引用 {{ item.* }} 与 {{ index }}）" FontWeight="SemiBold" Margin="0,8,0,4" />
+                <TextBlock
+                    Margin="0,8,0,4"
+                    FontWeight="SemiBold"
+                    Text="决策模板（state/问题中可引用 {{ item.* }} 与 {{ index }}）" />
                 <ContentControl Content="{Binding DecisionTemplate}" />
             </StackPanel>
         </StackPanel>
     </DataTemplate>
 
-    <!-- 并行扇出 -->
+    <!--  并行扇出  -->
     <DataTemplate DataType="{x:Type vm:ParallelNodeEditor}">
         <StackPanel>
-            <DataGrid ItemsSource="{Binding Branches}"
-                      SelectedItem="{Binding SelectedBranch, Mode=TwoWay}"
-                      MinHeight="100" MaxHeight="160" CanUserAddRows="False">
+            <DataGrid
+                MinHeight="100"
+                MaxHeight="160"
+                CanUserAddRows="False"
+                ItemsSource="{Binding Branches}"
+                SelectedItem="{Binding SelectedBranch, Mode=TwoWay}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="分支 ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="1.6*" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn
+                        Width="1*"
+                        Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="分支 ID" />
+                    <DataGridTextColumn
+                        Width="1.6*"
+                        Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="名称" />
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <Button Content="添加分支" Command="{Binding AddBranchCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="删除分支" Command="{Binding RemoveBranchCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
-                        CommandParameter="{Binding SelectedBranch}" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <Button
+                    Command="{Binding AddBranchCommand}"
+                    Content="添加分支"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button
+                    Command="{Binding RemoveBranchCommand}"
+                    CommandParameter="{Binding SelectedBranch}"
+                    Content="删除分支"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                <TextBlock Text="最大并发（1–8，可空）" VerticalAlignment="Center" Margin="0,0,6,0" />
+            <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                <TextBlock
+                    Margin="0,0,6,0"
+                    VerticalAlignment="Center"
+                    Text="最大并发（1–8，可空）" />
                 <TextBox Width="60" Text="{Binding MaxConcurrencyText, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
-            <TextBlock Text="共享值表达式（可选）" Margin="0,6,0,0" />
+            <TextBlock Margin="0,6,0,0" Text="共享值表达式（可选）" />
             <TextBox Text="{Binding SharedExpression, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="提示：从本节点连出多条线时，请在连线属性中把每个分支与对应连线关联；汇合使用“并行汇合”节点。"
-                       Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+            <TextBlock
+                Margin="0,4,0,0"
+                Style="{DynamicResource App.CaptionText}"
+                Text="提示：从本节点连出多条线时，请在连线属性中把每个分支与对应连线关联；汇合使用“并行汇合”节点。"
+                TextWrapping="Wrap" />
         </StackPanel>
     </DataTemplate>
 
-    <!-- 并行汇合 -->
+    <!--  并行汇合  -->
     <DataTemplate DataType="{x:Type vm:JoinNodeEditor}">
         <StackPanel>
             <TextBlock Text="汇合策略" />
             <ComboBox ItemsSource="{Binding JoinModeOptions}" SelectedItem="{Binding Mode, Mode=TwoWay}" />
-            <TextBlock Text="期望到达分支（可选，逗号分隔；仅用于校验提示）" Margin="0,6,0,0" />
+            <TextBlock Margin="0,6,0,0" Text="期望到达分支（可选，逗号分隔；仅用于校验提示）" />
             <TextBox Text="{Binding ExpectedBranches, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
     </DataTemplate>
 
-    <!-- 人工确认 -->
+    <!--  人工确认  -->
     <DataTemplate DataType="{x:Type vm:ConfirmNodeEditor}">
         <StackPanel>
             <TextBlock Text="标题" />
             <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="说明模板（支持 {{ 路径 }} 占位符）" Margin="0,6,0,0" />
-            <TextBox Text="{Binding MessageTemplate, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="46" />
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <TextBlock Text="批准按钮" VerticalAlignment="Center" Margin="0,0,6,0" />
+            <TextBlock Margin="0,6,0,0" Text="说明模板（支持 {{ 路径 }} 占位符）" />
+            <TextBox
+                MinHeight="46"
+                AcceptsReturn="True"
+                Text="{Binding MessageTemplate, UpdateSourceTrigger=PropertyChanged}" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <TextBlock
+                    Margin="0,0,6,0"
+                    VerticalAlignment="Center"
+                    Text="批准按钮" />
                 <TextBox Width="90" Text="{Binding ApproveLabel, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="拒绝按钮" VerticalAlignment="Center" Margin="12,0,6,0" />
+                <TextBlock
+                    Margin="12,0,6,0"
+                    VerticalAlignment="Center"
+                    Text="拒绝按钮" />
                 <TextBox Width="90" Text="{Binding RejectLabel, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
-            <TextBlock Text="可填写字段" FontWeight="SemiBold" Margin="0,8,0,4" />
-            <DataGrid ItemsSource="{Binding Fields}" MinHeight="90" MaxHeight="150" CanUserAddRows="False">
+            <TextBlock
+                Margin="0,8,0,4"
+                FontWeight="SemiBold"
+                Text="可填写字段" />
+            <DataGrid
+                MinHeight="90"
+                MaxHeight="150"
+                CanUserAddRows="False"
+                ItemsSource="{Binding Fields}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridTextColumn Header="标签" Binding="{Binding Label, UpdateSourceTrigger=PropertyChanged}" Width="1.4*" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridTextColumn Header="默认值" Binding="{Binding DefaultValue, UpdateSourceTrigger=PropertyChanged}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
-                    <DataGridCheckBoxColumn Header="必填" Binding="{Binding Required, UpdateSourceTrigger=PropertyChanged}" Width="50" />
+                    <DataGridTextColumn
+                        Width="1*"
+                        Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="ID" />
+                    <DataGridTextColumn
+                        Width="1.4*"
+                        Binding="{Binding Label, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="标签" />
+                    <DataGridTextColumn
+                        Width="1*"
+                        Binding="{Binding DefaultValue, UpdateSourceTrigger=PropertyChanged}"
+                        ElementStyle="{StaticResource App.CellText}"
+                        Header="默认值" />
+                    <DataGridCheckBoxColumn
+                        Width="50"
+                        Binding="{Binding Required, UpdateSourceTrigger=PropertyChanged}"
+                        Header="必填" />
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                <Button Content="添加字段" Command="{Binding AddFieldCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="删除字段" Command="{Binding RemoveFieldCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                <Button
+                    Command="{Binding AddFieldCommand}"
+                    Content="添加字段"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button
+                    Command="{Binding RemoveFieldCommand}"
+                    Content="删除字段"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
             </StackPanel>
-            <TextBlock Text="提示：人工确认需要交互通道；批量测试中未经配置的运行会明确失败而不是自动放行。"
-                       Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+            <TextBlock
+                Margin="0,4,0,0"
+                Style="{DynamicResource App.CaptionText}"
+                Text="提示：人工确认需要交互通道；批量测试中未经配置的运行会明确失败而不是自动放行。"
+                TextWrapping="Wrap" />
         </StackPanel>
     </DataTemplate>
 
-    <!-- 子工作流 -->
+    <!--  子工作流  -->
     <DataTemplate DataType="{x:Type vm:SubWorkflowNodeEditor}">
         <StackPanel>
             <TextBlock Text="子工作流" />
-            <ComboBox ItemsSource="{Binding WorkflowOptions}"
-                      SelectedValuePath="WorkflowId"
-                      SelectedValue="{Binding WorkflowId, Mode=TwoWay}"
-                      DisplayMemberPath="Name" />
-            <TextBlock Text="超时（秒，可空）" Margin="0,6,0,0" />
-            <TextBox Width="80" HorizontalAlignment="Left" Text="{Binding TimeoutText, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="子流程输入来自本节点的输入映射；输出位于 up.&lt;本节点&gt;.out（子流程输出）。递归与嵌套深度会被阻止。"
-                       Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+            <ComboBox
+                DisplayMemberPath="Name"
+                ItemsSource="{Binding WorkflowOptions}"
+                SelectedValue="{Binding WorkflowId, Mode=TwoWay}"
+                SelectedValuePath="WorkflowId" />
+            <TextBlock Margin="0,6,0,0" Text="超时（秒，可空）" />
+            <TextBox
+                Width="80"
+                HorizontalAlignment="Left"
+                Text="{Binding TimeoutText, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock
+                Margin="0,4,0,0"
+                Style="{DynamicResource App.CaptionText}"
+                Text="子流程输入来自本节点的输入映射；输出位于 up.&lt;本节点&gt;.out（子流程输出）。递归与嵌套深度会被阻止。"
+                TextWrapping="Wrap" />
         </StackPanel>
     </DataTemplate>
 
-    <!-- 异常处理 -->
+    <!--  异常处理  -->
     <DataTemplate DataType="{x:Type vm:ExceptionNodeEditor}">
         <StackPanel>
             <TextBlock Text="动作" />
             <ComboBox ItemsSource="{Binding ExceptionActionOptions}" SelectedItem="{Binding Action, Mode=TwoWay}" />
-            <CheckBox Content="写入运行日志" IsChecked="{Binding RecordLog}" Margin="0,6,0,0" />
-            <TextBlock Text="错误上下文位于 error.*（type/message/nodeId/attempts/details），输出在 up.&lt;本节点&gt;.out.error。"
-                       Style="{DynamicResource App.CaptionText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+            <CheckBox
+                Margin="0,6,0,0"
+                Content="写入运行日志"
+                IsChecked="{Binding RecordLog}" />
+            <TextBlock
+                Margin="0,4,0,0"
+                Style="{DynamicResource App.CaptionText}"
+                Text="错误上下文位于 error.*（type/message/nodeId/attempts/details），输出在 up.&lt;本节点&gt;.out.error。"
+                TextWrapping="Wrap" />
         </StackPanel>
     </DataTemplate>
 </ResourceDictionary>

@@ -19,7 +19,7 @@
             <CheckBox Content="暂停刷新" IsChecked="{Binding IsPaused}" Margin="12,0,0,0" VerticalAlignment="Center" />
             <TextBlock Text="搜索：" VerticalAlignment="Center" Margin="12,0,6,0" />
             <TextBox Width="200" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-            <Button Content="复制选中" Command="{Binding CopySelectedCommand}" Margin="12,0,0,0" />
+            <Button Content="复制选中" Command="{Binding CopySelectedCommand}" Margin="12,0,6,0" />
             <Button Content="复制全部" Command="{Binding CopyAllCommand}" />
             <Button Content="清空界面" Command="{Binding ClearViewCommand}" />
             <Button Content="打开日志目录" Command="{Binding OpenLogsFolderCommand}" />

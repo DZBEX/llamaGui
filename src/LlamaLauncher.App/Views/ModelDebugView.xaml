@@ -74,7 +74,7 @@
                              Margin="0,6,0,10" />
                     <WrapPanel Grid.Row="2" Margin="0,0,0,6">
                         <TextBlock Text="问题（questions，TypeSafe System One 结构）" FontWeight="SemiBold" />
-                        <Button Content="插入 choice" Command="{Binding InsertTemplateCommand}" CommandParameter="choice" Margin="10,0,0,0" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Button Content="插入 choice" Command="{Binding InsertTemplateCommand}" CommandParameter="choice" Style="{DynamicResource App.ToolbarButtonStyle}" />
                         <Button Content="插入 score" Command="{Binding InsertTemplateCommand}" CommandParameter="score" Style="{DynamicResource App.ToolbarButtonStyle}" />
                         <Button Content="插入 noul" Command="{Binding InsertTemplateCommand}" CommandParameter="noul" Style="{DynamicResource App.ToolbarButtonStyle}" />
                         <Button Content="格式化" Command="{Binding FormatInputsCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
