@@ -46,11 +46,15 @@ public static class InfrastructureServiceCollectionExtensions
         // 目录与数据库
         var paths = new AppPaths(AppContext.BaseDirectory);
         paths.EnsureCreated();
+        services.AddSingleton(paths);
         services.AddSingleton<IAppPaths>(paths);
         services.AddLogging(logging => logging.AddProvider(new AppFileLoggerProvider(paths.LogsDirectory)));
         services.AddSingleton(sp => new SqliteDatabase(
             sp.GetRequiredService<IAppPaths>().DatabasePath,
             sp.GetRequiredService<ILogger<SqliteDatabase>>()));
+        services.AddSingleton<PortableDataRelocationService>();
+        // 必须早于数据库初始化：在仓储读取路径之前把“整包复制到另一台电脑”的旧绝对路径改写为新目录。
+        services.AddHostedService<PortableDataRelocationHostedService>();
         services.AddHostedService<DatabaseInitializationHostedService>();
 
         // 仓储

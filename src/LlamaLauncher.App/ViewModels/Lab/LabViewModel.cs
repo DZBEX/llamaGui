@@ -6,7 +6,7 @@ using LlamaLauncher.App.Services;
 namespace LlamaLauncher.App.ViewModels.Lab;
 
 /// <summary>实验室子页签。</summary>
-public sealed record LabTab(string Title, string Glyph, string Description, object Page);
+public sealed record LabTab(string Title, string Icon, string Description, object Page);
 
 /// <summary>决策模型实验室：容器页（模型调试 / 工作流设计与调试 / 测试用例 / 批量测试 / 运行历史）。</summary>
 public sealed partial class LabViewModel : ViewModelBase, IPageViewModel
@@ -20,11 +20,11 @@ public sealed partial class LabViewModel : ViewModelBase, IPageViewModel
     {
         Tabs = new ObservableCollection<LabTab>
         {
-            new("模型调试", "◈", "单次输入调试决策模型，查看结构化输出与校验报告", modelDebug),
-            new("工作流设计与调试", "⑂", "可视化编辑工作流、运行、断点与运行轨迹", designer),
-            new("测试用例", "☑", "维护单场景测试数据、模拟响应与断言", testCases),
-            new("批量测试", "≣", "批量执行测试集，统计成功/失败与耗时", batchTest),
-            new("运行历史", "◷", "查询运行记录、比较差异、复现与导出诊断", history),
+            new("模型调试", "tab-debug", "单次输入调试决策模型，查看结构化输出与校验报告", modelDebug),
+            new("工作流设计与调试", "tab-designer", "可视化编辑工作流、运行、断点与运行轨迹", designer),
+            new("测试用例", "tab-testcases", "维护单场景测试数据、模拟响应与断言", testCases),
+            new("批量测试", "tab-batch", "批量执行测试集，统计成功/失败与耗时", batchTest),
+            new("运行历史", "nav-history", "查询运行记录、比较差异、复现与导出诊断", history),
         };
         CurrentTab = Tabs[0];
     }

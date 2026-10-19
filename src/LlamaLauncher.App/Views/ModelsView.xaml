@@ -32,15 +32,15 @@
             <DataGrid ItemsSource="{Binding Models}"
                       SelectedItem="{Binding SelectedModel, Mode=TwoWay}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="名称" Binding="{Binding DisplayName}" Width="1.6*" />
-                    <DataGridTextColumn Header="大小" Binding="{Binding SizeText}" Width="90" />
-                    <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="90" />
-                    <DataGridTextColumn Header="架构" Binding="{Binding Architecture}" Width="100" />
-                    <DataGridTextColumn Header="量化" Binding="{Binding Quantization}" Width="110" />
-                    <DataGridTextColumn Header="上下文" Binding="{Binding ContextLengthText}" Width="90" />
-                    <DataGridTextColumn Header="参数规模" Binding="{Binding ParameterCountText}" Width="100" />
-                    <DataGridTextColumn Header="最后修改" Binding="{Binding FileTimeText}" Width="140" />
-                    <DataGridTextColumn Header="路径" Binding="{Binding FilePath}" Width="2*" />
+                    <DataGridTextColumn Header="名称" Binding="{Binding DisplayName}" Width="1.2*" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="大小" Binding="{Binding SizeText}" Width="80" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="80" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="架构" Binding="{Binding Architecture}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="量化" Binding="{Binding Quantization}" Width="80" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="上下文" Binding="{Binding ContextLengthText}" Width="80" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="参数规模" Binding="{Binding ParameterCountText}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="最后修改" Binding="{Binding FileTimeText}" Width="142" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="路径" Binding="{Binding FilePath}" Width="2.4*" ElementStyle="{StaticResource App.CellText}" />
                 </DataGrid.Columns>
             </DataGrid>
 

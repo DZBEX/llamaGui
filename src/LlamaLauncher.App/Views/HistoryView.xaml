@@ -22,14 +22,14 @@
                   ItemsSource="{Binding Rows}"
                   SelectedItem="{Binding SelectedRow, Mode=TwoWay}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="启动时间" Binding="{Binding StartedText}" Width="150" />
-                <DataGridTextColumn Header="实例" Binding="{Binding InstanceName}" Width="140" />
-                <DataGridTextColumn Header="PID" Binding="{Binding PidText}" Width="70" />
-                <DataGridTextColumn Header="结束时间" Binding="{Binding EndedText}" Width="150" />
-                <DataGridTextColumn Header="退出码" Binding="{Binding ExitCodeText}" Width="70" />
-                <DataGridTextColumn Header="最终状态" Binding="{Binding FinalStateText}" Width="100" />
-                <DataGridTextColumn Header="失败阶段" Binding="{Binding FailureStageText}" Width="110" />
-                <DataGridTextColumn Header="错误摘要" Binding="{Binding ErrorText}" Width="2.4*" />
+                <DataGridTextColumn Header="启动时间" Binding="{Binding StartedText}" Width="150" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="实例" Binding="{Binding InstanceName}" Width="140" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="PID" Binding="{Binding PidText}" Width="70" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="结束时间" Binding="{Binding EndedText}" Width="150" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="退出码" Binding="{Binding ExitCodeText}" Width="70" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="最终状态" Binding="{Binding FinalStateText}" Width="100" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="失败阶段" Binding="{Binding FailureStageText}" Width="110" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="错误摘要" Binding="{Binding ErrorText}" Width="2.4*" ElementStyle="{StaticResource App.CellText}" />
             </DataGrid.Columns>
         </DataGrid>
 

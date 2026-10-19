@@ -27,7 +27,6 @@ public sealed class NodeTypeDescriptor
         string typeId,
         string displayName,
         string category,
-        string glyph,
         string description,
         IReadOnlyList<NodePortDescriptor> inputPorts,
         IReadOnlyList<NodePortDescriptor> outputPorts,
@@ -39,7 +38,6 @@ public sealed class NodeTypeDescriptor
         TypeId = typeId;
         DisplayName = displayName;
         Category = category;
-        Glyph = glyph;
         Description = description;
         InputPorts = inputPorts;
         OutputPorts = outputPorts;
@@ -60,9 +58,6 @@ public sealed class NodeTypeDescriptor
 
     /// <summary>分类（节点库分组）。</summary>
     public string Category { get; }
-
-    /// <summary>图标字形。</summary>
-    public string Glyph { get; }
 
     /// <summary>说明。</summary>
     public string Description { get; }
@@ -124,7 +119,6 @@ public static class NodeTypeCatalog
             Start,
             "开始",
             "基础",
-            "▶",
             "工作流入口：定义并校验输入变量，记录输入快照。",
             NoPorts,
             OutputOnly,
@@ -133,7 +127,6 @@ public static class NodeTypeCatalog
             End,
             "结束",
             "基础",
-            "■",
             "工作流出口：确定最终状态并映射输出。",
             InputOnly,
             NoPorts,
@@ -142,7 +135,6 @@ public static class NodeTypeCatalog
             Transform,
             "数据处理",
             "数据处理",
-            "⇄",
             "受控的数据处理管线：字段选择/重命名、转换、数组过滤映射、对象组装等。",
             InputOnly,
             OutputOnly,
@@ -152,7 +144,6 @@ public static class NodeTypeCatalog
             Condition,
             "条件分支",
             "控制流",
-            "◆",
             "按受限安全表达式选择命名分支（含默认分支）。",
             InputOnly,
             NoPorts,
@@ -170,7 +161,6 @@ public static class NodeTypeCatalog
             Loop,
             "循环",
             "控制流",
-            "↻",
             "对数组逐项执行子工作流或决策模型模板；有最大迭代与超时限制。",
             InputOnly,
             OutputOnly,
@@ -180,7 +170,6 @@ public static class NodeTypeCatalog
             Parallel,
             "并行扇出",
             "控制流",
-            "⑂",
             "把执行流分成多个并行分支（受最大并发限制）。",
             InputOnly,
             NoPorts,
@@ -198,7 +187,6 @@ public static class NodeTypeCatalog
             Join,
             "并行汇合",
             "控制流",
-            "⑃",
             "等待多个并行分支到达后汇合（全部完成 / 收集错误）。",
             InputOnly,
             OutputOnly,
@@ -208,7 +196,6 @@ public static class NodeTypeCatalog
             Exception,
             "异常处理",
             "控制流",
-            "⚠",
             "接收上游节点异常上下文（类型/信息/节点），记录或重新抛出。",
             new[] { new NodePortDescriptor(ErrorPort, "错误") },
             OutputOnly,
@@ -217,7 +204,6 @@ public static class NodeTypeCatalog
             Decision,
             "决策模型",
             "模型",
-            "◈",
             "调用本地 llama-server 的 /v1/systemone 决策接口（复用启动器实例管理，不另起进程）。",
             InputOnly,
             OutputOnly,
@@ -227,7 +213,6 @@ public static class NodeTypeCatalog
             Rules,
             "规则校验",
             "校验",
-            "☑",
             "按多条规则校验数据，区分硬错误与警告，可停止/走 fail 分支/继续。",
             InputOnly,
             OutputOnly,
@@ -244,7 +229,6 @@ public static class NodeTypeCatalog
             Algorithm,
             "算法求解",
             "算法",
-            "Σ",
             "调用已注册的求解器/业务算法（含内置示例求解器；接口可扩展）。",
             InputOnly,
             OutputOnly,
@@ -254,7 +238,6 @@ public static class NodeTypeCatalog
             Confirm,
             "人工确认",
             "交互",
-            "✋",
             "暂停工作流等待人工批准/拒绝，可填写指定字段。",
             InputOnly,
             NoPorts,
@@ -265,7 +248,6 @@ public static class NodeTypeCatalog
             SubWorkflow,
             "子工作流",
             "组合",
-            "⧉",
             "调用已保存的其他工作流（含输入输出映射与递归保护）。",
             InputOnly,
             OutputOnly,

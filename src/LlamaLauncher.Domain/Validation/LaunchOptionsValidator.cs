@@ -53,7 +53,10 @@ public static class LaunchOptionsValidator
 
         if (string.IsNullOrWhiteSpace(context.ExecutablePath))
         {
-            issues.Add(new ValidationIssue(ValidationSeverity.Error, "ExecutablePath", "未选择 llama-server.exe 程序路径。"));
+            issues.Add(new ValidationIssue(
+                ValidationSeverity.Error,
+                "ExecutablePath",
+                "未找到可用的 llama-server.exe 程序路径（原路径可能已失效）。请重新选择程序，或先在“版本管理”扫描本地版本。"));
         }
 
         // 监听地址与安全

@@ -114,11 +114,18 @@
                 </Grid>
 
                 <Button Grid.Row="2"
-                        Content="＋ 新建会话"
+                        AutomationProperties.Name="新建会话"
                         Margin="0,8,0,6"
                         HorizontalContentAlignment="Center"
                         Command="{Binding NewConversationCommand}"
-                        Style="{DynamicResource App.PrimaryButtonStyle}" />
+                        Style="{DynamicResource App.PrimaryButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <controls:AppIcon Icon="ui-plus" Width="12" Height="12" Margin="0,0,6,0"
+                                          VerticalAlignment="Center"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        <TextBlock Text="新建会话" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
 
                 <Grid Grid.Row="3">
                     <ListBox ItemsSource="{Binding Conversations}"
@@ -589,10 +596,16 @@
 
                 <DockPanel Grid.Row="0">
                     <Button DockPanel.Dock="Right"
-                            Content="✕"
+                            AutomationProperties.Name="收起参数面板"
                             Style="{StaticResource Chat.MiniButton}"
                             ToolTip="收起参数面板"
-                            Command="{Binding CloseParametersCommand}" />
+                            Command="{Binding CloseParametersCommand}">
+                        <controls:AppIcon Icon="ui-close"
+                                          Width="11"
+                                          Height="11"
+                                          VerticalAlignment="Center"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
                     <TextBlock Text="会话参数"
                                FontSize="14"
                                FontWeight="SemiBold"

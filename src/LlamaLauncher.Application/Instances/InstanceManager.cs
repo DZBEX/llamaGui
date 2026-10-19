@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using LlamaLauncher.Application.Abstractions;
 using LlamaLauncher.Application.CommandLine;
+using LlamaLauncher.Application.Services;
 using LlamaLauncher.Domain;
 using LlamaLauncher.Domain.StateMachine;
 using LlamaLauncher.Domain.Validation;
@@ -268,10 +269,41 @@ public sealed class InstanceManager : IInstanceManager, IAsyncDisposable
         var modelPath = model?.FilePath ?? options.ModelPath;
         options.ModelPath = modelPath;
 
-        var installation = profile.InstallationId is { } installationId
+        var selectedInstallation = profile.InstallationId is { } installationId
             ? await _installations.GetByIdAsync(installationId, cancellationToken).ConfigureAwait(false)
             : null;
-        var executablePath = installation?.ExecutablePath ?? profile.InstallationSnapshot?.ExecutablePath;
+        var installations = await _installations.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var resolution = InstallationResolver.Resolve(
+            selectedInstallation,
+            profile.InstallationSnapshot?.ExecutablePath,
+            installations);
+        var installation = resolution.Installation;
+        var executablePath = resolution.ExecutablePath;
+
+        // 数据目录可能整体拷贝自另一台电脑：原绑定的绝对路径失效时，自动回退到本机可用版本并修复配置，
+        // 避免用户必须手工重建启动配置。
+        if (resolution.UsedFallback && !string.IsNullOrWhiteSpace(executablePath))
+        {
+            if (installation is not null && profile.InstallationId != installation.Id)
+            {
+                profile.InstallationId = installation.Id;
+                profile.InstallationSnapshot = new InstallationReferenceSnapshot
+                {
+                    InstallationId = installation.Id,
+                    VersionLabel = installation.VersionLabel,
+                    ExecutablePath = installation.ExecutablePath,
+                };
+                await _profiles.UpsertAsync(profile, cancellationToken).ConfigureAwait(false);
+                instance.Record.InstallationId = installation.Id;
+                instance.Profile = profile;
+            }
+
+            var fallbackMessage =
+                $"原 llama.cpp 程序路径不可用，已自动改用 {installation?.VersionLabel ?? "本机可用版本"}：" +
+                executablePath;
+            _logStore.Append(instance.Id, instance.Name, LogStreamKind.Application, fallbackMessage);
+            _logger.LogWarning("实例 {Name} {Message}", instance.Name, fallbackMessage);
+        }
 
         var modelExists = !string.IsNullOrWhiteSpace(modelPath) && File.Exists(modelPath);
         var executableExists = !string.IsNullOrWhiteSpace(executablePath) && File.Exists(executablePath);
@@ -374,6 +406,9 @@ public sealed class InstanceManager : IInstanceManager, IAsyncDisposable
         history.ModelSnapshotJson = profile.ModelSnapshot is null
             ? history.ModelSnapshotJson
             : JsonSerializer.Serialize(profile.ModelSnapshot, JsonDefaults.Storage);
+        history.InstallationSnapshotJson = profile.InstallationSnapshot is null
+            ? history.InstallationSnapshotJson
+            : JsonSerializer.Serialize(profile.InstallationSnapshot, JsonDefaults.Storage);
         await _history.UpdateAsync(history, cancellationToken).ConfigureAwait(false);
 
         _logStore.Append(

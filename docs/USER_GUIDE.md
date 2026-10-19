@@ -6,6 +6,11 @@
 解压 zip 后直接运行 `LlamaLauncher.exe`。所有应用文件（`data/` 数据库、`logs/` 日志、`downloads/`、`runtimes/` 版本、`manifests/`、`backups/`、`exports/`）默认保存在程序根目录下。
 从旧版本升级时，首次启动会自动把 `%AppData%\LlamaLauncher`（或旧便携布局 `exe\data`）中的现有数据迁移到程序目录，并改写数据库与安装清单中的绝对路径。
 
+**搬到另一台电脑**：把整个程序目录（至少包含 `LlamaLauncher.exe`、依赖文件、`data\`、`runtimes\`）一起复制过去。
+首次启动会识别旧程序目录，自动改写数据库、实例快照、设置与安装清单中的绝对路径；配置里旧 `llama-server.exe`
+路径失效时，启动实例会自动回退到同版本或当前默认的本机版本。GGUF 模型不在自动重定位范围内：请在新电脑放到
+相同路径，或在“模型库”重新选择文件。
+
 ### 安装版
 运行 `LlamaLauncher-Setup-x.y.z-x64.exe`。默认按用户安装，无需管理员权限；可选择安装路径与是否创建桌面快捷方式。
 数据默认位于程序根目录；若安装到只读目录（如 Program Files），应用会自动回退使用 `%AppData%\LlamaLauncher` 并在启动时提示，也可在“设置”页指定其他数据目录。卸载不会删除数据目录内容。

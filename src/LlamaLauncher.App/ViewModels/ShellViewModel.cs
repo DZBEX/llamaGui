@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 namespace LlamaLauncher.App.ViewModels;
 
 /// <summary>左侧导航项。</summary>
-public sealed record NavItem(string Title, string Glyph, object Page);
+public sealed record NavItem(string Title, string Icon, object Page);
 
 /// <summary>Shell：导航、状态栏与全局刷新。</summary>
 public sealed partial class ShellViewModel : ViewModelBase, IDisposable
@@ -80,18 +80,18 @@ public sealed partial class ShellViewModel : ViewModelBase, IDisposable
 
         Pages = new ObservableCollection<NavItem>
         {
-            new("概览", "▦", dashboard),
-            new("服务实例", "◧", instancesPage),
-            new("模型库", "▤", modelsPage),
-            new("启动配置", "▥", profilesPage),
-            new("内置聊天", "◈", chatPage),
-            new("性能基准", "⚡", benchmarkPage),
-            new("决策模型实验室", "⚗", labPage),
-            new("硬件与后端", "▣", hardwarePage),
-            new("版本管理", "⟳", updatesPage),
-            new("日志与诊断", "≡", logsPage),
-            new("启动历史", "◷", historyPage),
-            new("设置", "⚙", settingsPage),
+            new("概览", "nav-dashboard", dashboard),
+            new("服务实例", "nav-instances", instancesPage),
+            new("模型库", "nav-models", modelsPage),
+            new("启动配置", "nav-profiles", profilesPage),
+            new("内置聊天", "nav-chat", chatPage),
+            new("性能基准", "nav-benchmark", benchmarkPage),
+            new("决策模型实验室", "nav-lab", labPage),
+            new("硬件与后端", "nav-hardware", hardwarePage),
+            new("版本管理", "nav-updates", updatesPage),
+            new("日志与诊断", "nav-logs", logsPage),
+            new("启动历史", "nav-history", historyPage),
+            new("设置", "nav-settings", settingsPage),
         };
         CurrentNav = Pages[0];
 

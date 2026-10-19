@@ -19,7 +19,8 @@ public sealed class NodeLibraryItem
 
     public string DisplayName => Descriptor.DisplayName;
 
-    public string Glyph => Descriptor.Glyph;
+    /// <summary>节点库条目的图标名称（按节点类型映射）。</summary>
+    public string Icon => Controls.AppIcons.NodeIconName(Descriptor.TypeId) ?? "state-pending";
 
     public string Description => Descriptor.Description;
 }

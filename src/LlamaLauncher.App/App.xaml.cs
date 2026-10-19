@@ -107,6 +107,19 @@ public partial class App : System.Windows.Application
 
             var services = _host.Services;
             var notifications = services.GetRequiredService<INotificationService>();
+            var relocation = services.GetRequiredService<PortableDataRelocationService>().LastReport;
+            if (relocation is { Changed: true })
+            {
+                notifications.Notify(
+                    $"检测到程序目录已移动，已自动适配数据库与安装清单中的路径：" +
+                    $"{string.Join("、", relocation.OldRoots)} → {relocation.ProgramRoot}。");
+            }
+
+            if (relocation is { Issues.Count: > 0 } relocationIssues)
+            {
+                notifications.Notify("路径自动适配存在问题：" + string.Join("；", relocationIssues.Issues));
+            }
+
             var settingsService = services.GetRequiredService<ISettingsService>();
             var manager = services.GetRequiredService<IInstanceManager>();
             var monitor = services.GetRequiredService<IResourceMonitorService>();

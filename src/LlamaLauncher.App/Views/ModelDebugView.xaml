@@ -1,6 +1,7 @@
 <UserControl x:Class="LlamaLauncher.App.Views.ModelDebugView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:LlamaLauncher.App.Controls">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -22,9 +23,17 @@
                 <TextBox Width="64" Text="{Binding TimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
                 <TextBlock Text="响应上限（KB）" VerticalAlignment="Center" Margin="14,0,6,0" />
                 <TextBox Width="70" Text="{Binding MaxResponseKb, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
-                <Button Content="▶ 运行" Command="{Binding RunCommand}"
+                <Button Command="{Binding RunCommand}"
+                        AutomationProperties.Name="运行"
                         IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBool}}"
-                        Margin="14,0,0,0" Style="{DynamicResource App.PrimaryButtonStyle}" />
+                        Margin="14,0,0,0" Style="{DynamicResource App.PrimaryButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <controls:AppIcon Icon="state-play" Width="12" Height="12" Margin="0,0,6,0"
+                                          VerticalAlignment="Center"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        <TextBlock Text="运行" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
                 <Button Content="取消" Command="{Binding CancelCommand}"
                         IsEnabled="{Binding IsRunning}"
                         Margin="6,0,0,0" />

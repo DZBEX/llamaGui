@@ -191,7 +191,16 @@ public sealed partial class TestCaseViewModel : ViewModelBase, IPageViewModel
         try
         {
             var cases = await _store.ListAsync().ConfigureAwait(true);
+            var workflows = await _definitions.ListAsync().ConfigureAwait(true);
             var selectedId = SelectedCase?.Id;
+
+            // 先填充工作流选项，再选中有用例：LoadCaseIntoEditor 依赖 WorkflowChoices 恢复“绑定工作流”。
+            WorkflowChoices.Clear();
+            foreach (var workflow in workflows)
+            {
+                WorkflowChoices.Add(workflow);
+            }
+
             Cases.Clear();
             foreach (var testCase in cases)
             {
@@ -199,13 +208,6 @@ public sealed partial class TestCaseViewModel : ViewModelBase, IPageViewModel
             }
 
             SelectedCase = Cases.FirstOrDefault(c => c.Id == selectedId) ?? Cases.FirstOrDefault();
-
-            var workflows = await _definitions.ListAsync().ConfigureAwait(true);
-            WorkflowChoices.Clear();
-            foreach (var workflow in workflows)
-            {
-                WorkflowChoices.Add(workflow);
-            }
         }
         catch (Exception ex)
         {

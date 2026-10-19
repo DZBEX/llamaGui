@@ -25,7 +25,7 @@ public sealed record AssetRow(AssetCandidate Candidate)
 
     public string SizeText => Formatting.Bytes(Candidate.Asset.SizeBytes);
 
-    public string RecommendedText => Candidate.Recommended ? "★ 推荐" : string.Empty;
+    public bool Recommended => Candidate.Recommended;
 
     public string Note => Candidate.Note;
 }

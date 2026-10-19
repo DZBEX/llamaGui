@@ -1,6 +1,6 @@
 # 测试计划与执行结果
 
-> 本文件记录**实际执行过**的命令与结果（2026-10-12/13 首版；2026-10-17 增量：决策模型实验室、模型性能基准）。
+> 本文件记录**实际执行过**的命令与结果（2026-10-12/13 首版；2026-10-17 增量：决策模型实验室、模型性能基准、界面图标与布局）。
 > 环境：Windows 10.0.26300，.NET SDK 8.0.425/8.0.426，RTX 4060 Laptop（8 GB）。
 
 ## 1. 自动化测试总览
@@ -9,7 +9,7 @@
 | --- | --- | --- | --- |
 | LlamaLauncher.UnitTests | 286 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UnitTests -c Debug` |
 | LlamaLauncher.IntegrationTests | 182 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.IntegrationTests -c Debug` |
-| LlamaLauncher.UiTests | 44 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UiTests -c Debug` |
+| LlamaLauncher.UiTests | 51 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UiTests -c Debug` |
 | 解决方案构建 | — | ✅ Debug / Release 均 0 警告 0 错误 | `dotnet build LlamaLauncher.sln -c Release` |
 | 无界面冒烟测试 | — | ✅ SMOKE_OK（含实验室视图实例化与布局） | `LlamaLauncher.exe --smoke-test` |
 | 一键流水线 | — | ✅ 构建 0 警告 0 错误 | `pwsh -File scripts/build.ps1` |
@@ -75,6 +75,9 @@
   表格渲染、`javascript:` 链接不生成超链接。
 - 组合根解析（12 个导航页）。
 - 应用图标资源：已嵌入且包含 16/24/32/48/64/128/256 全部尺寸、各条目为 PNG 压缩、可按 16/32 加载为托盘图标。
+- 界面图标资源：44 个 PNG 全部已嵌入且均为 64×64（导航/页签/节点/状态/操作全覆盖，
+  `AppIcons.NodeIconName` 与 `RunStateIconName` 覆盖全部节点类型与状态枚举取值）；
+  `AppIcon` 渲染按 `Fill` 着色、未覆盖区域保持透明；表格单元格样式带省略号与悬停提示（防止长文本硬截断回归）。
 - ComboBox 深色/浅色主题渲染回归：用真实主题资源字典渲染控件并做像素级断言
   （背景为对应主题色、文字像素清晰可见、下拉项选中态为强调色底白字），
   渲染结果同时输出到 `artifacts/combo-preview/*.png` 供人工核对。
@@ -207,3 +210,75 @@
     与版本快照 `b11577`；SQLite 重载样本数与状态一致；
   - 观察：首轮请求明显更慢（含首次 CUDA 预热，pp 1654 vs 预热后 ~7100 t/s），验证“预热不计入统计”的必要性；
     2048 目标档实际 prompt_n=1680——字符数估算与真实 tokenizer 存在偏差属预期（结果与报告如实展示“目标/实际”）。
+
+## 8. 界面图标与布局优化（2026-10-17 增量）
+
+> 目标（用户要求）：优化 UI 布局、内容不被遮挡且完整显示、把“用字符当图标”的位置全部换成图片。
+
+### 8.1 图标资源与渲染方式
+
+- 新增生成脚本 `pwsh -File scripts/make-ui-icons.ps1 -Preview`：确定性绘制 44 个 64×64 白色 PNG
+  到 `src/LlamaLauncher.App/Assets/Icons/`，预览表（64px + 20px + 16px，深/浅两种底色）
+  输出到 `artifacts/ui-icons-preview/icons-preview.png`（已人工核对每个图标的可辨识度）。
+- 覆盖范围：左侧导航 12、实验室页签 5、工作流节点类型 13（节点库 + 画布节点头部）、
+  运行状态 9（成功/运行/失败/超时/跳过/取消/暂停/等待人工/待运行）、常用操作（播放/暂停/停止/撤销/重做/缩放加减/关闭/星标）。
+- 渲染方式：`AppIcon` 控件把 PNG 作为不透明度蒙版再用主题画刷 `Fill` 着色——同一份资源自动适配
+  浅色/深色主题，并跟随导航/页签的悬停与选中前景色；画布节点图标走同一目录（`AppIcons.Get`，位图冻结缓存）。
+
+### 8.2 布局修复
+
+- 全局单行 `TextBlock` 统一 `CharacterEllipsis`；表格列增加 `App.CellText` 样式（省略号 + 悬停显示完整文本）。
+- 重排列宽：实例表（名称 1.6\*/模型 1\*/启动时间 132/等）、模型表（路径 2.4\*、最后修改 142 等）、
+  更新（目录）/硬件/历史等长文本列不再出现“半个字”硬截断。
+- ComboBox 模板为下拉箭头预留 30px，长文本不再钻到箭头下方；Expander 头部改为主题化箭头；
+  CheckBox 改为主题化勾选框（原系统白框在深色主题下突兀）。
+
+### 8.3 验证（实际执行）
+
+- 自动化：`dotnet test tests/LlamaLauncher.UiTests -c Debug` → 49/49 通过（新增 5 项：图标资源齐全且 64×64、
+  状态图标映射覆盖全部枚举、未知图标名安全返回、`AppIcon` 红色着色像素断言 + 角落透明、单元格样式含省略号与提示）。
+- 一键流水线：`pwsh -File scripts/build.ps1` → Release 构建 0 警告 0 错误；UnitTests 286 / IntegrationTests 182 / UiTests 49 全部通过。
+- 发布产物：`LlamaLauncher.exe --smoke-test`（Release，含实验室视图实例化与画布初始化）→ `SMOKE_OK`、退出码 0。
+- 人工核对：以真实应用（Debug）在**深色与浅色两种主题**下逐页截图（概览/实例/模型库/启动配置/聊天/基准/
+  实验室 5 个子页/硬件/版本/日志/历史/设置）并放大检查关键区域，截图保存在 `artifacts/ui-capture/`（不入库）。
+
+## 9. 决策模型实验室演示数据（2026-10-17 增量）
+
+> 数据文件位于应用数据目录（程序目录）的 `workflows/`（工作流）与 `workflows/testcases/`（测试用例）；
+> 源文件备份与安装脚本在 `artifacts/lab-demo/`（gitignored）。
+
+### 9.1 内容
+
+- 主流程 `triage-master`：智能工单处置（23 节点 / 27 连线），覆盖数据处理全管线、入口规则分支、
+  决策模型（choice/score/noul）、条件分流、三分支并行、并行汇合、循环子流程、异常错误分支、
+  变量（`outputVariable`）、模板、重试、自动通过/升级人工、三种结束节点（成功/拒绝受理/终审阻断）。
+- 主流程 `deployment-advisor-master`：模型部署选型（28 节点 / 32 连线），**多决策 + 嵌套循环**——
+  决策①任务分类、决策②部署策略、决策③发布评审，循环①逐候选决策评估、循环②逐方案子流程校验
+  （子流程内循环③逐检查项）、质量门禁、发布/试点/人工复核/降级兜底、错误分支与三种业务结束。
+- 子流程 `config-check-sub`（候选配置校验，内含循环③）与 `check-item-sub`（单项检查）。
+- 子流程 `refund-assess-sub`（退款核算）与 `history-risk-sub`（历史工单风险评估；撤销条目以业务失败结束）。
+- 测试用例 5 个：`triage-happy-path`（28 断言）、`triage-standard-auto`（16）、
+  `triage-invalid-business-fail`（12）、`triage-degraded-model-failure`（15）、`triage-history-mixed`（17）。
+- 测试用例（多决策循环）4 个：`deployment-approve`（22）、`deployment-pilot`（12）、
+  `deployment-rework`（14）、`deployment-degraded-review`（13）。合计 9 个用例 / 149 条断言。
+
+### 9.2 自动化验证（实际执行）
+
+- 验证工具：`dotnet run --project artifacts/lab-demo/verify -- <数据根>`（使用产品代码路径：
+  `JsonWorkflowDefinitionStore` / `JsonWorkflowTestCaseStore` → `WorkflowValidator` → `WorkflowEngine`
+  → `WorkflowAssertionEvaluator`）。
+- 结果：7 个工作流（含既有 `real-laya-route`）校验 **0 错误 0 警告**；9 个用例共 **149 条断言全部通过**
+  （多决策流程覆盖全量发布/灰度试点/返工业务失败/评审降级，工单流程覆盖加急/自动/业务失败/降级/循环容错），
+  工具输出 `ALL_OK`。
+- UI 端到端（真实应用）：设计器打开主流程并点击“适配”可见完整 23 节点图；
+  测试用例页选中“用例·VIP 退款加急（全链路）”点击“运行用例”得到
+  `运行 Succeeded · 断言全部通过（28 条）`（截图 `artifacts/ui-capture/lab-demo/`）。
+- UI 端到端（多决策流程）：设计器加载 28 节点主流程；运行“用例·多决策循环·全量发布”得到
+  `运行 Succeeded · 断言全部通过（22 条）`（截图 `artifacts/ui-capture/lab-demo2/`）。
+- 回归修复：测试用例页刷新后“绑定工作流”未恢复的问题已修复，新增 2 项 UI 测试
+  （`TestCaseViewModelTests`）：刷新后绑定恢复并可运行通过断言；绑定缺失时给出明确提示。
+
+### 9.3 启动与可访问性
+
+- 主窗口默认最大化启动（`WindowState="Maximized"`），仍保留 1320×760 还原尺寸、最小尺寸与托盘启动设置语义。
+- 图标化按钮新增 `AutomationProperties.Name`，保证读屏与 UI 自动化可识别。

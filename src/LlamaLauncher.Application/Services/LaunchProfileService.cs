@@ -204,11 +204,25 @@ public sealed class LaunchProfileService : ILaunchProfileService
         var modelPath = model?.FilePath ?? profile.Options.ModelPath;
         var modelExists = !string.IsNullOrWhiteSpace(modelPath) && File.Exists(modelPath);
 
-        var installation = profile.InstallationId is { } installationId
+        var selectedInstallation = profile.InstallationId is { } installationId
             ? await _installations.GetByIdAsync(installationId, cancellationToken).ConfigureAwait(false)
             : null;
-        var executablePath = installation?.ExecutablePath ?? profile.InstallationSnapshot?.ExecutablePath;
+        var installations = await _installations.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var resolution = InstallationResolver.Resolve(
+            selectedInstallation,
+            profile.InstallationSnapshot?.ExecutablePath,
+            installations);
+        var executablePath = resolution.ExecutablePath;
         var executableExists = !string.IsNullOrWhiteSpace(executablePath) && File.Exists(executablePath);
+        if (resolution.UsedFallback && executableExists)
+        {
+            issues.Add(new ValidationIssue(
+                ValidationSeverity.Warning,
+                "ExecutablePath",
+                $"原绑定的 llama.cpp 程序不可用，校验已改用本机可用的 " +
+                $"{resolution.Installation?.VersionLabel ?? "llama-server.exe"}：" +
+                $"{executablePath}。保存配置后将固定使用该版本。"));
+        }
 
         var options = JsonSerializer.Deserialize<ServerLaunchOptions>(
             JsonSerializer.Serialize(profile.Options, JsonDefaults.Storage),

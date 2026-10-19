@@ -314,8 +314,10 @@ public sealed class WorkflowCanvasControl : FrameworkElement
         dc.DrawRectangle(categoryBrush, null, stripRect);
         dc.Pop();
 
-        var glyph = CreateText(descriptor?.Glyph ?? "?", 16, textBrush);
-        dc.DrawText(glyph, new Point(rect.X + 14, rect.Y + 8));
+        if (AppIcons.NodeIconName(descriptor?.TypeId) is { } nodeIcon)
+        {
+            DrawIcon(dc, nodeIcon, new Rect(rect.X + 14, rect.Y + 8, 18, 18), textBrush);
+        }
 
         var name = CreateText(node.Name, 13, textBrush, FontWeights.SemiBold, NodeWidth - 60);
         dc.DrawText(name, new Point(rect.X + 40, rect.Y + 9));
@@ -331,9 +333,10 @@ public sealed class WorkflowCanvasControl : FrameworkElement
         var statusText = NodeStatusTexts?.GetValueOrDefault(node.Id);
         if (state is not null || statusText is not null)
         {
-            var label = statusText ?? state.ToString();
-            var status = CreateText($"{StateGlyph(state)} {label}", 10.5, stateColor, FontWeights.Normal, NodeWidth - 56);
-            dc.DrawText(status, new Point(rect.X + 14, rect.Y + 52));
+            var label = statusText ?? state?.ToString() ?? "未运行";
+            DrawIcon(dc, AppIcons.RunStateIconName(state), new Rect(rect.X + 14, rect.Y + 51, 12, 12), stateColor);
+            var status = CreateText(label, 10.5, stateColor, FontWeights.Normal, NodeWidth - 72);
+            dc.DrawText(status, new Point(rect.X + 31, rect.Y + 52));
         }
 
         if (node.IsBreakpoint)
@@ -481,19 +484,18 @@ public sealed class WorkflowCanvasControl : FrameworkElement
             _ => new SolidColorBrush(Color.FromRgb(0xAA, 0xB0, 0xB8)),
         };
 
-    private static string StateGlyph(NodeRunState? state)
-        => state switch
+    /// <summary>按当前着色画刷绘制 PNG 图标（不透明度蒙版着色）。</summary>
+    private static void DrawIcon(DrawingContext dc, string iconName, Rect rect, Brush brush)
+    {
+        if (AppIcons.Get(iconName) is not { } image)
         {
-            NodeRunState.Succeeded => "●",
-            NodeRunState.Running => "▶",
-            NodeRunState.Failed => "✕",
-            NodeRunState.TimedOut => "⏱",
-            NodeRunState.Skipped => "–",
-            NodeRunState.Canceled => "⊘",
-            NodeRunState.PausedAtBreakpoint => "⏸",
-            NodeRunState.WaitingForUser => "✋",
-            _ => "○",
-        };
+            return;
+        }
+
+        dc.PushOpacityMask(new ImageBrush(image) { Stretch = Stretch.Uniform });
+        dc.DrawRectangle(brush, null, rect);
+        dc.Pop();
+    }
 
     private static Color CategoryColor(string? category)
         => category switch

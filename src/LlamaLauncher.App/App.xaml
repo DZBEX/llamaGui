@@ -20,9 +20,10 @@
             <converters:NullToBoolConverter x:Key="NullToBoolIndeterminate" />
             <converters:LabPageTemplateSelector x:Key="LabPageTemplateSelector" />
             <converters:NodeRunStateToBrushConverter x:Key="NodeRunStateToBrush" />
-            <converters:RunStateGlyphConverter x:Key="RunStateGlyph" />
+            <converters:RunStateIconConverter x:Key="RunStateIcon" />
             <converters:DiffKindToBrushConverter x:Key="DiffKindToBrush" />
             <converters:EnumEqualsToVisibilityConverter x:Key="EnumEqualsToVisibility" />
+            <converters:EmptyToNullConverter x:Key="EmptyToNull" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

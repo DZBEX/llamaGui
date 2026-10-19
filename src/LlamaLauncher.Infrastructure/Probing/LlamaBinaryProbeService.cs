@@ -121,12 +121,39 @@ public sealed class LlamaBinaryProbeService : ILlamaBinaryProbeService
         if (capabilities.Outcome == ProbeOutcome.Failed)
         {
             capabilities.Warnings.Add("版本与帮助探测均失败，无法确认该程序可用。");
+            try
+            {
+                var directory = Path.GetDirectoryName(executablePath);
+                var hasCompanionDlls = !string.IsNullOrWhiteSpace(directory)
+                    && Directory.Exists(directory)
+                    && Directory.EnumerateFiles(directory, "*.dll", SearchOption.TopDirectoryOnly).Any();
+                if (!hasCompanionDlls)
+                {
+                    capabilities.Warnings.Add(
+                        "该目录中只有可执行文件、没有 llama.cpp 依赖 DLL；请复制完整发行包目录" +
+                        "（含 ggml*.dll、llama*.dll 等），或使用“版本管理”重新安装/导入完整压缩包。");
+                }
+            }
+            catch (Exception)
+            {
+                // 依赖完整性提示是附加诊断，不影响探测结果。
+            }
         }
 
         _cache[key] = capabilities;
-        _logger.LogInformation(
-            "能力探测完成：{Path}，结果 {Outcome}，支持参数 {OptionCount} 个，设备 {DeviceCount} 台",
-            executablePath, capabilities.Outcome, capabilities.Options.Count, capabilities.Devices.Count);
+        if (capabilities.Outcome == ProbeOutcome.Failed)
+        {
+            _logger.LogWarning(
+                "能力探测失败：{Path}；{Details}",
+                executablePath,
+                string.Join("；", capabilities.Warnings));
+        }
+        else
+        {
+            _logger.LogInformation(
+                "能力探测完成：{Path}，结果 {Outcome}，支持参数 {OptionCount} 个，设备 {DeviceCount} 台",
+                executablePath, capabilities.Outcome, capabilities.Options.Count, capabilities.Devices.Count);
+        }
         return capabilities;
     }
 

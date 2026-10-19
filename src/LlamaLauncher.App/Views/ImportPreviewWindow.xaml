@@ -35,10 +35,10 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="名称" Binding="{Binding ProfileName}" Width="1.4*" />
-                <DataGridTextColumn Header="动作" Binding="{Binding ActionText}" Width="90" />
-                <DataGridTextColumn Header="模型" Binding="{Binding ModelStatusText}" Width="1.4*" />
-                <DataGridTextColumn Header="问题" Binding="{Binding IssuesText}" Width="2*" />
+                <DataGridTextColumn Header="名称" Binding="{Binding ProfileName}" Width="1.4*" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="动作" Binding="{Binding ActionText}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="模型" Binding="{Binding ModelStatusText}" Width="1.4*" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="问题" Binding="{Binding IssuesText}" Width="2*" ElementStyle="{StaticResource App.CellText}" />
             </DataGrid.Columns>
         </DataGrid>
 

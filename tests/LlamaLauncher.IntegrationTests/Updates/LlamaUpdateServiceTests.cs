@@ -679,6 +679,36 @@ public sealed class LlamaUpdateServiceTests
     }
 
     [Fact]
+    public async Task DiscoverLocalVersions_ReplacesMissingDefaultWithDiscoveredVersion()
+    {
+        using var fixture = new IntegrationFixture();
+        var stale = new LlamaCppInstallation
+        {
+            Id = Guid.NewGuid(),
+            VersionLabel = "b11702",
+            Directory = @"D:\OldComputer\runtimes\llama.cpp\b11702-deadbeef",
+            ExecutablePath = @"D:\OldComputer\runtimes\llama.cpp\b11702-deadbeef\llama-server.exe",
+            SourceKind = InstallationSourceKind.ExternalPath,
+            Status = InstallationStatus.Missing,
+            IsDefault = true,
+            InstalledUtc = fixture.TimeProvider.GetUtcNow(),
+        };
+        await fixture.InstallationsRepo.UpsertAsync(stale);
+
+        var versionDirectory = Path.Combine(fixture.Paths.RuntimesDirectory, "b9998-cafebabe");
+        CopyChildProcessInto(versionDirectory);
+        var service = fixture.CreateUpdateService(new FakeReleaseFeed(), new FakeDownloadService());
+
+        var discovered = await service.DiscoverLocalVersionsAsync();
+
+        var installation = Assert.Single(discovered);
+        Assert.Equal(InstallationStatus.Available, installation.Status);
+        var currentDefault = await fixture.InstallationsRepo.GetDefaultAsync();
+        Assert.Equal(installation.Id, currentDefault!.Id);
+        Assert.False((await fixture.InstallationsRepo.GetByIdAsync(stale.Id))!.IsDefault);
+    }
+
+    [Fact]
     public async Task DeleteInstallation_HandlesMovedRuntimesDirectory()
     {
         using var fixture = new IntegrationFixture();

@@ -31,10 +31,10 @@
                   SelectedItem="{Binding SelectedInstance, Mode=TwoWay}"
                   SelectionMode="Single">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="1.3*" />
-                <DataGridTextColumn Header="模型" Binding="{Binding ModelName}" Width="1.3*" />
-                <DataGridTextColumn Header="版本" Binding="{Binding VersionLabel}" Width="80" />
-                <DataGridTextColumn Header="PID" Binding="{Binding ProcessIdText}" Width="60" />
+                <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="1.6*" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="模型" Binding="{Binding ModelName}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="版本" Binding="{Binding VersionLabel}" Width="64" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="PID" Binding="{Binding ProcessIdText}" Width="56" ElementStyle="{StaticResource App.CellText}" />
                 <DataGridTemplateColumn Header="状态" Width="90">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -46,13 +46,13 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="端口" Binding="{Binding Port}" Width="56" />
-                <DataGridTextColumn Header="API 地址" Binding="{Binding Url}" Width="140" />
-                <DataGridTextColumn Header="启动时间" Binding="{Binding StartedText}" Width="132" />
-                <DataGridTextColumn Header="运行时长" Binding="{Binding UptimeText}" Width="88" />
-                <DataGridTextColumn Header="CPU" Binding="{Binding CpuText}" Width="50" />
-                <DataGridTextColumn Header="内存" Binding="{Binding MemoryText}" Width="76" />
-                <DataGridTextColumn Header="健康检查" Binding="{Binding HealthText}" Width="92" />
+                <DataGridTextColumn Header="端口" Binding="{Binding Port}" Width="56" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="API 地址" Binding="{Binding Url}" Width="140" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="启动时间" Binding="{Binding StartedText}" Width="132" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="运行时长" Binding="{Binding UptimeText}" Width="76" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="CPU" Binding="{Binding CpuText}" Width="50" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="内存" Binding="{Binding MemoryText}" Width="70" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="健康检查" Binding="{Binding HealthText}" Width="80" ElementStyle="{StaticResource App.CellText}" />
             </DataGrid.Columns>
         </DataGrid>
 

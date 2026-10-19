@@ -42,6 +42,8 @@ dotnet run --project src/LlamaLauncher.App -c Debug
 
 ```powershell
 pwsh -File scripts/publish-portable.ps1            # 自包含便携版 + zip + SHA-256（-FrameworkDependent 可改为框架依赖）
+pwsh -File scripts/publish-portable.ps1 -IncludeRuntimes -RuntimesSource "D:\path\to\runtimes\llama.cpp"
+                                                   # 同时附带 llama.cpp 运行时，适合直接拷到另一台电脑
 pwsh -File scripts/build-installer.ps1             # Windows 安装包（需要 Inno Setup 6；脚本会自动检测并给出指引）
 ```
 

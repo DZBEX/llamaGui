@@ -74,14 +74,14 @@
                     <TextBlock Text="实例状态" FontWeight="SemiBold" Margin="0,0,0,6" />
                     <DataGrid ItemsSource="{Binding ActiveInstances}" MaxHeight="280" RowHeight="30">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="1.2*" />
-                            <DataGridTextColumn Header="模型" Binding="{Binding ModelName}" Width="1.2*" />
-                            <DataGridTextColumn Header="状态" Binding="{Binding StateText}" Width="90" />
-                            <DataGridTextColumn Header="端口" Binding="{Binding Port}" Width="60" />
-                            <DataGridTextColumn Header="运行时长" Binding="{Binding UptimeText}" Width="120" />
-                            <DataGridTextColumn Header="CPU" Binding="{Binding CpuText}" Width="70" />
-                            <DataGridTextColumn Header="内存" Binding="{Binding MemoryText}" Width="90" />
-                            <DataGridTextColumn Header="健康" Binding="{Binding HealthText}" Width="*" />
+                            <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="1.2*" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="模型" Binding="{Binding ModelName}" Width="1.2*" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="状态" Binding="{Binding StateText}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="端口" Binding="{Binding Port}" Width="60" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="运行时长" Binding="{Binding UptimeText}" Width="120" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="CPU" Binding="{Binding CpuText}" Width="70" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="内存" Binding="{Binding MemoryText}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="健康" Binding="{Binding HealthText}" Width="*" ElementStyle="{StaticResource App.CellText}" />
                         </DataGrid.Columns>
                     </DataGrid>
                     <TextBlock Text="提示：完整操作（启动/停止/API 测试等）请前往“服务实例”页面。"

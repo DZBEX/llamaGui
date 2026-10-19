@@ -81,8 +81,8 @@
                       Margin="0,6,0,0"
                       CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="目标" Binding="{Binding Target, UpdateSourceTrigger=PropertyChanged}" Width="72" />
-                    <DataGridTextColumn Header="来源表达式" Binding="{Binding Source, UpdateSourceTrigger=PropertyChanged}" Width="112" />
+                    <DataGridTextColumn Header="目标" Binding="{Binding Target, UpdateSourceTrigger=PropertyChanged}" Width="72" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="来源表达式" Binding="{Binding Source, UpdateSourceTrigger=PropertyChanged}" Width="112" ElementStyle="{StaticResource App.CellText}" />
                     <DataGridTemplateColumn Header="转换" Width="64">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -92,7 +92,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridCheckBoxColumn Header="必填" Binding="{Binding Required, UpdateSourceTrigger=PropertyChanged}" Width="42" />
-                    <DataGridTextColumn Header="默认值 (JSON)" Binding="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}" Width="54" />
+                    <DataGridTextColumn Header="默认值 (JSON)" Binding="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}" Width="54" ElementStyle="{StaticResource App.CellText}" />
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="0,6,0,0">

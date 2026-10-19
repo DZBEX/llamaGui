@@ -25,6 +25,7 @@
   <!-- 应用图标：ApplicationIcon 写入 exe（资源管理器/快捷方式/安装包），Resource 供 WPF 窗口与托盘加载 -->
   <ItemGroup>
     <Resource Include="Assets\LlamaLauncher.ico" />
+    <Resource Include="Assets\Icons\*.png" />
   </ItemGroup>
   <!-- 移除 WinForms SDK 注入的隐式 using，避免与 WPF 类型（UserControl/Color 等）产生歧义 -->
   <ItemGroup>

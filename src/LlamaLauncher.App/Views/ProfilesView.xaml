@@ -1,6 +1,7 @@
 <UserControl x:Class="LlamaLauncher.App.Views.ProfilesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:LlamaLauncher.App.Controls">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -28,19 +29,21 @@
                 <DataGridTemplateColumn Header="默认" Width="60">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="★"
-                                       FontSize="14"
-                                       Foreground="{DynamicResource App.State.Loading}"
-                                       Visibility="{Binding IsDefault, Converter={StaticResource BoolToVisibility}}" />
+                            <controls:AppIcon Icon="star"
+                                              Width="14"
+                                              Height="14"
+                                              VerticalAlignment="Center"
+                                              Fill="{DynamicResource App.State.Loading}"
+                                              Visibility="{Binding IsDefault, Converter={StaticResource BoolToVisibility}}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="1.6*" />
-                <DataGridTextColumn Header="模型" Binding="{Binding ModelName}" Width="1.6*" />
-                <DataGridTextColumn Header="程序版本" Binding="{Binding VersionLabel}" Width="110" />
-                <DataGridTextColumn Header="监听" Binding="{Binding EndpointText}" Width="140" />
-                <DataGridTextColumn Header="访问范围" Binding="{Binding ScopeText}" Width="100" />
-                <DataGridTextColumn Header="更新时间" Binding="{Binding UpdatedText}" Width="150" />
+                <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="1.6*" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="模型" Binding="{Binding ModelName}" Width="1.6*" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="程序版本" Binding="{Binding VersionLabel}" Width="110" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="监听" Binding="{Binding EndpointText}" Width="140" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="访问范围" Binding="{Binding ScopeText}" Width="100" ElementStyle="{StaticResource App.CellText}" />
+                <DataGridTextColumn Header="更新时间" Binding="{Binding UpdatedText}" Width="150" ElementStyle="{StaticResource App.CellText}" />
             </DataGrid.Columns>
         </DataGrid>
 

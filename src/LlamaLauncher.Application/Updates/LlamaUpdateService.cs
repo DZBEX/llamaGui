@@ -371,23 +371,41 @@ public sealed class LlamaUpdateService : ILlamaUpdateService
             }
         }
 
-        if (discovered.Count == 0)
+        // 与“首个下载安装自动成为默认”一致：没有默认版本，或默认版本所在的文件已随搬家失效时，
+        // 自动切换到本机当前存在且探测可用的版本。这样旧配置在新电脑上仍能解析到可用程序。
+        var all = await _installations.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var existingDefault = all.FirstOrDefault(i => i.IsDefault);
+        var repairedDefault = false;
+        if (existingDefault is null || !File.Exists(existingDefault.ExecutablePath))
+        {
+            var firstAvailable = all
+                .Where(i => File.Exists(i.ExecutablePath) && i.Status != InstallationStatus.Missing)
+                .OrderByDescending(i => i.Status == InstallationStatus.Available)
+                .ThenBy(i => i.InstalledUtc)
+                .FirstOrDefault();
+            if (firstAvailable is not null)
+            {
+                await _installations.SetDefaultAsync(firstAvailable.Id, cancellationToken).ConfigureAwait(false);
+                firstAvailable.IsDefault = true;
+                if (discovered.FirstOrDefault(i => i.Id == firstAvailable.Id) is { } discoveredDefault)
+                {
+                    discoveredDefault.IsDefault = true;
+                }
+                repairedDefault = true;
+                _logger.LogInformation(
+                    "默认 llama.cpp 版本不可用，已自动切换为 {Version}（{Path}）",
+                    firstAvailable.VersionLabel,
+                    firstAvailable.ExecutablePath);
+            }
+        }
+
+        if (discovered.Count == 0 && !repairedDefault)
         {
             return discovered;
         }
 
-        // 与“首个下载安装自动成为默认”一致：没有默认版本时，取首个探测可用的版本
-        var hasDefault = await _installations.GetDefaultAsync(cancellationToken).ConfigureAwait(false) is not null;
-        if (!hasDefault
-            && discovered.FirstOrDefault(i => i.Status == InstallationStatus.Available) is { } firstAvailable)
-        {
-            await _installations.SetDefaultAsync(firstAvailable.Id, cancellationToken).ConfigureAwait(false);
-            firstAvailable.IsDefault = true;
-            _logger.LogInformation("已将发现的首个可用版本 {Version} 设为默认", firstAvailable.VersionLabel);
-        }
-
         // 同步镜像文件（与安装/切换流程保持一致）
-        var all = await _installations.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        all = await _installations.GetAllAsync(cancellationToken).ConfigureAwait(false);
         var manifest = _manifest.Load();
         if (all.FirstOrDefault(i => i.IsDefault) is { } currentDefault)
         {

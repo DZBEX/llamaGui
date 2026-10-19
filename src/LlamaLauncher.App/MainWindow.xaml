@@ -5,10 +5,12 @@
         xmlns:vmlab="clr-namespace:LlamaLauncher.App.ViewModels.Lab"
         xmlns:views="clr-namespace:LlamaLauncher.App.Views"
         xmlns:conv="clr-namespace:LlamaLauncher.App.Converters"
+        xmlns:controls="clr-namespace:LlamaLauncher.App.Controls"
         Title="LlamaLauncher — llama.cpp 启动器"
         Icon="/Assets/LlamaLauncher.ico"
         Height="760" Width="1320"
         MinHeight="600" MinWidth="1080"
+        WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource App.Window.Background}">
     <Window.Resources>
@@ -139,8 +141,13 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Glyph}" Width="22" FontSize="14" />
-                                <TextBlock Text="{Binding Title}" />
+                                <controls:AppIcon Icon="{Binding Icon}"
+                                                  Width="18"
+                                                  Height="18"
+                                                  Margin="0,0,9,0"
+                                                  VerticalAlignment="Center"
+                                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

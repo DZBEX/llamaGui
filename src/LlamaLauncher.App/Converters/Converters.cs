@@ -80,7 +80,7 @@ public sealed class LabPageTemplateSelector : DataTemplateSelector
     };
 }
 
-/// <summary>节点运行状态 → 状态色。</summary>
+/// <summary>节点 / 工作流运行状态 → 状态色。</summary>
 public sealed class NodeRunStateToBrushConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -90,6 +90,9 @@ public sealed class NodeRunStateToBrushConverter : IValueConverter
             NodeRunState.Succeeded => "App.State.Ready",
             NodeRunState.Running or NodeRunState.WaitingForUser or NodeRunState.PausedAtBreakpoint => "App.State.Loading",
             NodeRunState.Failed or NodeRunState.TimedOut => "App.State.Error",
+            WorkflowRunState.Succeeded => "App.State.Ready",
+            WorkflowRunState.Running or WorkflowRunState.Paused => "App.State.Loading",
+            WorkflowRunState.Failed or WorkflowRunState.TimedOut => "App.State.Error",
             _ => "App.State.Stopped",
         };
         return System.Windows.Application.Current?.TryFindResource(key) as Brush
@@ -100,29 +103,26 @@ public sealed class NodeRunStateToBrushConverter : IValueConverter
         => throw new NotSupportedException();
 }
 
-/// <summary>运行/节点状态 → 图标字形。</summary>
-public sealed class RunStateGlyphConverter : IValueConverter
+/// <summary>运行 / 节点状态 → 图标名称（供 AppIcon 显示）。</summary>
+public sealed class RunStateIconConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value switch
         {
-            NodeRunState.Succeeded => "●",
-            NodeRunState.Running => "▶",
-            NodeRunState.Failed => "✕",
-            NodeRunState.TimedOut => "⏱",
-            NodeRunState.Skipped => "–",
-            NodeRunState.Canceled => "⊘",
-            NodeRunState.PausedAtBreakpoint => "⏸",
-            NodeRunState.WaitingForUser => "✋",
-            NodeRunState.Pending => "○",
-            WorkflowRunState.Succeeded => "●",
-            WorkflowRunState.Running => "▶",
-            WorkflowRunState.Paused => "⏸",
-            WorkflowRunState.Failed => "✕",
-            WorkflowRunState.Canceled => "⊘",
-            WorkflowRunState.TimedOut => "⏱",
-            _ => "○",
+            NodeRunState state => LlamaLauncher.App.Controls.AppIcons.RunStateIconName(state),
+            WorkflowRunState state => LlamaLauncher.App.Controls.AppIcons.RunStateIconName(state),
+            _ => "state-pending",
         };
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>空字符串 / null → null（用于 ToolTip：内容为空时不弹提示）。</summary>
+public sealed class EmptyToNullConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is string s && string.IsNullOrWhiteSpace(s) ? null : value;
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();

@@ -175,6 +175,54 @@ public sealed class InstanceManagerTests
     }
 
     [Fact]
+    public async Task Start_FallsBackToAvailableInstallation_WhenProfilePathIsFromAnotherComputer()
+    {
+        using var fixture = new IntegrationFixture();
+        var modelPath = fixture.CreateModelFile();
+        var available = await fixture.InstallationService.RegisterExternalAsync(
+            IntegrationFixture.ChildExecutablePath);
+
+        var now = fixture.TimeProvider.GetUtcNow();
+        var stale = new LlamaCppInstallation
+        {
+            Id = Guid.NewGuid(),
+            VersionLabel = "b11703",
+            Directory = @"D:\OtherComputer\llama.cpp\b11703",
+            ExecutablePath = @"D:\OtherComputer\llama.cpp\b11703\llama-server.exe",
+            SourceKind = InstallationSourceKind.ExternalPath,
+            Status = InstallationStatus.Missing,
+            InstalledUtc = now,
+        };
+        await fixture.InstallationsRepo.UpsertAsync(stale);
+        var profile = await CreateProfileAsync(
+            fixture,
+            IntegrationFixture.GetFreePort(),
+            stale.Id,
+            modelPath);
+        var instance = await fixture.Manager.CreateAsync("跨电脑实例", profile.Id);
+
+        try
+        {
+            fixture.SetEnvironment("LLAMALAUNCHER_TEST_ENABLE_HTTP", "1");
+
+            var result = await fixture.Manager.StartAsync(instance.Id, waitForReady: true);
+
+            Assert.True(result.Success, result.Message);
+            Assert.Equal(InstanceState.Ready, instance.State);
+            var repaired = await fixture.Profiles.GetByIdAsync(profile.Id);
+            Assert.Equal(available.Id, repaired!.InstallationId);
+            Assert.Equal(available.ExecutablePath, repaired.InstallationSnapshot?.ExecutablePath);
+            Assert.Contains(
+                fixture.LogStore.GetRecent(instance.Id, 200),
+                line => line.Text.Contains("原 llama.cpp 程序路径不可用"));
+        }
+        finally
+        {
+            fixture.SetEnvironment("LLAMALAUNCHER_TEST_ENABLE_HTTP", null);
+        }
+    }
+
+    [Fact]
     public async Task UnexpectedExit_IsDetectedAndRecorded()
     {
         using var fixture = new IntegrationFixture();

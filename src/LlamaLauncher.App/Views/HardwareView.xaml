@@ -33,10 +33,10 @@
                         <TextBlock Text="系统枚举的显示适配器（不代表 llama.cpp 可用设备）" FontWeight="SemiBold" TextWrapping="Wrap" />
                         <DataGrid ItemsSource="{Binding DisplayAdapters}" MaxHeight="220" Margin="0,6,0,0">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="1.6*" />
-                                <DataGridTextColumn Header="厂商" Binding="{Binding Vendor}" Width="1*" />
-                                <DataGridTextColumn Header="驱动" Binding="{Binding Driver}" Width="1*" />
-                                <DataGridTextColumn Header="显存（粗略）" Binding="{Binding Memory}" Width="100" />
+                                <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="1.6*" ElementStyle="{StaticResource App.CellText}" />
+                                <DataGridTextColumn Header="厂商" Binding="{Binding Vendor}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
+                                <DataGridTextColumn Header="驱动" Binding="{Binding Driver}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
+                                <DataGridTextColumn Header="显存（粗略）" Binding="{Binding Memory}" Width="100" ElementStyle="{StaticResource App.CellText}" />
                             </DataGrid.Columns>
                         </DataGrid>
                         <TextBlock Text="来源：WMI Win32_VideoController（AdapterRAM 可能不准确）"
@@ -49,10 +49,10 @@
                         <TextBlock Text="GPU 实时指标（仅可用来源）" FontWeight="SemiBold" />
                         <DataGrid ItemsSource="{Binding GpuMetrics}" MaxHeight="220" Margin="0,6,0,0">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="设备" Binding="{Binding Name}" Width="1.6*" />
-                                <DataGridTextColumn Header="利用率" Binding="{Binding Utilization}" Width="90" />
-                                <DataGridTextColumn Header="显存" Binding="{Binding Memory}" Width="130" />
-                                <DataGridTextColumn Header="来源" Binding="{Binding Source}" Width="100" />
+                                <DataGridTextColumn Header="设备" Binding="{Binding Name}" Width="1.6*" ElementStyle="{StaticResource App.CellText}" />
+                                <DataGridTextColumn Header="利用率" Binding="{Binding Utilization}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                                <DataGridTextColumn Header="显存" Binding="{Binding Memory}" Width="130" ElementStyle="{StaticResource App.CellText}" />
+                                <DataGridTextColumn Header="来源" Binding="{Binding Source}" Width="100" ElementStyle="{StaticResource App.CellText}" />
                             </DataGrid.Columns>
                         </DataGrid>
                         <TextBlock Text="无法可靠获取的指标一律显示“—”，不使用估算值冒充真实数据。"
@@ -92,9 +92,9 @@
                             <TextBlock Text="此二进制的实际推理设备（--list-devices）" FontWeight="SemiBold" TextWrapping="Wrap" />
                             <DataGrid ItemsSource="{Binding DetectedDevices}" MaxHeight="200" Margin="0,6,0,0">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="后端" Binding="{Binding Backend}" Width="100" />
-                                    <DataGridTextColumn Header="序号" Binding="{Binding Index}" Width="60" />
-                                    <DataGridTextColumn Header="设备" Binding="{Binding Name}" Width="*" />
+                                    <DataGridTextColumn Header="后端" Binding="{Binding Backend}" Width="100" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="序号" Binding="{Binding Index}" Width="60" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="设备" Binding="{Binding Name}" Width="*" ElementStyle="{StaticResource App.CellText}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>
@@ -102,9 +102,9 @@
                             <TextBlock Text="解析出的受支持参数" FontWeight="SemiBold" />
                             <DataGrid ItemsSource="{Binding SupportedOptions}" MaxHeight="200" Margin="0,6,0,0">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="参数" Binding="{Binding Canonical}" Width="120" />
-                                    <DataGridTextColumn Header="写法" Binding="{Binding Flags}" Width="1.4*" />
-                                    <DataGridTextColumn Header="取值" Binding="{Binding ValueKind}" Width="120" />
+                                    <DataGridTextColumn Header="参数" Binding="{Binding Canonical}" Width="120" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="写法" Binding="{Binding Flags}" Width="1.4*" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="取值" Binding="{Binding ValueKind}" Width="120" ElementStyle="{StaticResource App.CellText}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>

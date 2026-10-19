@@ -19,9 +19,9 @@
             <TextBlock Text="输出映射（目标输出名 → 来源表达式）" FontWeight="SemiBold" Margin="0,8,0,0" />
             <DataGrid ItemsSource="{Binding OutputMappings}" MinHeight="110" MaxHeight="200" Margin="0,6,0,0" CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="输出名" Binding="{Binding Target, UpdateSourceTrigger=PropertyChanged}" Width="90" />
-                    <DataGridTextColumn Header="来源表达式" Binding="{Binding Source, UpdateSourceTrigger=PropertyChanged}" Width="140" />
-                    <DataGridTextColumn Header="默认值" Binding="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}" Width="96" />
+                    <DataGridTextColumn Header="输出名" Binding="{Binding Target, UpdateSourceTrigger=PropertyChanged}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="来源表达式" Binding="{Binding Source, UpdateSourceTrigger=PropertyChanged}" Width="140" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="默认值" Binding="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}" Width="96" ElementStyle="{StaticResource App.CellText}" />
                 </DataGrid.Columns>
             </DataGrid>
             <TextBlock Text="提示：输出映射的目标名会出现在运行输出中；表达式可用 up.&lt;节点ID&gt;.out… 引用上游结果。"
@@ -97,9 +97,9 @@
             <DataGrid ItemsSource="{Binding Branches}" SelectedItem="{Binding SelectedBranch, Mode=TwoWay}"
                       MinHeight="120" MaxHeight="200" CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="分支 ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="1*" />
-                    <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="1*" />
-                    <DataGridTextColumn Header="条件表达式" Binding="{Binding Condition, UpdateSourceTrigger=PropertyChanged}" Width="2*" />
+                    <DataGridTextColumn Header="分支 ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="条件表达式" Binding="{Binding Condition, UpdateSourceTrigger=PropertyChanged}" Width="2*" ElementStyle="{StaticResource App.CellText}" />
                     <DataGridCheckBoxColumn Header="默认" Binding="{Binding IsDefault, UpdateSourceTrigger=PropertyChanged}" Width="50" />
                 </DataGrid.Columns>
             </DataGrid>
@@ -182,9 +182,9 @@
             <DataGrid ItemsSource="{Binding Rules}" SelectedItem="{Binding SelectedRule, Mode=TwoWay}"
                       MinHeight="120" MaxHeight="200" Margin="0,6,0,0" CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="44" />
-                    <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="70" />
-                    <DataGridTextColumn Header="条件" Binding="{Binding Condition, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="44" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="70" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="条件" Binding="{Binding Condition, UpdateSourceTrigger=PropertyChanged}" Width="100" ElementStyle="{StaticResource App.CellText}" />
                     <DataGridTemplateColumn Header="级别" Width="72">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -193,7 +193,7 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="消息模板" Binding="{Binding MessageTemplate, UpdateSourceTrigger=PropertyChanged}" Width="58" />
+                    <DataGridTextColumn Header="消息模板" Binding="{Binding MessageTemplate, UpdateSourceTrigger=PropertyChanged}" Width="58" ElementStyle="{StaticResource App.CellText}" />
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
@@ -259,8 +259,8 @@
                       SelectedItem="{Binding SelectedBranch, Mode=TwoWay}"
                       MinHeight="100" MaxHeight="160" CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="分支 ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="1*" />
-                    <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="1.6*" />
+                    <DataGridTextColumn Header="分支 ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="1.6*" ElementStyle="{StaticResource App.CellText}" />
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
@@ -305,9 +305,9 @@
             <TextBlock Text="可填写字段" FontWeight="SemiBold" Margin="0,8,0,4" />
             <DataGrid ItemsSource="{Binding Fields}" MinHeight="90" MaxHeight="150" CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="1*" />
-                    <DataGridTextColumn Header="标签" Binding="{Binding Label, UpdateSourceTrigger=PropertyChanged}" Width="1.4*" />
-                    <DataGridTextColumn Header="默认值" Binding="{Binding DefaultValue, UpdateSourceTrigger=PropertyChanged}" Width="1*" />
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id, UpdateSourceTrigger=PropertyChanged}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="标签" Binding="{Binding Label, UpdateSourceTrigger=PropertyChanged}" Width="1.4*" ElementStyle="{StaticResource App.CellText}" />
+                    <DataGridTextColumn Header="默认值" Binding="{Binding DefaultValue, UpdateSourceTrigger=PropertyChanged}" Width="1*" ElementStyle="{StaticResource App.CellText}" />
                     <DataGridCheckBoxColumn Header="必填" Binding="{Binding Required, UpdateSourceTrigger=PropertyChanged}" Width="50" />
                 </DataGrid.Columns>
             </DataGrid>

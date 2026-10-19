@@ -17,7 +17,7 @@
             <StackPanel>
                 <WrapPanel>
                     <TextBlock Text="实例" VerticalAlignment="Center" Margin="0,0,6,0" />
-                    <ComboBox Width="300"
+                    <ComboBox Width="330"
                               ItemsSource="{Binding Instances}"
                               SelectedItem="{Binding SelectedInstance, Mode=TwoWay}"
                               DisplayMemberPath="DisplayText"
@@ -138,13 +138,13 @@
                               MaxHeight="160"
                               HeadersVisibility="Column">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="目标提示(tokens)" Binding="{Binding PromptText}" Width="130" />
-                            <DataGridTextColumn Header="实际提示(平均)" Binding="{Binding ActualPromptText}" Width="120" />
-                            <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="140" />
-                            <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="140" />
-                            <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="140" />
-                            <DataGridTextColumn Header="单次总耗时(ms)" Binding="{Binding TotalText}" Width="150" />
-                            <DataGridTextColumn Header="样本" Binding="{Binding SampleText}" Width="*" />
+                            <DataGridTextColumn Header="目标提示(tokens)" Binding="{Binding PromptText}" Width="130" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="实际提示(平均)" Binding="{Binding ActualPromptText}" Width="120" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="140" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="140" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="140" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="单次总耗时(ms)" Binding="{Binding TotalText}" Width="150" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="样本" Binding="{Binding SampleText}" Width="*" ElementStyle="{StaticResource App.CellText}" />
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -156,15 +156,15 @@
                               IsReadOnly="True"
                               HeadersVisibility="Column">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="目标提示" Binding="{Binding PromptText}" Width="90" />
-                            <DataGridTextColumn Header="序号" Binding="{Binding KindText}" Width="80" />
-                            <DataGridTextColumn Header="实际提示" Binding="{Binding ActualPromptText}" Width="90" />
-                            <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="120" />
-                            <DataGridTextColumn Header="生成(tokens)" Binding="{Binding GeneratedText}" Width="100" />
-                            <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="120" />
-                            <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="110" />
-                            <DataGridTextColumn Header="总耗时(ms)" Binding="{Binding TotalText}" Width="110" />
-                            <DataGridTextColumn Header="备注" Binding="{Binding ErrorText}" Width="*" />
+                            <DataGridTextColumn Header="目标提示" Binding="{Binding PromptText}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="序号" Binding="{Binding KindText}" Width="80" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="实际提示" Binding="{Binding ActualPromptText}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="120" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="生成(tokens)" Binding="{Binding GeneratedText}" Width="100" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="120" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="110" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="总耗时(ms)" Binding="{Binding TotalText}" Width="110" ElementStyle="{StaticResource App.CellText}" />
+                            <DataGridTextColumn Header="备注" Binding="{Binding ErrorText}" Width="*" ElementStyle="{StaticResource App.CellText}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -250,13 +250,13 @@
                                       MaxHeight="140"
                                       HeadersVisibility="Column">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="目标提示(tokens)" Binding="{Binding PromptText}" Width="130" />
-                                    <DataGridTextColumn Header="实际提示(平均)" Binding="{Binding ActualPromptText}" Width="120" />
-                                    <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="140" />
-                                    <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="140" />
-                                    <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="140" />
-                                    <DataGridTextColumn Header="单次总耗时(ms)" Binding="{Binding TotalText}" Width="150" />
-                                    <DataGridTextColumn Header="样本" Binding="{Binding SampleText}" Width="*" />
+                                    <DataGridTextColumn Header="目标提示(tokens)" Binding="{Binding PromptText}" Width="130" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="实际提示(平均)" Binding="{Binding ActualPromptText}" Width="120" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="140" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="140" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="140" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="单次总耗时(ms)" Binding="{Binding TotalText}" Width="150" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="样本" Binding="{Binding SampleText}" Width="*" ElementStyle="{StaticResource App.CellText}" />
                                 </DataGrid.Columns>
                             </DataGrid>
 
@@ -268,15 +268,15 @@
                                       IsReadOnly="True"
                                       HeadersVisibility="Column">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="目标提示" Binding="{Binding PromptText}" Width="90" />
-                                    <DataGridTextColumn Header="序号" Binding="{Binding KindText}" Width="80" />
-                                    <DataGridTextColumn Header="实际提示" Binding="{Binding ActualPromptText}" Width="90" />
-                                    <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="120" />
-                                    <DataGridTextColumn Header="生成(tokens)" Binding="{Binding GeneratedText}" Width="100" />
-                                    <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="120" />
-                                    <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="110" />
-                                    <DataGridTextColumn Header="总耗时(ms)" Binding="{Binding TotalText}" Width="110" />
-                                    <DataGridTextColumn Header="备注" Binding="{Binding ErrorText}" Width="*" />
+                                    <DataGridTextColumn Header="目标提示" Binding="{Binding PromptText}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="序号" Binding="{Binding KindText}" Width="80" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="实际提示" Binding="{Binding ActualPromptText}" Width="90" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="提示处理(t/s)" Binding="{Binding PromptSpeedText}" Width="120" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="生成(tokens)" Binding="{Binding GeneratedText}" Width="100" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="生成速度(t/s)" Binding="{Binding GenerateSpeedText}" Width="120" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="首 token(ms)" Binding="{Binding TtftText}" Width="110" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="总耗时(ms)" Binding="{Binding TotalText}" Width="110" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="备注" Binding="{Binding ErrorText}" Width="*" ElementStyle="{StaticResource App.CellText}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>

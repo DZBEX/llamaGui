@@ -39,14 +39,38 @@
                 <Button Content="导入" Command="{Binding ImportWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
                 <Button Content="导出" Command="{Binding ExportWorkflowCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
                 <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
-                <Button Content="↶ 撤销" Command="{Binding UndoCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="↷ 重做" Command="{Binding RedoCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Command="{Binding UndoCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
+                        AutomationProperties.Name="撤销">
+                    <StackPanel Orientation="Horizontal">
+                        <controls:AppIcon Icon="ui-undo" Width="13" Height="13" Margin="0,0,6,0"
+                                          VerticalAlignment="Center"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        <TextBlock Text="撤销" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding RedoCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
+                        AutomationProperties.Name="重做">
+                    <StackPanel Orientation="Horizontal">
+                        <controls:AppIcon Icon="ui-redo" Width="13" Height="13" Margin="0,0,6,0"
+                                          VerticalAlignment="Center"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        <TextBlock Text="重做" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
                 <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
                 <Button Content="校验工作流" Command="{Binding ValidateCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
                 <Button Content="自动布局" Command="{Binding AutoLayoutCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
                 <Button Content="适配" Command="{Binding FitCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="＋" Command="{Binding ZoomInCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                <Button Content="－" Command="{Binding ZoomOutCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <Button Command="{Binding ZoomInCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" ToolTip="放大画布"
+                        AutomationProperties.Name="放大画布">
+                    <controls:AppIcon Icon="ui-plus" Width="13" Height="13"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                </Button>
+                <Button Command="{Binding ZoomOutCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" ToolTip="缩小画布"
+                        AutomationProperties.Name="缩小画布">
+                    <controls:AppIcon Icon="ui-minus" Width="13" Height="13"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                </Button>
                 <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
                 <Button Content="刷新服务列表" Command="{Binding RefreshContextCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
                 <TextBlock Text="{Binding SnapshotInfoText}" VerticalAlignment="Center" Margin="8,0,0,0"
@@ -101,7 +125,11 @@
                                                             MouseMove="OnLibraryItemMouseMove"
                                                             MouseLeftButtonUp="OnLibraryItemMouseUp">
                                                         <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="{Binding Glyph}" Width="20" />
+                                                            <controls:AppIcon Icon="{Binding Icon}"
+                                                                              Width="15"
+                                                                              Height="15"
+                                                                              Margin="0,0,5,0"
+                                                                              VerticalAlignment="Center" />
                                                             <TextBlock Text="{Binding DisplayName}" />
                                                         </StackPanel>
                                                     </Border>
@@ -125,17 +153,41 @@
 
                 <Border Grid.Row="0" Style="{DynamicResource App.CardBorder}" Padding="8">
                     <WrapPanel VerticalAlignment="Center">
-                        <Button Content="▶ 运行" Command="{Binding StartRunCommand}" Style="{DynamicResource App.PrimaryButtonStyle}"
-                                IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}" />
+                        <Button Command="{Binding StartRunCommand}" Style="{DynamicResource App.PrimaryButtonStyle}"
+                                AutomationProperties.Name="运行"
+                                IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}">
+                            <StackPanel Orientation="Horizontal">
+                                <controls:AppIcon Icon="state-play" Width="12" Height="12" Margin="0,0,6,0"
+                                                  VerticalAlignment="Center"
+                                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                <TextBlock Text="运行" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                         <Button Content="单步启动" Command="{Binding StartStepRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
                                 IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}" />
                         <Button Content="从选中节点开始" Command="{Binding StartFromNodeCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
                                 IsEnabled="{Binding IsRunActive, Converter={StaticResource InverseBool}}" />
                         <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
-                        <Button Content="⏸ 暂停" Command="{Binding PauseRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Button Command="{Binding PauseRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
+                                AutomationProperties.Name="暂停">
+                            <StackPanel Orientation="Horizontal">
+                                <controls:AppIcon Icon="state-pause" Width="12" Height="12" Margin="0,0,6,0"
+                                                  VerticalAlignment="Center"
+                                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                <TextBlock Text="暂停" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                         <Button Content="继续" Command="{Binding ResumeRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
                         <Button Content="单步" Command="{Binding StepRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
-                        <Button Content="⏹ 停止" Command="{Binding StopRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
+                        <Button Command="{Binding StopRunCommand}" Style="{DynamicResource App.ToolbarButtonStyle}"
+                                AutomationProperties.Name="停止">
+                            <StackPanel Orientation="Horizontal">
+                                <controls:AppIcon Icon="state-stop" Width="12" Height="12" Margin="0,0,6,0"
+                                                  VerticalAlignment="Center"
+                                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                <TextBlock Text="停止" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                         <Button Content="清除轨迹" Command="{Binding ClearRunVisualsCommand}" Style="{DynamicResource App.ToolbarButtonStyle}" />
                         <Rectangle Width="1" Margin="8,2" Fill="{DynamicResource App.Border}" />
                         <TextBlock VerticalAlignment="Center" Margin="2,0,0,0">
@@ -174,7 +226,7 @@
                                     <TextBlock Text="工作流输入" FontWeight="SemiBold" Margin="0,10,0,4" />
                                     <DataGrid x:Name="InputGrid" ItemsSource="{Binding InputVariables}" MinHeight="110" MaxHeight="180" CanUserAddRows="False" AutoGenerateColumns="False">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="112" />
+                                            <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="112" ElementStyle="{StaticResource App.CellText}" />
                                             <DataGridTemplateColumn Header="类型" Width="88">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
@@ -184,7 +236,7 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
                                             <DataGridCheckBoxColumn Header="必填" Binding="{Binding Required, UpdateSourceTrigger=PropertyChanged}" Width="44" />
-                                            <DataGridTextColumn Header="默认值" Binding="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}" Width="96" />
+                                            <DataGridTextColumn Header="默认值" Binding="{Binding DefaultValueJson, UpdateSourceTrigger=PropertyChanged}" Width="96" ElementStyle="{StaticResource App.CellText}" />
                                         </DataGrid.Columns>
                                     </DataGrid>
                                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
@@ -196,7 +248,7 @@
                                     <TextBlock Text="工作流输出（说明用；实际输出由结束节点映射）" FontWeight="SemiBold" Margin="0,10,0,4" />
                                     <DataGrid x:Name="OutputGrid" ItemsSource="{Binding OutputVariables}" MinHeight="80" MaxHeight="140" CanUserAddRows="False" AutoGenerateColumns="False">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="150" />
+                                            <DataGridTextColumn Header="名称" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="150" ElementStyle="{StaticResource App.CellText}" />
                                             <DataGridTemplateColumn Header="类型" Width="88">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
@@ -255,11 +307,11 @@
                                 <TextBlock Text="节点运行状态" FontWeight="SemiBold" Margin="0,10,0,4" />
                                 <DataGrid ItemsSource="{Binding NodeStates}" MinHeight="140" MaxHeight="230" CanUserAddRows="False" AutoGenerateColumns="False">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="节点" Binding="{Binding Name}" Width="96" />
-                                        <DataGridTextColumn Header="状态" Binding="{Binding StateText}" Width="64" />
-                                        <DataGridTextColumn Header="耗时" Binding="{Binding DurationText}" Width="56" />
-                                        <DataGridTextColumn Header="重试" Binding="{Binding Retries}" Width="32" />
-                                        <DataGridTextColumn Header="错误" Binding="{Binding Error}" Width="92" />
+                                        <DataGridTextColumn Header="节点" Binding="{Binding Name}" Width="96" ElementStyle="{StaticResource App.CellText}" />
+                                        <DataGridTextColumn Header="状态" Binding="{Binding StateText}" Width="64" ElementStyle="{StaticResource App.CellText}" />
+                                        <DataGridTextColumn Header="耗时" Binding="{Binding DurationText}" Width="56" ElementStyle="{StaticResource App.CellText}" />
+                                        <DataGridTextColumn Header="重试" Binding="{Binding Retries}" Width="32" ElementStyle="{StaticResource App.CellText}" />
+                                        <DataGridTextColumn Header="错误" Binding="{Binding Error}" Width="92" ElementStyle="{StaticResource App.CellText}" />
                                     </DataGrid.Columns>
                                 </DataGrid>
                                 <TextBlock Text="节点详情（在画布中选择节点）" FontWeight="SemiBold" Margin="0,10,0,4" />
@@ -300,10 +352,10 @@
                                       AutoGenerateColumns="False" CanUserAddRows="False"
                                       MouseDoubleClick="OnIssueDoubleClick">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="级别" Binding="{Binding SeverityText}" Width="44" />
-                                    <DataGridTextColumn Header="代码" Binding="{Binding Code}" Width="88" />
-                                    <DataGridTextColumn Header="说明" Binding="{Binding Message}" Width="124" />
-                                    <DataGridTextColumn Header="建议" Binding="{Binding Hint}" Width="86" />
+                                    <DataGridTextColumn Header="级别" Binding="{Binding SeverityText}" Width="44" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="代码" Binding="{Binding Code}" Width="88" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="说明" Binding="{Binding Message}" Width="124" ElementStyle="{StaticResource App.CellText}" />
+                                    <DataGridTextColumn Header="建议" Binding="{Binding Hint}" Width="86" ElementStyle="{StaticResource App.CellText}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>
