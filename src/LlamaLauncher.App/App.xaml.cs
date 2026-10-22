@@ -27,7 +27,7 @@ public partial class App : System.Windows.Application
     private static void RunLabSmokeTest(IServiceProvider services)
     {
         var lab = services.GetRequiredService<ViewModels.Lab.LabViewModel>();
-        if (lab.Tabs.Count != 5)
+        if (lab.Tabs.Count != 6)
         {
             throw new InvalidOperationException($"实验室子页数量异常：{lab.Tabs.Count}。");
         }
@@ -39,6 +39,7 @@ public partial class App : System.Windows.Application
             new Views.WorkflowDesignerView(),
             new Views.TestCaseView(),
             new Views.BatchTestView(),
+            new Views.GameLabView(),
             new Views.RunHistoryView(),
         };
         foreach (var view in views)

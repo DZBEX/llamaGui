@@ -67,6 +67,8 @@ public sealed class LabPageTemplateSelector : DataTemplateSelector
 
     public DataTemplate? BatchTest { get; set; }
 
+    public DataTemplate? Games { get; set; }
+
     public DataTemplate? History { get; set; }
 
     public override DataTemplate? SelectTemplate(object? item, DependencyObject container) => item switch
@@ -75,6 +77,7 @@ public sealed class LabPageTemplateSelector : DataTemplateSelector
         WorkflowDesignerViewModel => Designer,
         TestCaseViewModel => TestCases,
         BatchTestViewModel => BatchTest,
+        GameLabViewModel => Games,
         RunHistoryViewModel => History,
         _ => null,
     };

@@ -15,7 +15,7 @@ namespace LlamaLauncher.UiTests;
 
 /// <summary>
 /// 决策模型实验室 UI 冒烟与渲染测试：
-/// 用真实主题资源与依赖容器解析实验室（含 5 个子页），在离屏窗口中进行布局与渲染，
+/// 用真实主题资源与依赖容器解析实验室（含 6 个子页），在离屏窗口中进行布局与渲染，
 /// 每位子页输出 PNG 到 artifacts/lab-preview/ 供人工检查，并断言关键区域有内容（非空白）。
 /// </summary>
 [Collection("数据目录串行")]
@@ -115,6 +115,25 @@ public sealed class LabViewRenderingTests
                     }
                     Mark("rendered-running");
 
+                    // 游戏测试在窄窗口下应保留完整棋盘，顶部命令自动换行，决策详情仍可滚动查看。
+                    lab.CurrentTab = lab.Tabs.First(t => t.Page is GameLabViewModel);
+                    view.Width = 1080;
+                    view.Height = 720;
+                    PumpLayout(view);
+                    RenderAndSave(view, 1080, 720, "lab-10-game-compact.png");
+                    Mark("rendered-game-compact");
+
+                    if (lab.Tabs.First(t => t.Page is GameLabViewModel).Page is GameLabViewModel gameVm)
+                    {
+                        foreach (var game in gameVm.Games.Where(g => g.Key is "gomoku" or "tetris"))
+                        {
+                            gameVm.SelectedGame = game;
+                            PumpLayout(view);
+                            RenderAndSave(view, 1080, 720, $"lab-11-game-{game.Key}.png");
+                        }
+                    }
+                    Mark("rendered-all-games");
+
                     Mark("done");
                     Mark("probe-star=" + ProbeStarColumnWidth());
 
@@ -152,6 +171,7 @@ public sealed class LabViewRenderingTests
         "工作流设计与调试" => "designer",
         "测试用例" => "test-cases",
         "批量测试" => "batch-test",
+        "游戏测试" => "game-test",
         "运行历史" => "history",
         _ => "tab",
     };

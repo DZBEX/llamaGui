@@ -8,7 +8,7 @@ namespace LlamaLauncher.App.ViewModels.Lab;
 /// <summary>实验室子页签。</summary>
 public sealed record LabTab(string Title, string Icon, string Description, object Page);
 
-/// <summary>决策模型实验室：容器页（模型调试 / 工作流设计与调试 / 测试用例 / 批量测试 / 运行历史）。</summary>
+/// <summary>决策模型实验室：容器页（模型调试 / 工作流设计与调试 / 测试用例 / 批量测试 / 游戏测试 / 运行历史）。</summary>
 public sealed partial class LabViewModel : ViewModelBase, IPageViewModel
 {
     public LabViewModel(
@@ -16,6 +16,7 @@ public sealed partial class LabViewModel : ViewModelBase, IPageViewModel
         WorkflowDesignerViewModel designer,
         TestCaseViewModel testCases,
         BatchTestViewModel batchTest,
+        GameLabViewModel games,
         RunHistoryViewModel history)
     {
         Tabs = new ObservableCollection<LabTab>
@@ -24,6 +25,7 @@ public sealed partial class LabViewModel : ViewModelBase, IPageViewModel
             new("工作流设计与调试", "tab-designer", "可视化编辑工作流、运行、断点与运行轨迹", designer),
             new("测试用例", "tab-testcases", "维护单场景测试数据、模拟响应与断言", testCases),
             new("批量测试", "tab-batch", "批量执行测试集，统计成功/失败与耗时", batchTest),
+            new("游戏测试", "state-play", "用贪吃蛇、五子棋和俄罗斯方块逐步观察模型决策与状态", games),
             new("运行历史", "nav-history", "查询运行记录、比较差异、复现与导出诊断", history),
         };
         CurrentTab = Tabs[0];

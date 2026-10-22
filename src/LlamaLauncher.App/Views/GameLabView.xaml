@@ -1,0 +1,586 @@
+<UserControl
+    x:Class="LlamaLauncher.App.Views.GameLabView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:LlamaLauncher.App.Controls">
+    <UserControl.Resources>
+        <Style x:Key="GameCellButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Arrow" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            Margin="0.5"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.82" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="1" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DecisionGridText" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="5,0" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="GameControlLabelStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+
+        <Style x:Key="GameMetricChipStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="Padding" Value="7,3" />
+            <Setter Property="Background" Value="{DynamicResource App.Surface.Alt}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource App.Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="7" />
+        </Style>
+
+        <Style x:Key="GameMetricLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Foreground" Value="{DynamicResource App.Text.Secondary}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="GameMetricValueStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="5,0,0,0" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="BoardStageStyle" TargetType="Border">
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="Background" Value="#11161C" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect
+                        BlurRadius="18"
+                        Direction="270"
+                        Opacity="0.22"
+                        ShadowDepth="4"
+                        Color="#000000" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border
+            Grid.Row="0"
+            Padding="8"
+            Style="{DynamicResource App.CardBorder}">
+            <WrapPanel VerticalAlignment="Center">
+                <TextBlock Style="{StaticResource GameControlLabelStyle}" Text="游戏" />
+                <ComboBox
+                    Width="145"
+                    DisplayMemberPath="Title"
+                    ItemsSource="{Binding Games}"
+                    SelectedItem="{Binding SelectedGame, Mode=TwoWay}" />
+                <Rectangle
+                    Width="1"
+                    Height="22"
+                    Margin="10,0"
+                    Fill="{DynamicResource App.Border}" />
+                <TextBlock Style="{StaticResource GameControlLabelStyle}" Text="模型服务" />
+                <ComboBox
+                    Width="270"
+                    DisplayMemberPath="Display"
+                    ItemsSource="{Binding Instances}"
+                    SelectedItem="{Binding SelectedInstance, Mode=TwoWay}" />
+                <Button
+                    Margin="6,0,0,0"
+                    Command="{Binding RefreshCommand}"
+                    Content="刷新"
+                    Style="{DynamicResource App.ToolbarButtonStyle}" />
+                <TextBlock
+                    Margin="11,0,6,0"
+                    Style="{StaticResource GameControlLabelStyle}"
+                    Text="超时（秒）" />
+                <TextBox
+                    Width="56"
+                    Text="{Binding TimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Margin="11,0,6,0"
+                    Style="{StaticResource GameControlLabelStyle}"
+                    Text="步间隔（ms）" />
+                <TextBox
+                    Width="60"
+                    Text="{Binding DecisionIntervalMs, UpdateSourceTrigger=PropertyChanged}" />
+                <StackPanel Margin="10,0,0,0" Orientation="Horizontal">
+                    <Button
+                        Command="{Binding NewGameCommand}"
+                        Content="新对局"
+                        Style="{DynamicResource App.ToolbarButtonStyle}" />
+                    <Button
+                        Margin="4,0,0,0"
+                        AutomationProperties.Name="{Binding AutoRunButtonText}"
+                        Command="{Binding ToggleRunCommand}"
+                        Style="{DynamicResource App.PrimaryButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <controls:AppIcon
+                                Width="12"
+                                Height="12"
+                                Margin="0,0,6,0"
+                                VerticalAlignment="Center"
+                                Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Icon="state-play" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding AutoRunButtonText}" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Margin="4,0,0,0"
+                        Command="{Binding StepCommand}"
+                        Content="单步决策"
+                        IsEnabled="{Binding CanStep}"
+                        Style="{DynamicResource App.ToolbarButtonStyle}" />
+                    <Button
+                        Margin="4,0,0,0"
+                        Command="{Binding StopCommand}"
+                        IsEnabled="{Binding IsRunning}"
+                        Style="{DynamicResource App.ToolbarButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <controls:AppIcon
+                                Width="12"
+                                Height="12"
+                                Margin="0,0,5,0"
+                                VerticalAlignment="Center"
+                                Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Icon="state-stop" />
+                            <TextBlock VerticalAlignment="Center" Text="停止" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </WrapPanel>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="520" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{DynamicResource App.CardBorder}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="9.5"
+                                FontWeight="SemiBold"
+                                Foreground="{Binding GameAccentBrush}"
+                                Text="LIVE BOARD · 实时棋盘" />
+                            <TextBlock
+                                Margin="0,2,0,0"
+                                FontSize="16"
+                                FontWeight="SemiBold"
+                                Text="{Binding SelectedGame.Title}" />
+                        </StackPanel>
+                        <Border
+                            Grid.Column="1"
+                            Padding="8,4"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource GameMetricChipStyle}">
+                            <TextBlock
+                                Style="{StaticResource GameMetricLabelStyle}"
+                                Text="{Binding GameSecondaryStatusText}" />
+                        </Border>
+                    </Grid>
+
+                    <Border
+                        Grid.Row="1"
+                        Margin="0,8,0,8"
+                        Padding="9,6"
+                        Background="{DynamicResource App.Surface.Alt}"
+                        BorderBrush="{DynamicResource App.Border}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                        <DockPanel>
+                            <Ellipse
+                                Width="7"
+                                Height="7"
+                                Margin="0,0,7,0"
+                                VerticalAlignment="Center"
+                                DockPanel.Dock="Left"
+                                Fill="{Binding GameAccentBrush}" />
+                            <TextBlock
+                                FontSize="11.5"
+                                Foreground="{DynamicResource App.Text.Secondary}"
+                                Text="{Binding GameStatusText}"
+                                TextTrimming="CharacterEllipsis"
+                                ToolTip="{Binding GameStatusText}" />
+                        </DockPanel>
+                    </Border>
+
+                    <Border
+                        Grid.Row="2"
+                        Padding="12"
+                        BorderBrush="{Binding GameAccentBrush}"
+                        Style="{StaticResource BoardStageStyle}">
+                        <Viewbox
+                            MaxWidth="480"
+                            MaxHeight="530"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Stretch="Uniform"
+                            StretchDirection="DownOnly">
+                            <ItemsControl
+                                Width="{Binding BoardPixelWidth}"
+                                Height="{Binding BoardPixelHeight}"
+                                ItemsSource="{Binding Cells}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="{Binding BoardColumns}" Rows="{Binding BoardRows}" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button
+                                            Background="{Binding Fill}"
+                                            BorderBrush="{Binding Stroke}"
+                                            Command="{Binding DataContext.HumanMoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Content="{Binding Glyph}"
+                                            FontSize="{Binding GlyphSize}"
+                                            Foreground="{Binding Foreground}"
+                                            IsEnabled="{Binding DataContext.IsBoardInteractive, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Style="{StaticResource GameCellButtonStyle}"
+                                            ToolTip="{Binding ToolTip}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Viewbox>
+                    </Border>
+
+                    <Border
+                        Grid.Row="3"
+                        Margin="0,8,0,0"
+                        Padding="9,7"
+                        Background="{DynamicResource App.Surface.Alt}"
+                        BorderBrush="{DynamicResource App.Border}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="11"
+                                Style="{DynamicResource App.SecondaryText}"
+                                Text="{Binding BoardHintText}"
+                                TextWrapping="Wrap" />
+                            <TextBlock
+                                Margin="0,5,0,0"
+                                Foreground="{DynamicResource App.State.Error}"
+                                Text="{Binding ErrorText}"
+                                TextWrapping="Wrap"
+                                Visibility="{Binding ErrorText, Converter={StaticResource NullOrEmptyToVisibility}}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2" Style="{DynamicResource App.CardBorder}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="180" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock
+                            FontSize="9.5"
+                            FontWeight="SemiBold"
+                            Foreground="{Binding GameAccentBrush}"
+                            Text="DECISION STREAM · 决策时间线" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="可观测决策轨迹" />
+                        <WrapPanel Margin="0,7,0,0">
+                            <Border Style="{StaticResource GameMetricChipStyle}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse
+                                        Width="6"
+                                        Height="6"
+                                        Margin="0,0,5,0"
+                                        VerticalAlignment="Center"
+                                        Fill="{DynamicResource App.Accent}" />
+                                    <TextBlock Style="{StaticResource GameMetricLabelStyle}" Text="AI 决策" />
+                                    <TextBlock Style="{StaticResource GameMetricValueStyle}" Text="{Binding AiDecisionCount}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource GameMetricChipStyle}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse
+                                        Width="6"
+                                        Height="6"
+                                        Margin="0,0,5,0"
+                                        VerticalAlignment="Center"
+                                        Fill="{DynamicResource App.State.Ready}" />
+                                    <TextBlock Style="{StaticResource GameMetricLabelStyle}" Text="程序算法" />
+                                    <TextBlock Style="{StaticResource GameMetricValueStyle}" Text="{Binding AlgorithmDecisionCount}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource GameMetricChipStyle}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource GameMetricLabelStyle}" Text="成功" />
+                                    <TextBlock Style="{StaticResource GameMetricValueStyle}" Text="{Binding SuccessfulDecisionText}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource GameMetricChipStyle}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource GameMetricLabelStyle}" Text="AI 平均" />
+                                    <TextBlock Style="{StaticResource GameMetricValueStyle}" Text="{Binding AverageAiLatencyText}" />
+                                </StackPanel>
+                            </Border>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <Border
+                        Grid.Row="1"
+                        Margin="0,8,0,0"
+                        Padding="4"
+                        Background="{DynamicResource App.Surface.Alt}"
+                        BorderBrush="{DynamicResource App.Border}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <DataGrid
+                        AutoGenerateColumns="False"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        GridLinesVisibility="None"
+                        HeadersVisibility="Column"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding Decisions}"
+                        RowHeight="30"
+                        SelectedItem="{Binding SelectedDecision, Mode=TwoWay}"
+                        SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="72"
+                                Binding="{Binding TurnTimeText}"
+                                ElementStyle="{StaticResource App.CellText}"
+                                Header="步/时" />
+                            <DataGridTemplateColumn Width="82" Header="来源">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            x:Name="SourceBadge"
+                                            Margin="4,3"
+                                            Padding="6,2"
+                                            Background="#263754"
+                                            BorderBrush="{DynamicResource App.Accent}"
+                                            BorderThickness="1"
+                                            CornerRadius="8">
+                                            <TextBlock
+                                                x:Name="SourceLabel"
+                                                FontSize="10.5"
+                                                Foreground="{DynamicResource App.Accent}"
+                                                Text="{Binding SourceShortText}"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip="{Binding SourceText}" />
+                                        </Border>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding SourceShortText}" Value="算法 · 唯一">
+                                                <Setter TargetName="SourceBadge" Property="Background" Value="#263A2D" />
+                                                <Setter TargetName="SourceBadge" Property="BorderBrush" Value="{DynamicResource App.State.Ready}" />
+                                                <Setter TargetName="SourceLabel" Property="Foreground" Value="{DynamicResource App.State.Ready}" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding Action}"
+                                Header="决策/动作">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style BasedOn="{StaticResource App.CellText}" TargetType="TextBlock">
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        <Setter Property="ToolTip" Value="{Binding Action}" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn
+                                Width="50"
+                                Binding="{Binding ConfidenceText}"
+                                ElementStyle="{StaticResource App.CellText}"
+                                Header="置信" />
+                            <DataGridTextColumn
+                                Width="50"
+                                Binding="{Binding ElapsedText}"
+                                ElementStyle="{StaticResource App.CellText}"
+                                Header="耗时" />
+                            <DataGridTemplateColumn Width="42" Header="结果">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock
+                                            x:Name="StateText"
+                                            Foreground="{DynamicResource App.State.Ready}"
+                                            Style="{StaticResource DecisionGridText}"
+                                            Text="{Binding ResultText}" />
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding Success}" Value="False">
+                                                <Setter TargetName="StateText" Property="Foreground" Value="{DynamicResource App.State.Error}" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn
+                                Width="*"
+                                MinWidth="94"
+                                Binding="{Binding Outcome}"
+                                Header="动作结果">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style BasedOn="{StaticResource App.CellText}" TargetType="TextBlock">
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        <Setter Property="ToolTip" Value="{Binding Outcome}" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    </Border>
+
+                    <DockPanel Grid.Row="2" Margin="0,8,0,6">
+                        <Border
+                            x:Name="DetailSourceBadge"
+                            Padding="7,2"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            DockPanel.Dock="Right"
+                            Visibility="{Binding SelectedDecision, Converter={StaticResource NullOrEmptyToVisibility}}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#263754" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource App.Accent}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedDecision.SourceText}"
+                                                     Value="程序算法 · 唯一候选">
+                                            <Setter Property="Background" Value="#263A2D" />
+                                            <Setter Property="BorderBrush" Value="{DynamicResource App.State.Ready}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock
+                                FontSize="10.5"
+                                Text="{Binding SelectedDecision.SourceText}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource App.Accent}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedDecision.SourceText}"
+                                                         Value="程序算法 · 唯一候选">
+                                                <Setter Property="Foreground" Value="{DynamicResource App.State.Ready}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+                        <TextBlock
+                            Margin="0,0,8,0"
+                            Style="{DynamicResource App.CaptionText}"
+                            Text="蓝色为 AI 模型决策，绿色为程序算法唯一候选；选中历史行可查看当时的完整数据。"
+                            TextWrapping="Wrap" />
+                    </DockPanel>
+
+                    <TabControl Grid.Row="3">
+                        <TabItem Header="发送状态">
+                            <TextBox
+                                AcceptsReturn="True"
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                HorizontalScrollBarVisibility="Auto"
+                                IsReadOnly="True"
+                                Text="{Binding DetailStateJson, Mode=OneWay}"
+                                TextWrapping="NoWrap"
+                                VerticalScrollBarVisibility="Auto" />
+                        </TabItem>
+                        <TabItem Header="问题">
+                            <TextBox
+                                AcceptsReturn="True"
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                HorizontalScrollBarVisibility="Auto"
+                                IsReadOnly="True"
+                                Text="{Binding DetailQuestionsJson, Mode=OneWay}"
+                                TextWrapping="NoWrap"
+                                VerticalScrollBarVisibility="Auto" />
+                        </TabItem>
+                        <TabItem Header="答复 / 决策">
+                            <TextBox
+                                AcceptsReturn="True"
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                HorizontalScrollBarVisibility="Auto"
+                                IsReadOnly="True"
+                                Text="{Binding DetailAnswerJson, Mode=OneWay}"
+                                TextWrapping="NoWrap"
+                                VerticalScrollBarVisibility="Auto" />
+                        </TabItem>
+                        <TabItem Header="原始数据">
+                            <TextBox
+                                AcceptsReturn="True"
+                                FontFamily="Consolas"
+                                FontSize="12"
+                                HorizontalScrollBarVisibility="Auto"
+                                IsReadOnly="True"
+                                Text="{Binding DetailRawResponseJson, Mode=OneWay}"
+                                TextWrapping="NoWrap"
+                                VerticalScrollBarVisibility="Auto" />
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

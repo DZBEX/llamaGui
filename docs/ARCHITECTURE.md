@@ -122,7 +122,7 @@ Application/Workflows        # 引擎（调度/分支/并行/断点/单步/取�
                              # 断言评估、JSON 差异、模型解析与算法注册抽象、运行协调（WorkflowRunnerService）
 Infrastructure               # /v1/systemone HTTP 客户端、实例→模型目标解析、JSON 文件存储（原子写）、
                              # WorkflowRuns SQLite 仓储（迁移 v2）
-App/ViewModels/Lab + Views   # 实验室容器与五个子页、节点属性编辑器、自绘画布控件（无第三方图形库）
+App/ViewModels/Lab + Views   # 实验室容器与六个子页、节点属性编辑器、自绘棋盘与工作流画布（无第三方图形库）
 ```
 
 - 引擎通过 `IWorkflowRunObserver` 单向通知 UI（UI 侧切回 Dispatcher），不引用窗口/控件；

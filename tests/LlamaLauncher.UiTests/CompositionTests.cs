@@ -78,9 +78,10 @@ public sealed class CompositionTests
             Assert.NotNull(provider.GetRequiredService<App.ViewModels.Lab.WorkflowDesignerViewModel>());
             Assert.NotNull(provider.GetRequiredService<App.ViewModels.Lab.TestCaseViewModel>());
             Assert.NotNull(provider.GetRequiredService<App.ViewModels.Lab.BatchTestViewModel>());
+            Assert.NotNull(provider.GetRequiredService<App.ViewModels.Lab.GameLabViewModel>());
             Assert.NotNull(provider.GetRequiredService<App.ViewModels.Lab.RunHistoryViewModel>());
             var lab = provider.GetRequiredService<App.ViewModels.Lab.LabViewModel>();
-            Assert.Equal(5, lab.Tabs.Count);
+            Assert.Equal(6, lab.Tabs.Count);
 
             // 性能基准（页面 ViewModel + 运行编排 + 客户端/存储）
             Assert.NotNull(provider.GetRequiredService<LlamaLauncher.Application.Benchmarks.BenchmarkRunnerService>());

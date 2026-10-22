@@ -54,6 +54,7 @@ internal static class AppServiceCollectionExtensions
         services.AddSingleton<WorkflowDesignerViewModel>();
         services.AddSingleton<TestCaseViewModel>();
         services.AddSingleton<BatchTestViewModel>();
+        services.AddSingleton<GameLabViewModel>();
         services.AddSingleton<RunHistoryViewModel>();
         services.AddSingleton<LabViewModel>();
 

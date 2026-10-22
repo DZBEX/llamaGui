@@ -27,6 +27,8 @@ public sealed class ModelTargetRow
 /// </summary>
 public sealed partial class ModelDebugViewModel : ViewModelBase, IPageViewModel
 {
+    private const string PreferredModelName = "Kev-4B-Q4_K_M";
+
     private const string DefaultQuestions = """
         {
           "department": {
@@ -140,9 +142,13 @@ public sealed partial class ModelDebugViewModel : ViewModelBase, IPageViewModel
                 Instances.Add(new ModelTargetRow { Target = target });
             }
 
-            // 刷新会重建行对象；按实例 ID 重新解析选中项，避免选中旧对象导致下拉框显示为空。
+            // 刷新会重建行对象；可用时优先 Kev，否则按实例 ID 恢复原选择，避免选中旧对象导致下拉框为空。
             var previousInstanceId = SelectedInstance?.Target.InstanceId;
-            SelectedInstance = Instances.FirstOrDefault(i => i.Target.InstanceId == previousInstanceId)
+            var preferred = Instances.FirstOrDefault(i =>
+                    i.IsUsable
+                    && i.Target.InstanceName.Contains(PreferredModelName, StringComparison.OrdinalIgnoreCase));
+            SelectedInstance = preferred
+                ?? Instances.FirstOrDefault(i => i.Target.InstanceId == previousInstanceId)
                 ?? Instances.FirstOrDefault(i => i.IsUsable)
                 ?? Instances.FirstOrDefault();
 

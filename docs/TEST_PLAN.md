@@ -1,15 +1,16 @@
 # 测试计划与执行结果
 
-> 本文件记录**实际执行过**的命令与结果（2026-10-12/13 首版；2026-10-17 增量：决策模型实验室、模型性能基准、界面图标与布局）。
+> 本文件记录**实际执行过**的命令与结果（2026-10-12/13 首版；2026-10-17 增量：决策模型实验室、模型性能基准、界面图标与布局；
+> 2026-10-21 增量：决策模型游戏测试）。
 > 环境：Windows 10.0.26300，.NET SDK 8.0.425/8.0.426，RTX 4060 Laptop（8 GB）。
 
 ## 1. 自动化测试总览
 
 | 测试项目 | 数量 | 结果 | 命令 |
 | --- | --- | --- | --- |
-| LlamaLauncher.UnitTests | 286 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UnitTests -c Debug` |
-| LlamaLauncher.IntegrationTests | 182 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.IntegrationTests -c Debug` |
-| LlamaLauncher.UiTests | 51 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UiTests -c Debug` |
+| LlamaLauncher.UnitTests | 297 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UnitTests -c Debug` |
+| LlamaLauncher.IntegrationTests | 186 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.IntegrationTests -c Debug` |
+| LlamaLauncher.UiTests | 57 | ✅ 全部通过 | `dotnet test tests/LlamaLauncher.UiTests -c Debug` |
 | 解决方案构建 | — | ✅ Debug / Release 均 0 警告 0 错误 | `dotnet build LlamaLauncher.sln -c Release` |
 | 无界面冒烟测试 | — | ✅ SMOKE_OK（含实验室视图实例化与布局） | `LlamaLauncher.exe --smoke-test` |
 | 一键流水线 | — | ✅ 构建 0 警告 0 错误 | `pwsh -File scripts/build.ps1` |
@@ -135,7 +136,7 @@
 
 ### 5.3 UI 测试（`tests/LlamaLauncher.UiTests/`，+6 项）
 
-- 组合根：页面 11 项、实验室 5 个子页 ViewModel 与引擎服务（运行协调/引擎/存储/决策客户端/模型解析）全部可解析。
+- 组合根：页面 11 项、实验室 6 个子页 ViewModel 与引擎服务（运行协调/引擎/存储/决策客户端/模型解析）全部可解析。
 - 实验室渲染：真实主题资源 + 容器解析下逐页布局与渲染（6 张 PNG 产物在 `artifacts/lab-preview/`），
   非空白断言；设计器画布初始化（`InitializePreview`）覆盖画布/ViewModel 桥接路径。
 - 冒烟测试：`--smoke-test` 现将实验室 ViewModel 与全部子页视图实例化并执行一次布局，发布产物自动验证覆盖实验室。
@@ -240,7 +241,7 @@
 - 一键流水线：`pwsh -File scripts/build.ps1` → Release 构建 0 警告 0 错误；UnitTests 286 / IntegrationTests 182 / UiTests 49 全部通过。
 - 发布产物：`LlamaLauncher.exe --smoke-test`（Release，含实验室视图实例化与画布初始化）→ `SMOKE_OK`、退出码 0。
 - 人工核对：以真实应用（Debug）在**深色与浅色两种主题**下逐页截图（概览/实例/模型库/启动配置/聊天/基准/
-  实验室 5 个子页/硬件/版本/日志/历史/设置）并放大检查关键区域，截图保存在 `artifacts/ui-capture/`（不入库）。
+  实验室 6 个子页/硬件/版本/日志/历史/设置）并放大检查关键区域，截图保存在 `artifacts/ui-capture/`（不入库）。
 
 ## 9. 决策模型实验室演示数据（2026-10-17 增量）
 
@@ -282,3 +283,28 @@
 
 - 主窗口默认最大化启动（`WindowState="Maximized"`），仍保留 1320×760 还原尺寸、最小尺寸与托盘启动设置语义。
 - 图标化按钮新增 `AutomationProperties.Name`，保证读屏与 UI 自动化可识别。
+
+## 10. 决策模型游戏测试（2026-10-21 增量）
+
+- **纯规则测试（11 项）**：贪吃蛇安全候选、反向拒绝、行动后果与撞墙结束；五子棋动态候选、人机交替、
+  五连胜负、必胜/必封/活三/双重威胁候选收窄；俄罗斯方块完整落点、两层评分、原子放置、基础动作兼容与未知动作拒绝。
+- **页面调用测试（1 项）**：三款游戏分别执行单步决策，验证 `/v1/systemone` 请求包含正确游戏状态，
+  决策列表保存 `state`、`questions`、结构化答案和原始响应。
+- **离屏渲染**：真实主题资源下输出贪吃蛇、五子棋、俄罗斯方块截图到 `artifacts/lab-preview/`；
+  1080×720 窄窗口验证命令换行、完整棋盘和可滚动决策详情。
+- **实际执行**：`dotnet test LlamaLauncher.sln -c Debug --no-restore` → UnitTests 297、IntegrationTests 186、
+  UiTests 57，全部通过；`LlamaLauncher.exe --smoke-test` → `SMOKE_OK`、退出码 0。
+- **人工核对**：三款棋盘在深色主题下均完整显示，五子棋格点可点击区域清晰，俄罗斯方块 10×20 棋盘无裁切，
+  右侧“发送状态 / 问题 / 模型答复 / 原始响应”四个页签可独立滚动查看。
+- **优化后真实模型复测（Laya-Q8_0）**：贪吃蛇 3 个种子均为 100 步、0 非法动作，得分 100–110；
+  五子棋开局、一步获胜、唯一封堵、活三防守、制造双重威胁 5/5；俄罗斯方块两层搜索后两局分别
+  23/11 消行，得分 4142/2586。
+- **完整落点动画**：动画预览不推进游戏状态；单元测试断言生成非空旋转/横移/下落帧、帧内方块坐标完整，
+  且预览后决策数不变；完整页面单步测试确认动画结束后正常锁定与生成下一块。
+- **Kev-4B-Q4_K_M 实机**：将实例批大小调整为 `4096/2048` 后，`/v1/systemone` 可处理五子棋动态候选；
+  贪吃蛇 3 局 100 步、0 非法动作；五子棋 5/5；俄罗斯方块种子 41/73 均跑满 80 个方块，
+  分别 31/29 消行、最大高度 7/6、最大空洞 3/4。模型调试与游戏测试首次加载优先选择 Kev。
+- **决策来源标识**：单候选记录标记为程序算法且不调用模型；多候选记录标记为 AI 模型并显示候选数。
+  UI 测试验证来源文本、候选数量约束，并覆盖两类决策统计。
+- **游戏测试视觉回归**：顶部改为单层工具条；棋盘舞台、状态条、指标胶囊和决策来源列在
+  1280×820、1080×720 两种尺寸均完整显示，窄窗口下操作按钮整组换行。
